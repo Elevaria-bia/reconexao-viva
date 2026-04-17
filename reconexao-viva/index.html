@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Reconexão Viva"/>
+  <meta name="theme-color" content="#0A0A0A"/>
+  <link rel="manifest" href="manifest.json"/>
+  <title>Método Reconexão Viva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #0A0A0A;
+      --surface:  #111111;
+      --card:     #181818;
+      --card2:    #1E1E1E;
+      --border:   rgba(255,255,255,0.06);
+      --green:    #3D5A3A;
+      --green-lt: rgba(61,90,58,0.14);
+      --accent:   #E87B6A;
+      --acc-lt:   rgba(232,123,106,0.1);
+      --gold:     #C4A87A;
+      --white:    #FFFFFF;
+      --muted:    rgba(255,255,255,0.38);
+      --faint:    rgba(255,255,255,0.07);
+      --safe-b:   env(safe-area-inset-bottom, 0px);
+      --safe-t:   env(safe-area-inset-top, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--white); }
+    #app { display: flex; flex-direction: column; height: 100dvh; }
+
+    /* VIEWS */
+    .view { display: none; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+    .view.active { display: block; }
+
+    /* ONBOARDING */
+    #v-onboard {
+      min-height: 100dvh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 48px 32px;
+      background: radial-gradient(ellipse 80% 55% at 50% 0%, rgba(61,90,58,0.28) 0%, transparent 70%);
+    }
+    #v-onboard.active { display: flex; }
+    .ob-mark { width: 76px; height: 76px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; margin-bottom: 32px; box-shadow: 0 0 80px rgba(61,90,58,0.35); }
+    .ob-mark-r { font-family: 'Playfair Display', serif; font-size: 34px; color: var(--accent); line-height: 1; }
+    .ob-h { font-family: 'Playfair Display', serif; font-size: clamp(30px,8vw,42px); text-align: center; line-height: 1.15; margin-bottom: 12px; }
+    .ob-p { font-size: 15px; color: var(--muted); text-align: center; line-height: 1.65; margin-bottom: 48px; max-width: 290px; }
+    .ob-input { width: 100%; max-width: 320px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--white); text-align: center; outline: none; margin-bottom: 14px; transition: border-color 0.2s; }
+    .ob-input::placeholder { color: var(--muted); }
+    .ob-input:focus { border-color: rgba(61,90,58,0.7); }
+    .btn-primary { width: 100%; max-width: 320px; background: var(--green); border: none; border-radius: 14px; padding: 17px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.1s; }
+    .btn-primary:active { transform: scale(0.97); opacity: 0.85; }
+
+    .ob-dots { display:flex; gap:8px; margin-bottom:32px; }
+    .ob-dot { width:8px; height:8px; border-radius:50%; background:var(--card2); transition:background 0.3s; }
+    .ob-dot.active { background:var(--green); }
+    .ob-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:320px; margin-bottom:20px; }
+    .ob-card { background:var(--card2); border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .ob-card-t { font-size:12px; font-weight:600; color:var(--green); margin-bottom:4px; letter-spacing:0.04em; }
+    .ob-card-d { font-size:12px; color:var(--muted); line-height:1.5; }
+    .ob-phases { width:100%; max-width:320px; margin-bottom:20px; display:flex; flex-direction:column; gap:0; border-left:2px solid var(--green); padding-left:16px; }
+    .ob-phase { padding:8px 0; border-bottom:1px solid var(--border); }
+    .ob-phase:last-child { border-bottom:none; }
+    .ob-phase-num { font-size:10px; color:var(--green); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+    .ob-phase-name { font-family:'Playfair Display',serif; font-size:14px; margin:1px 0; }
+    .ob-phase-period { font-size:11px; color:var(--muted); }
+
+    /* NAVBAR */
+    #nav { display: none; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 calc(8px + var(--safe-b)); flex-shrink: 0; }
+    #nav.visible { display: flex; }
+    .nav-items { display: flex; width: 100%; }
+    .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 4px; cursor: pointer; border: none; background: none; color: var(--muted); transition: color 0.2s; }
+    .nav-btn.active { color: var(--green); }
+    .nav-btn svg { width: 22px; height: 22px; margin-bottom: 3px; }
+    .nav-lbl { font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    /* HOJE */
+    #v-hoje { padding-bottom: 100px; }
+    .hoje-hd { padding: calc(var(--safe-t) + 48px) 24px 20px; background: linear-gradient(180deg, rgba(61,90,58,0.1) 0%, transparent 100%); }
+    .hoje-greet { font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--green); font-weight: 600; margin-bottom: 7px; }
+    .hoje-name { font-family: 'Playfair Display', serif; font-size: clamp(24px,6vw,32px); line-height: 1.2; margin-bottom: 3px; }
+    .hoje-dt { font-size: 13px; color: var(--muted); }
+
+    .reminder-strip { margin: 14px 24px 0; padding: 14px 16px; background: var(--card2); border-radius: 12px; border-left: 3px solid var(--accent); font-size: 13px; color: var(--muted); font-style: italic; line-height: 1.5; }
+
+    .wellness-card { margin: 14px 24px 0; padding: 16px 18px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); }
+    .wellness-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; }
+    .w-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .w-pill { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border); background: var(--card2); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .w-pill:active { transform: scale(0.97); }
+    .w-pill.sel { background: var(--green); border-color: var(--green); color: var(--white); }
+
+    .int-strip { margin: 14px 24px 0; padding: 16px 18px; background: var(--card); border-radius: 16px; border-left: 3px solid var(--green); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .int-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); margin-bottom: 7px; }
+    .int-txt { font-family: 'Playfair Display', serif; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,0.82); font-style: italic; }
+
+    .tmr-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--acc-lt); border: 1px solid rgba(232,123,106,0.22); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--accent); margin: 12px 24px 0; }
+
+    .score-strip { margin: 14px 24px; background: var(--card); border-radius: 18px; border: 1px solid var(--border); padding: 18px 20px; display: flex; align-items: center; gap: 18px; }
+    .arc-wrap { position: relative; flex-shrink: 0; }
+    .arc-wrap svg { transform: rotate(-90deg); display: block; }
+    .arc-pct { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; }
+    .score-txt { flex: 1; }
+    .score-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+    .score-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
+    .score-streak { font-size: 12px; color: var(--gold); margin-top: 3px; }
+
+    .timeline-wrap { padding: 0 24px; }
+    .section-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; margin-bottom: 14px; }
+    .rit-card { background: var(--card); border-radius: 20px; border: 1px solid var(--border); padding: 20px; margin-bottom: 12px; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.15s, border-color 0.25s; }
+    .rit-card:active { transform: scale(0.98); }
+    .rit-card.r-done { border-color: rgba(61,90,58,0.38); }
+    .rit-card.r-done::after, .rit-card.r-now::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .rit-card.r-done::after { background: var(--green); }
+    .rit-card.r-now { border-color: rgba(232,123,106,0.35); }
+    .rit-card.r-now::after { background: var(--accent); }
+    .rc-time { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
+    .rc-name { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 4px; }
+    .rc-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .rc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .rc-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rc-pill { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; padding: 4px 10px; border-radius: 100px; background: var(--faint); color: var(--muted); }
+    .rc-cta { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+    .rc-done { font-size: 11px; color: var(--green); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+    .micro-wrap { padding: 4px 24px; margin-top: 4px; }
+    .micro-scr { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .micro-scr::-webkit-scrollbar { display: none; }
+    .micro-c { flex-shrink: 0; width: 155px; background: var(--card2); border-radius: 16px; border: 1px solid var(--border); padding: 16px; cursor: pointer; transition: transform 0.15s; }
+    .micro-c:active { transform: scale(0.97); }
+    .micro-c.done { border-color: rgba(61,90,58,0.38); }
+    .mc-pillar { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); margin-bottom: 8px; }
+    .mc-name { font-family: 'Playfair Display', serif; font-size: 14px; margin-bottom: 6px; line-height: 1.3; }
+    .mc-time { font-size: 11px; color: var(--muted); }
+
+    /* GUIAS */
+    #v-guias { padding: calc(var(--safe-t) + 48px) 24px 100px; }
+    .guias-h { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 6px; }
+    .guias-p { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+    .pillar-list { display: flex; flex-direction: column; gap: 10px; }
+    .pillar-row { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 18px 20px; cursor: pointer; transition: transform 0.15s; display: flex; align-items: center; gap: 16px; }
+    .pillar-row:active { transform: scale(0.98); }
+    .p-num { width: 34px; height: 34px; border-radius: 50%; background: var(--green-lt); border: 1px solid rgba(61,90,58,0.3); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--green); flex-shrink: 0; }
+    .p-info { flex: 1; }
+    .p-name { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 2px; }
+    .p-tag { font-size: 12px; color: var(--muted); }
+    .p-arrow { color: var(--muted); }
+
+    /* JORNADA (Evolução) */
+    #v-evolucao { padding: calc(var(--safe-t) + 48px) 24px 100px; }
+    .evol-h { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 24px; }
+    .e-card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); padding: 22px; margin-bottom: 14px; }
+    .e-card-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 18px; }
+
+    /* COMPARAÇÃO FOTOGRÁFICA */
+    .photo-type-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+    .photo-type-btn { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--card2); color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.2s; }
+    .photo-type-btn.active { background: var(--green); color: var(--white); border-color: var(--green); }
+    .photo-type-btn:active { transform: scale(0.97); }
+    .photo-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+    .photo-slot { aspect-ratio: 3/4; background: var(--card2); border: 1px solid var(--border); border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+    .photo-slot img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-slot.empty { color: var(--muted); font-size: 12px; text-align: center; padding: 20px; }
+    .photo-slot-label { position: absolute; top: 10px; left: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 6px; }
+    .timeline-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .phase-photo-group { display: flex; flex-direction: column; gap: 8px; }
+    .phase-num { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    .phase-photo-row { display: flex; gap: 6px; }
+    .photo-thumb { flex: 1; aspect-ratio: 3/4; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb:active { transform: scale(0.95); }
+    .photo-thumb.current { border-color: var(--green); box-shadow: 0 0 0 2px rgba(61,90,58,0.3); }
+    .phase-photo-group.completed .phase-num { color: var(--green); }
+
+    .phase-timeline { display: flex; flex-direction: column; }
+    .phase-step { display: flex; gap: 14px; cursor: pointer; margin-bottom: 0; }
+    .phase-step-left { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
+    .phase-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; flex-shrink: 0; transition: box-shadow 0.3s; }
+    .phase-circle.completed { background: var(--green); color: white; }
+    .phase-circle.current { background: var(--accent); color: white; animation: pulse-acc 2s infinite; }
+    .phase-circle.upcoming { background: var(--faint); border: 1px solid var(--border); color: var(--muted); }
+    .phase-connector { width: 2px; flex: 1; min-height: 16px; margin: 4px 0; }
+    .phase-connector.completed { background: var(--green); }
+    .phase-connector.current { background: linear-gradient(to bottom, var(--accent), var(--faint)); }
+    .phase-connector.upcoming { background: var(--faint); }
+    .phase-card-inner { flex: 1; background: var(--card2); border-radius: 14px; border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 14px; transition: transform 0.15s; }
+    .phase-card-inner:active { transform: scale(0.98); }
+    .phase-card-inner.completed { border-color: rgba(61,90,58,0.35); }
+    .phase-card-inner.current { border-color: rgba(232,123,106,0.35); }
+    .phase-card-inner.upcoming { opacity: 0.6; }
+    .phase-period { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
+    .phase-name-big { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 2px; }
+    .phase-desc-sm { font-size: 12px; color: var(--muted); }
+    .phase-status-tag { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 100px; margin-top: 8px; }
+    .phase-status-tag.completed { background: var(--green-lt); color: var(--green); }
+    .phase-status-tag.current { background: var(--acc-lt); color: var(--accent); }
+    @keyframes pulse-acc { 0%,100%{box-shadow:0 0 0 0 rgba(232,123,106,0.4)} 50%{box-shadow:0 0 0 8px rgba(232,123,106,0)} }
+
+    .gauge-outer { display: flex; align-items: center; justify-content: center; }
+    .gauge-rel { position: relative; }
+    .gauge-rel svg { transform: rotate(-90deg); display: block; }
+    .gauge-ctr { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    .gauge-n { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; display: block; }
+    .gauge-u { font-size: 11px; color: var(--muted); }
+    .week-row { display: flex; gap: 6px; }
+    .wd { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+    .wd-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .wd-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--faint); border: 1px solid var(--border); }
+    .wd-dot.done { background: var(--green); border-color: var(--green); }
+    .wd-dot.today { border-color: var(--accent); }
+    .lv-row { display: flex; align-items: center; gap: 16px; }
+    .lv-sq { width: 62px; height: 62px; background: var(--green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .lv-r { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--accent); }
+    .lv-inf { flex: 1; }
+    .lv-n { font-family: 'Playfair Display', serif; font-size: 19px; margin-bottom: 2px; }
+    .lv-d { font-size: 12px; color: var(--muted); }
+    .lv-bar-bg { height: 4px; background: var(--faint); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+    .lv-bar-fg { height: 100%; background: var(--green); border-radius: 2px; transition: width 1.2s; }
+    .radar-wrap { display: flex; justify-content: center; padding: 8px 0; }
+    .radar-lbl { font-size: 10px; fill: rgba(255,255,255,0.4); font-family: 'DM Sans', sans-serif; }
+
+    /* PERFIL */
+    #v-perfil { padding: calc(var(--safe-t) + 48px) 24px 100px; }
+    .av { width: 80px; height: 80px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .av-l { font-family: 'Playfair Display', serif; font-size: 36px; color: var(--accent); }
+    .pf-name { font-family: 'Playfair Display', serif; font-size: 26px; text-align: center; margin-bottom: 4px; }
+    .pf-since { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 32px; }
+    .stats-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .st-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 18px; text-align: center; }
+    .st-n { font-family: 'Playfair Display', serif; font-size: 30px; color: var(--accent); margin-bottom: 4px; }
+    .st-l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .rst-btn { width: 100%; background: none; border: 1px solid var(--border); border-radius: 12px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--muted); cursor: pointer; }
+
+    /* RITUAL MODAL */
+    #modal-ritual { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.38s cubic-bezier(0.32,1.12,0.64,1); }
+    #modal-ritual.open { display: flex; transform: translateY(0); }
+    .mr-hd { padding: calc(var(--safe-t) + 20px) 20px 0; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .mr-phase { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 2px; }
+    .mr-title { font-family: 'Playfair Display', serif; font-size: 21px; }
+    .step-dots { display: flex; gap: 5px; padding: 20px 24px 0; flex-shrink: 0; }
+    .sd { flex: 1; height: 3px; border-radius: 2px; background: var(--faint); transition: background 0.3s; }
+    .sd.done { background: var(--green); }
+    .sd.cur { background: var(--accent); }
+    .mr-body { flex: 1; overflow-y: auto; padding: 26px 24px 0; overscroll-behavior: contain; }
+    .step-n { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; }
+    .step-nm { font-family: 'Playfair Display', serif; font-size: clamp(22px,6vw,30px); line-height: 1.2; margin-bottom: 16px; }
+    .step-bd { font-size: 15px; line-height: 1.75; color: rgba(255,255,255,0.78); }
+    .step-bd p { margin-bottom: 14px; }
+    .step-bd strong { color: var(--accent); font-weight: 600; }
+    .instr { background: var(--card2); border-left: 3px solid var(--green); border-radius: 0 12px 12px 0; padding: 14px 16px; margin: 16px 0; font-size: 14px; line-height: 1.65; color: rgba(255,255,255,0.82); }
+    .tip { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 14px; line-height: 1.65; }
+    .mr-foot { padding: 16px 24px calc(24px + var(--safe-b)); flex-shrink: 0; }
+    .btn-step { width: 100%; background: var(--green); border: none; border-radius: 16px; padding: 18px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--white); letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.1s; }
+    .btn-step:active { transform: scale(0.98); opacity: 0.85; }
+    .btn-step.finish { background: var(--accent); }
+
+    .timer-wrap { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; padding: 14px 16px; background: var(--card2); border-radius: 14px; }
+    .timer-track { flex: 1; height: 3px; background: var(--faint); border-radius: 2px; overflow: hidden; }
+    .timer-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 1s linear; }
+    .timer-done .timer-fill { background: var(--green); }
+    .timer-cnt { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+    .timer-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); white-space: nowrap; }
+
+    .int-opts { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+    .int-opt { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; gap: 14px; }
+    .int-opt:active { transform: scale(0.98); }
+    .int-opt.selected { border-color: rgba(61,90,58,0.6); background: var(--green-lt); }
+    .int-opt-body { flex: 1; }
+    .int-opt-name { font-family: 'Playfair Display', serif; font-size: 16px; margin-bottom: 2px; }
+    .int-opt-desc { font-size: 12px; color: var(--muted); }
+    .int-opt-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; transition: background 0.2s, border-color 0.2s; }
+    .int-opt.selected .int-opt-check { background: var(--green); border-color: var(--green); }
+
+    /* BREATHING */
+    .breath-scene { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0 8px; }
+    .breath-outer { position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
+    .breath-glow { position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(circle, rgba(61,90,58,0.18) 0%, transparent 65%); pointer-events: none; }
+    #breath-ring { width: 140px; height: 140px; border-radius: 50%; background: rgba(61,90,58,0.08); border: 1.5px solid rgba(61,90,58,0.4); display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; transition: transform 5s ease-in-out, box-shadow 5s ease-in-out; }
+    #breath-ring.expand { transform: scale(1.32); box-shadow: 0 0 50px rgba(61,90,58,0.25); }
+    #breath-ring.contract { transform: scale(1); box-shadow: 0 0 0px rgba(61,90,58,0); }
+    .breath-inner { width: 70px; height: 70px; border-radius: 50%; background: var(--green); opacity: 0.6; transition: transform 5s ease-in-out, opacity 5s ease-in-out; }
+    #breath-ring.expand .breath-inner { transform: scale(1.15); opacity: 0.85; }
+    #breath-ring.contract .breath-inner { transform: scale(1); opacity: 0.6; }
+    .br-lbl { font-family: 'Playfair Display', serif; font-size: 26px; text-align: center; min-height: 36px; cursor: pointer; }
+    .br-cnt { font-size: 52px; font-weight: 300; color: var(--green); min-height: 64px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums; }
+    .br-guide { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; max-width: 220px; }
+    .br-dots { display: flex; gap: 9px; margin-top: 4px; }
+    .brd { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); transition: background 0.4s; }
+    .brd.done { background: var(--green); }
+
+    /* TCM */
+    .tcm-card { background: var(--card2); border-radius: 16px; border: 1px solid var(--border); padding: 20px; margin: 14px 0; }
+    .tcm-nm { font-family: 'Playfair Display', serif; font-size: 19px; margin-bottom: 4px; }
+    .tcm-zh { font-size: 12px; color: var(--gold); margin-bottom: 12px; }
+    .tcm-loc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+    .tcm-steps { list-style: none; }
+    .tcm-steps li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.78); display: flex; gap: 10px; }
+    .tcm-steps li:last-child { border-bottom: none; }
+    .tcm-sn { width: 20px; height: 20px; border-radius: 50%; background: var(--green-lt); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--green); flex-shrink: 0; margin-top: 2px; }
+
+    /* PILLAR MODAL */
+    #modal-pillar { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94); }
+    #modal-pillar.open { display: flex; transform: translateX(0); }
+    .pd-hd { padding: calc(var(--safe-t) + 18px) 20px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .pd-n { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); margin-bottom: 8px; }
+    .pd-title { font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 8px; }
+    .pd-why { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.65; }
+    .pd-body { flex: 1; overflow-y: auto; padding: 24px 20px 60px; }
+    .tech-item { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 24px; }
+    .tech-item:last-child { border-bottom: none; }
+    .tech-nm { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 10px; color: var(--accent); }
+    .tech-steps { list-style: none; }
+    .tech-steps li { padding: 10px 0; border-bottom: 1px solid var(--faint); font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.78); display: flex; gap: 12px; }
+    .tech-steps li:last-child { border-bottom: none; }
+    .tsn { width: 22px; height: 22px; border-radius: 50%; background: var(--green-lt); border: 1px solid rgba(61,90,58,0.35); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--green); flex-shrink: 0; margin-top: 2px; font-weight: 600; }
+
+    /* PHASE DETAIL MODAL */
+    #modal-phase { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94); }
+    #modal-phase.open { display: flex; transform: translateX(0); }
+    .phd-hd { padding: calc(var(--safe-t) + 18px) 20px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: flex-start; gap: 14px; }
+    .phd-body { flex: 1; overflow-y: auto; padding: 24px 20px 80px; }
+
+    /* MICRO MODAL */
+    #modal-micro { position: fixed; inset: 0; z-index: 100; background: rgba(8,8,8,0.96); backdrop-filter: blur(16px); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 36px; }
+    #modal-micro.open { display: flex; }
+    .mm-phase { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--green); margin-bottom: 12px; }
+    .mm-name { font-family: 'Playfair Display', serif; font-size: clamp(26px,7vw,34px); text-align: center; margin-bottom: 24px; line-height: 1.2; }
+    .mm-instr { font-size: 15px; line-height: 1.75; color: rgba(255,255,255,0.78); text-align: center; max-width: 320px; margin-bottom: 36px; }
+    .mm-done { background: var(--green); border: none; border-radius: 16px; padding: 16px 52px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--white); }
+
+    /* LEVEL UP */
+    #modal-lu { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; padding: 32px; }
+    #modal-lu.open { display: flex; }
+    .lu-box { background: var(--card); border-radius: 24px; border: 1px solid rgba(61,90,58,0.4); padding: 40px 32px; text-align: center; max-width: 320px; width: 100%; box-shadow: 0 0 100px rgba(61,90,58,0.25); }
+    .lu-ico { width: 80px; height: 80px; background: var(--green); border-radius: 20px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+    .lu-r { font-family: 'Playfair Display', serif; font-size: 36px; color: var(--accent); }
+    .lu-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--green); margin-bottom: 8px; }
+    .lu-n { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 8px; }
+    .lu-d { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+    .lu-cl { background: var(--green); border: none; border-radius: 14px; padding: 15px 40px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--white); cursor: pointer; }
+
+    ::-webkit-scrollbar { width: 0; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div id="ob1" style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
+    <div class="ob-mark"><span class="ob-mark-r">R</span></div>
+    <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+    <h1 class="ob-h">Você não precisa parecer mais jovem.</h1>
+    <p style="font-family:'Playfair Display',serif;font-size:18px;color:var(--accent);text-align:center;margin-bottom:16px;font-style:italic">Precisa se sentir mais você.</p>
+    <p class="ob-p">O Método Reconexão Facial não luta contra o tempo. Ele convida você a voltar para o próprio rosto — com consciência, com toque, com presença.</p>
+    <button class="btn-primary" onclick="goOb(2)">Continuar</button>
+  </div>
+  <div id="ob2" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
+    <h2 class="ob-h" style="font-size:clamp(22px,6vw,30px);margin-bottom:20px">Como funciona</h2>
+    <div class="ob-cards">
+      <div class="ob-card"><div class="ob-card-t">Consciência</div><div class="ob-card-d">Perceba o rosto que você carrega sem saber</div></div>
+      <div class="ob-card"><div class="ob-card-t">Respiração</div><div class="ob-card-d">Regule o sistema nervoso antes de qualquer toque</div></div>
+      <div class="ob-card"><div class="ob-card-t">Liberação</div><div class="ob-card-d">Dissolva tensões acumuladas por anos</div></div>
+      <div class="ob-card"><div class="ob-card-t">Toque</div><div class="ob-card-d">Reconecte-se com automassagem e drenagem</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:32px;line-height:1.6">10 a 20 minutos por dia. Suas mãos. Sua presença.</p>
+    <button class="btn-primary" onclick="goOb(3)">Continuar</button>
+  </div>
+  <div id="ob3" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
+    <h2 class="ob-h" style="font-size:clamp(22px,6vw,30px);margin-bottom:20px">Sua jornada de 6 fases</h2>
+    <div class="ob-phases">
+      <div class="ob-phase"><div class="ob-phase-num">Fase I</div><div class="ob-phase-name">Presença</div><div class="ob-phase-period">Semanas 1–2</div></div>
+      <div class="ob-phase"><div class="ob-phase-num">Fase II</div><div class="ob-phase-name">Reconexão</div><div class="ob-phase-period">Semanas 3–4</div></div>
+      <div class="ob-phase"><div class="ob-phase-num">Fase III</div><div class="ob-phase-name">Integração</div><div class="ob-phase-period">Semanas 5–7</div></div>
+      <div class="ob-phase"><div class="ob-phase-num">Fase IV</div><div class="ob-phase-name">Transformação</div><div class="ob-phase-period">Semanas 8–11</div></div>
+      <div class="ob-phase"><div class="ob-phase-num">Fase V</div><div class="ob-phase-name">Maestria</div><div class="ob-phase-period">Semanas 12–16</div></div>
+      <div class="ob-phase"><div class="ob-phase-num">Fase VI</div><div class="ob-phase-name">Presença Plena</div><div class="ob-phase-period">A partir da semana 17</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:32px;line-height:1.6">Cada fase aprofunda a anterior. O ritmo é seu.</p>
+    <button class="btn-primary" onclick="goOb(4)">Começar minha jornada</button>
+  </div>
+
+  <div id="v-onboard" class="view active">
+    <div class="ob-mark"><span class="ob-mark-r">R</span></div>
+    <h1 class="ob-h">Método<br/>Reconexão Viva</h1>
+    <p class="ob-p">Sua companheira diária para o rejuvenescimento natural — guiada pelos 9 pilares.</p>
+    <input type="text" class="ob-input" id="ob-name" placeholder="Como posso te chamar?" autocomplete="off" autocorrect="off"/>
+    <button class="btn-primary" onclick="startApp()">Iniciar minha jornada</button>
+  </div>
+
+  <div id="v-hoje" class="view"></div>
+
+  <div id="v-guias" class="view">
+    <h2 class="guias-h">Os 9 Pilares</h2>
+    <p class="guias-p">Técnicas completas para cada dimensão do rejuvenescimento natural.</p>
+    <div class="pillar-list" id="pillar-list"></div>
+  </div>
+
+  <div id="v-evolucao" class="view">
+    <h2 class="evol-h">Evolução</h2>
+
+    <div class="e-card">
+      <div class="e-card-lbl">Comparação Fotográfica</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Selecione um tipo de foto para visualizar sua evolução da Fase I até agora.</div>
+      <div class="photo-type-selector" id="photo-type-selector"></div>
+      <div class="photo-comparison" id="photo-comparison"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:14px;text-align:center;padding:10px 0;border-top:1px solid var(--border)">
+        Quer adicionar fotos? <a href="#" onclick="openPhaseForPhotos(event)" style="color:var(--green);text-decoration:none;font-weight:600">Abra uma Fase</a>
+      </div>
+    </div>
+
+    <div class="e-card">
+      <div class="e-card-lbl">Galeria de Fases</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Toque em uma miniatura para selecioná-la. Clique no tipo de foto para expandir a vista.</div>
+      <div class="timeline-phases" id="timeline-phases"></div>
+    </div>
+  </div>
+
+  <div id="v-perfil" class="view">
+    <div class="av"><span class="av-l" id="av-l">B</span></div>
+    <div class="pf-name" id="pf-name"></div>
+    <div class="pf-since" id="pf-since"></div>
+    <div class="stats-g" id="stats-g"></div>
+    <button class="rst-btn" onclick="confirmReset()">Reiniciar dados</button>
+  </div>
+
+  <nav id="nav">
+    <div class="nav-items">
+      <button class="nav-btn active" onclick="switchTab('hoje')" data-tab="hoje">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <span class="nav-lbl">Hoje</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('guias')" data-tab="guias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span class="nav-lbl">Guias</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('evolucao')" data-tab="evolucao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21v-4h4v-4h4v-4h4v-4h4v-4h3"/></svg>
+        <span class="nav-lbl">Jornada</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('perfil')" data-tab="perfil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span class="nav-lbl">Perfil</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<div id="modal-ritual">
+  <div class="mr-hd">
+    <div class="back-btn" onclick="closeRitual()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </div>
+    <div>
+      <div class="mr-phase" id="mr-phase"></div>
+      <div class="mr-title" id="mr-title"></div>
+    </div>
+  </div>
+  <div class="step-dots" id="mr-dots"></div>
+  <div class="mr-body" id="mr-body"></div>
+  <div class="mr-foot"><button class="btn-step" id="mr-btn" onclick="nextStep()"></button></div>
+</div>
+
+<div id="modal-pillar">
+  <div class="pd-hd">
+    <div class="back-btn" onclick="closePillar()" style="margin-bottom:14px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </div>
+    <div class="pd-n" id="pd-n"></div>
+    <div class="pd-title" id="pd-title"></div>
+    <div class="pd-why" id="pd-why"></div>
+  </div>
+  <div class="pd-body" id="pd-body"></div>
+</div>
+
+<div id="modal-phase" style="position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)">
+  <div style="padding:calc(var(--safe-t) + 18px) 20px 16px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:flex-start;gap:14px">
+    <div class="back-btn" onclick="closePhaseDetail()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </div>
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);margin-bottom:4px" id="phd-num"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px" id="phd-name"></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="phd-period"></div>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:24px 20px 80px" id="phd-body"></div>
+</div>
+
+<div id="modal-micro">
+  <div class="mm-phase" id="mm-phase"></div>
+  <div class="mm-name" id="mm-name"></div>
+  <div class="mm-instr" id="mm-instr"></div>
+  <button class="mm-done" onclick="completeMicro()">Feito</button>
+</div>
+
+<div id="modal-lu">
+  <div class="lu-box">
+    <div class="lu-ico"><span class="lu-r" id="lu-r"></span></div>
+    <div class="lu-tag">Novo Nível</div>
+    <div class="lu-n" id="lu-n"></div>
+    <div class="lu-d" id="lu-d"></div>
+    <button class="lu-cl" onclick="closeLU()">Continuar</button>
+  </div>
+</div>
+
+<input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFile(event)">
+
+<script>
+const RITUALS = [
+  {
+    id: 'manha', phase: 'O Despertar', time: '6h — 10h',
+    name: 'Ritual da Manhã',
+    desc: 'Desperte o corpo com intenção. Cinco práticas para ativar sua vitalidade antes do dia começar.',
+    pills: ['Língua','Respiração','Occipital','Postura'],
+    pillarIds: ['lingua','respiracao','occipital','postura'],
+    tStart: 5, tEnd: 12,
+    steps: [
+      {
+        name: 'Verificação Corporal',
+        body: `<p>Antes de se levantar, <strong>mantenha os olhos fechados</strong> por um momento.</p>
+<div class="instr">Percorra mentalmente o corpo de cima a baixo. Onde há tensão? Onde está leve? Apenas observe — sem julgamento. Leve atenção especialmente à mandíbula, nuca e ombros.</div>
+<p>Estes três pontos acumulam a tensão do sono. O simples ato de notar já começa a dissolução.</p>
+<p class="tip">Pesquisas em neurociência mostram que 60 segundos de varredura corporal matinal reduzem o cortisol nas primeiras horas do dia.</p>`
+      },
+      {
+        name: 'Língua no Palato', timer: 60,
+        body: `<p>Com a boca fechada e os lábios relaxados, <strong>posicione a língua completamente no palato</strong>.</p>
+<div class="instr">Ponta da língua logo atrás dos incisivos superiores. O corpo inteiro da língua toca o palato suavemente. Respire exclusivamente pelo nariz.</div>
+<p>Mantenha pelo tempo indicado. Perceba como os músculos ao redor dos olhos, bochechas e têmporas relaxam em cadeia.</p>
+<p class="tip">A língua no palato cria uma força contínua que sustenta a arcada superior e previne o afundamento facial. Este é o alicerce de tudo.</p>`
+      },
+      {
+        name: 'Respiração Diafragmática',
+        body: `<p>Coloque uma mão sobre o peito e outra sobre o abdômen. <strong>Somente a mão do abdômen deve se mover.</strong></p>
+<div class="instr">Inspire pelo nariz: 4 tempos — o abdômen expande.<br/>Segure: 2 tempos.<br/>Expire lentamente: 6 tempos — abdômen retorna.<br/>Pausa natural. Repita 5 ciclos completos.</div>
+<p>Se o peito subir antes do abdômen, você está usando a respiração torácica — que aumenta o cortisol e a tensão facial.</p>
+<p class="tip">A respiração diafragmática é a bomba linfática do corpo. Cada ciclo move linfa, reduzindo inchaço facial e toxinas acumuladas.</p>`
+      },
+      {
+        name: 'Liberação Occipital', timer: 45,
+        body: `<p>Sente-se com a coluna ereta. Entrelaçe os dedos e apoie-os na base do crânio — onde o osso termina e o pescoço começa.</p>
+<div class="instr">Sem pressionar, apenas apoie o peso natural da cabeça nas mãos.<br/>Deixe o queixo cair levemente em direção ao peito.<br/>Respire profundamente 3 vezes, sentindo o espaço se criando na nuca.</div>
+<p>Os músculos suboccipitais vão progressivamente amolecendo durante o tempo indicado.</p>
+<p class="tip">Os suboccipitais se conectam à aponeurose epicraniana, que se estende até o músculo frontal da testa. Liberar aqui é um lifting não cirúrgico.</p>`
+      },
+      {
+        name: 'Intenção do Dia',
+        body: `<p>Com o corpo já ativado, defina <strong>uma palavra</strong> para guiar seu dia.</p>
+<div class="instr">Pode ser: presença, gentileza, fluidez, força, calma, abertura.<br/>Repita mentalmente três vezes enquanto toca suavemente as têmporas com as pontas dos dedos médios.<br/>Respire fundo antes de abrir os olhos.</div>
+<p>Este gesto ativa o ponto <strong>Taiyang</strong> — que alivia tensão craniana e clareia a mente segundo a medicina chinesa.</p>
+<p class="tip">A conexão mente-corpo começa na intenção. O que você cultiva de manhã, você irradia durante o dia inteiro.</p>`
+      }
+    ]
+  },
+  {
+    id: 'tarde', phase: 'Pausa de Presença', time: '12h — 17h',
+    name: 'Pausa da Tarde',
+    desc: 'Dois minutos para descomprimir. Respiração guiada e o ponto de medicina chinesa do dia.',
+    pills: ['Respiração','MTC'],
+    pillarIds: ['respiracao','mtc'],
+    tStart: 11, tEnd: 18,
+    steps: [
+      { name: 'Respiração Coerente', breathStep: true, body: '' },
+      { name: 'Ponto do Dia', tcmStep: true, body: '' }
+    ]
+  },
+  {
+    id: 'noite', phase: 'O Recolhimento', time: '18h — 22h',
+    name: 'Ritual da Noite',
+    desc: 'Dissolva o dia. Liberte a fáscia, solte o masseter e prepare o corpo para regenerar enquanto dorme.',
+    pills: ['Fáscia','Masseter','Couro Cabeludo','Diário'],
+    pillarIds: ['fascia','masseter','couro','mente'],
+    tStart: 17, tEnd: 24,
+    steps: [
+      {
+        name: 'Liberação da Fáscia Facial', timer: 60,
+        body: `<p>Com os dedos médios, encontre os <strong>pontos de tensão nas bochechas</strong> — logo abaixo dos ossos zigomáticos.</p>
+<div class="instr">Aplique pressão suave e sustentada — não deslize, apenas segure o ponto.<br/>Respire profundamente e aguarde até sentir o tecido "ceder" sob os dedos.<br/>Mova para a testa: três dedos no centro, afaste gentilmente em direção às têmporas.</div>
+<p class="tip">A fáscia guarda a história do corpo. Liberar adesões permite que os músculos retornem à posição anatômica natural.</p>`
+      },
+      {
+        name: 'Relaxamento do Masseter', timer: 90,
+        body: `<p>Com os dentes levemente separados, localize os <strong>masseteres</strong> na lateral da mandíbula.</p>
+<div class="instr">Passo 1: Três dedos juntos, pressão circular lenta por 30 segundos.<br/>Passo 2: Abra a boca levemente e mova a mandíbula lado a lado, 5 vezes.<br/>Passo 3: Língua no palato, mandíbula caindo pela gravidade.</div>
+<p>O masseter é o músculo mais poderoso do corpo. <strong>Bruxismo e tensão crônica</strong> aqui quadram a mandíbula e envelhecem a face.</p>
+<p class="tip">Após este exercício, verifique: você estava apertando os dentes sem perceber?</p>`
+      },
+      {
+        name: 'Liberação do Couro Cabeludo', timer: 90,
+        body: `<p>Com todas as pontas dos dedos no couro cabeludo — como lavar o cabelo, mas <strong>sem deslizar os dedos</strong>.</p>
+<div class="instr">Mova o couro cabeludo sobre o crânio — não os dedos sobre o cabelo.<br/>Sinta o tecido se deslocando. Se não houver mobilidade, há tensão.<br/>Três zonas: frontal, temporal, occipital.</div>
+<p>O músculo frontal — que cria rugas na testa — <strong>começa no couro cabeludo</strong>. Liberar aqui suaviza linhas de expressão.</p>
+<p class="tip">Três minutos diários de liberação do couro cabeludo equivalem a uma sessão de fisioterapia craniana.</p>`
+      },
+      {
+        name: 'Diário de Reconexão',
+        body: `<p>Três perguntas. Uma resposta curta cada. <strong>Sem julgamento.</strong></p>
+<div class="instr">1. O que meu corpo tentou me dizer hoje?<br/>2. Em qual momento perdi a consciência — da postura, da tensão, da respiração?<br/>3. Uma coisa que posso levar para amanhã.</div>
+<p>A tensão facial é frequentemente a <strong>linguagem não falada das emoções</strong> que não foram processadas.</p>
+<p class="tip">5 minutos de escrita reflexiva antes de dormir melhoram a qualidade do sono e a autoconsciência corporal.</p>`
+      },
+      {
+        name: 'Intenção de Amanhã', intentionStep: true,
+        body: `<p>Escolha <strong>um foco</strong> para levar para o dia de amanhã.</p>
+<p>Esta pequena escolha ativa sua atenção antecipada — quando você nomeia o que vai observar, seu sistema nervoso começa a treinar para isso durante o sono.</p>`
+      }
+    ]
+  }
+];
+
+const MICRO = [
+  { id: 'm1', pillar: 'Língua', pillarId: 'lingua', name: 'Check da Língua', time: '10 seg', instr: 'Onde está sua língua agora? Se não está no palato, leve-a gentilmente para lá. Sinta como os músculos ao redor dos olhos e bochechas relaxam imediatamente em resposta.' },
+  { id: 'm2', pillar: 'Postura', pillarId: 'postura', name: 'Alinhamento Cervical', time: '20 seg', instr: 'Imagine um fio puxando o topo da cabeça em direção ao teto. Traga o queixo levemente para trás — não para baixo. Sinta o espaço se criando na nuca. O tech neck envelhece a face; esta posição reverte.' },
+  { id: 'm3', pillar: 'Respiração', pillarId: 'respiracao', name: 'Três Respirações', time: '30 seg', instr: 'Três respirações diafragmáticas agora. Mais lento, mais profundo. A cada expiração, solte qualquer tensão acumulada no rosto — nos olhos, na testa, na mandíbula.' },
+  { id: 'm4', pillar: 'Masseter', pillarId: 'masseter', name: 'Relaxe a Mandíbula', time: '15 seg', instr: 'Dentes separados, lábios fechados, língua no palato. Esta é a posição de repouso fisiológica da boca. Se seus dentes estavam tocando, você estava em tensão crônica sem perceber.' },
+  { id: 'm5', pillar: 'Mente', pillarId: 'mente', name: 'Observação Neutra', time: '60 seg', instr: 'Observe seu rosto como está agora — sem julgamento. Qual expressão você carrega? O que ela diz? Deixe o rosto amolecer completamente por um momento. Perceba a diferença.' }
+];
+
+const PILLAR_IDS = ['lingua','respiracao','masseter','postura','occipital','fascia','couro','mtc','mente'];
+const PILLARS = [
+  { num:'I',   id:'lingua',    name:'Língua no Palato',       tag:'O suporte invisível da estrutura facial',
+    why:'A posição correta da língua cria uma força contínua que sustenta a arcada superior, previne o afundamento das bochechas e alinha a coluna cervical — tudo simultaneamente.',
+    techs:[
+      { name:'Posição de Repouso Correta', steps:['Feche os lábios sem esforço, mantendo-os completamente relaxados.','Posicione a ponta da língua logo atrás dos incisivos superiores — no ponto palatino.','Expanda o corpo da língua suavemente em direção ao palato — toda a superfície em contato.','Respire exclusivamente pelo nariz com esta posição.','Mantenha como padrão inconsciente ao longo do dia. Verifique a cada hora.'] },
+      { name:'Fortalecimento da Língua', steps:['Com a boca aberta, pressione a língua completamente contra o palato — como fazer sucção.','Mantenha a pressão máxima por 5 segundos.','Relaxe por 2 segundos. Repita 10 vezes.','Sinta o cansaço nos músculos da língua — sinal de que está correto.','Avance: faça o mesmo com a boca fechada, aumentando a intensidade gradualmente.'] },
+      { name:'Mewing Consciente', steps:['Posicione a língua inteira no palato — não apenas a ponta, mas todo o corpo.','Aplique uma pressão suave e constante — como empurrar o palato de dentro para cima.','Mantenha durante as atividades do dia: trabalhar, ler, dirigir, caminhar.','Se perceber que a língua caiu, reposicione sem autocrítica — é treino neural.','Com semanas de prática, a posição se torna automática e inconsciente.'] }
+    ]
+  },
+  { num:'II',  id:'respiracao', name:'Respiração Diafragmática', tag:'A bomba linfática e reguladora do cortisol',
+    why:'A respiração diafragmática profunda move a linfa — reduzindo inchaço e toxinas faciais — e ativa o nervo vago, regulando cortisol e revertendo o envelhecimento acelerado pelo estresse crônico.',
+    techs:[
+      { name:'Respiração 4-2-6', steps:['Deite ou sente-se com a coluna ereta. Uma mão no peito, outra no abdômen.','Inspire pelo nariz contando 4 tempos — o abdômen expande, o peito quieto.','Segure a respiração por 2 tempos.','Expire lentamente contando 6 tempos — abdômen retorna.','Pausa natural antes de inspirar novamente. Repita 8-10 ciclos.'] },
+      { name:'Respiração Coerente 5-5', steps:['Inspire pelo nariz por exatamente 5 segundos — suave e constante.','Expire pelo nariz por exatamente 5 segundos — suave e constante.','Sem pausa entre inspire e expire: fluxo contínuo e circular.','Mantenha por 5 minutos. 6 respirações/min sincroniza o sistema cardiovascular.','Ideal durante o trabalho ou em momentos de ansiedade.'] },
+      { name:'Ativação Linfática', steps:['Deite de costas. Coloque as mãos sobre as costelas laterais.','Inspire expandindo as costelas para os lados — sinta as mãos se afastarem.','Expire completamente, sentindo as costelas se fecharem.','Ao final de cada expiração, contraia levemente o assoalho pélvico.','Esta técnica maximiza o movimento da linfa pelo corpo e pela face.'] }
+    ]
+  },
+  { num:'III', id:'masseter',   name:'Masseter e Mandíbula',    tag:'O músculo mais poderoso e mais tenso do corpo',
+    why:'O bruxismo e a tensão crônica do masseter quadram a mandíbula, tensionam os ligamentos da face e transmitem tensão para todo o crânio. Liberar este músculo tem impacto imediato e visível.',
+    techs:[
+      { name:'Liberação por Pressão Sustentada', steps:['Localize o masseter: morda suavemente e sinta onde o músculo se contrai na lateral da mandíbula.','Com três dedos juntos, aplique pressão direta e firme — sem deslizar, apenas pressão sustentada.','Segure por 30-60 segundos, respirando profundamente.','Espere o "ceder" — sensação de amolecimento ou liberação de calor.','Repita nas três regiões: anterior, central e posterior (próximo à orelha).'] },
+      { name:'Exercício de Mobilidade', steps:['Abra a boca suavemente ao máximo — sem forçar além do confortável.','Mova a mandíbula para a direita, mantenha 5 segundos.','Mova para a esquerda, mantenha 5 segundos.','Deslize a mandíbula para frente (protrusão) e mantenha 3 segundos.','Finalize com 5 movimentos circulares lentos de cada lado. Reposicione a língua no palato.'] },
+      { name:'Protocolo Anti-Bruxismo Noturno', steps:['Antes de dormir: realize a liberação por pressão sustentada por 2 minutos.','Posicione a língua completamente no palato.','Deixe os dentes completamente separados — nenhum contato entre as arcadas.','Mantenha os lábios fechados, a mandíbula "caindo" pela gravidade.','Se acordar com mandíbula tensa, repita a liberação antes de sair da cama.'] }
+    ]
+  },
+  { num:'IV',  id:'postura',    name:'Postura Cervical e SCM',  tag:'Tech neck: o envelhecedor silencioso',
+    why:'Cada centímetro de avanço da cabeça adiciona 5kg de carga na coluna e traciona as estruturas faciais para baixo. O SCM tenso comprime linfonodos cervicais e tensiona a pele do pescoço.',
+    techs:[
+      { name:'Correção da Postura da Cabeça', steps:['Em pé ou sentada, olhe para frente, ombros relaxados.','Sem abaixar o queixo, deslize a cabeça para trás — como fazer uma leve "papada".','Sinta o alongamento imediato na base do crânio e alívio na nuca.','Esta é a posição neutra cervical. Mantenha-a como padrão ao longo do dia.','Defina lembretes a cada hora para verificar e recalibrar.'] },
+      { name:'Liberação do Esternocleidomastoideo', steps:['Gire a cabeça para um lado — o SCM aparece como um cordão do pescoço ao crânio.','Com o polegar e o indicador, segure suavemente o músculo — pinçar gentilmente.','Aplique pressão suave e sustentada enquanto respira profundamente.','Deslize levemente ao longo do músculo das inserções centrais para as extremidades.','Repita no outro lado. Nunca pressione a linha central do pescoço.'] },
+      { name:'Alongamento Cervical Completo', steps:['Flexão lateral: incline a orelha em direção ao ombro. Segure 20 segundos cada lado.','Extensão: traga o queixo levemente para cima. Segure 10 segundos.','Rotação: gire lentamente para cada lado até o limite natural. Segure 15 segundos.','Círculos: movimentos circulares muito lentos — metade do arco de cada vez.','Finalize retomando a postura correta da cabeça.'] }
+    ]
+  },
+  { num:'V',   id:'occipital',  name:'Liberação Occipital',     tag:'A conexão entre a nuca e o lifting facial',
+    why:'Os músculos suboccipitais conectam-se à aponeurose epicraniana — a fáscia que recobre o crânio e se estende até o músculo frontal da testa. Liberá-los produz um lifting não cirúrgico real.',
+    techs:[
+      { name:'Compressão Isquêmica Suboccipital', steps:['Deite de costas sem travesseiro (ou com um enrolado fino).','Entrelaçe os dedos e posicione-os na base do crânio — onde o osso termina.','O peso da cabeça cria pressão natural sobre os dedos. Não force nada.','Permaneça imóvel, respirando profundamente, por 3-5 minutos.','Ao terminar, mova a cabeça muito lentamente antes de se levantar.'] },
+      { name:'Mobilização da Aponeurose', steps:['Posicione os polegares na base do crânio, na linha média.','Aplique pressão firme e deslize muito lentamente em direção ao topo do crânio.','Sinta a fáscia se deslocando sob os polegares.','Continue até o hairline. Repita 3 vezes.','Continue com a liberação do couro cabeludo para completar a cadeia fascial.'] }
+    ]
+  },
+  { num:'VI',  id:'fascia',     name:'Fáscia Facial',           tag:'A rede que sustenta ou afunda a face',
+    why:'A fáscia superficial da face é a camada entre a pele e os músculos. Adesões fasciais criam dobras, bolsas e ptose. Liberar a fáscia restaura a estrutura tridimensional do rosto.',
+    techs:[
+      { name:'Liberação por Pinçamento', steps:['Com o polegar e o indicador, pince gentilmente a pele e o tecido subjacente.','Segure o tecido sem deslizar — pressão sustentada, não movimento.','Trabalhe ao longo dos zigomáticos, das têmporas e do contorno da mandíbula.','Quando sentir resistência, mantenha por 10-15 segundos até o tecido ceder.','A sensação correta é pressão moderada. Nunca dor ou vermelhidão intensa.'] },
+      { name:'Deslizamento Miofascial', steps:['Com as palmas abertas, posicione as mãos nas bochechas sem pressionar.','Com extrema lentidão, deslize para cima e para fora — em direção às orelhas.','O movimento deve ser ultra-lento: 1 centímetro por segundo.','Repita nos quadrantes: bochechas, queixo/mandíbula, testa/temporais.','Cada zona: 3 deslizamentos lentos. Total: 3-5 minutos por sessão.'] }
+    ]
+  },
+  { num:'VII', id:'couro',      name:'Couro Cabeludo',          tag:'O músculo frontal começa no hairline',
+    why:'O músculo frontal — que cria rugas na testa — continua pelo couro cabeludo. Tensão aqui perpetua linhas de expressão e comprime os vasos que nutrem rosto e folículos capilares.',
+    techs:[
+      { name:'Mobilização do Couro Cabeludo', steps:['Posicione as pontas dos dez dedos no couro cabeludo.','Sem deslizar os dedos: mova o couro cabeludo sobre o crânio.','Teste a mobilidade: se o couro não se move, há tensão e aderência.','Movimentos para frente/trás, lado/lado e circulares. Três zonas: frontal, lateral, occipital.','Leve os dedos sistematicamente por todo o couro, liberando cada área.'] },
+      { name:'Acupressão dos Pontos Cranianos', steps:['Du 20 (Baihui): topo do crânio. Pressione com o dedo médio por 60 segundos.','GB 20 (Fengchi): nas duas covinhas na base do crânio. Polegares por 60 segundos.','Bladder 10: logo abaixo do GB 20, no hairline da nuca. Polegares por 30 segundos.','Finalize com suaves deslizamentos da nuca em direção ao topo do crânio.','Estes pontos aliviam cefaleia tensional e melhoram a circulação craniana.'] }
+    ]
+  },
+  { num:'VIII',id:'mtc',        name:'Medicina Chinesa',        tag:'Pontos ancestrais para tensão moderna',
+    why:'Os meridianos de acupuntura percorrem a face e o crânio. A pressão nos pontos corretos dissolve o Qi bloqueado — que se manifesta como tensão, inchaço e ptose facial.',
+    techs:[
+      { name:'ST6 — Jiache (Barreira da Mandíbula)', steps:['Localize: na lateral da mandíbula, onde o masseter forma a maior proeminência ao morder.','Com o dedo médio, aplique pressão firme e circular por 30-60 segundos.','Indicações: tensão da mandíbula, bruxismo, dor de ouvido, tensão facial.','Repita bilateralmente — ambos os lados simultaneamente é mais eficaz.','Complemento: após ST6, mova para ST7 (onde a mandíbula articula).'] },
+      { name:'Yintang — Terceiro Olho', steps:['Localize: no ponto entre as sobrancelhas, levemente acima da linha das sobrancelhas.','Com o dedo médio, aplique pressão circular suave por 60-90 segundos.','Indicações: estresse, ansiedade, insônia, rugas entre as sobrancelhas.','Este ponto acalma o sistema nervoso e relaxa o músculo glabela.','Termine com toque leve e estático por mais 30 segundos.'] },
+      { name:'Du 20 — Baihui (Cem Convergências)', steps:['Localize: topo exato do crânio, intersecção da linha entre orelhas com a linha mediana.','Com o dedo médio, aplique pressão firme por 60 segundos.','Ao pressionar, visualize o ponto sendo "levantado" em direção ao teto.','Indicações: ptose facial, fadiga, pressão craniana.','Du 20 é o ponto de maior yang do corpo — ativa e "levanta" a estrutura facial.'] }
+    ]
+  },
+  { num:'IX',  id:'mente',      name:'Mente e Observação',      tag:'Emoções não processadas se instalam na face',
+    why:'Cada emoção ativa padrões musculares específicos no rosto. Emoções repetidas ou suprimidas criam tensão crônica que se manifesta como rugas, sulcos e assimetrias. A consciência emocional é técnica de rejuvenescimento.',
+    techs:[
+      { name:'Varredura de Tensão Emocional', steps:['Feche os olhos e respire profundamente três vezes.','Pergunte: qual emoção está presente agora? Não julgue a resposta.','Localize onde esta emoção se manifesta no rosto: testa? queixo? olhos?','Inspire e, na expiração, solte conscientemente a tensão nesta região.','Repita: onde mais esta emoção está guardada no corpo?'] },
+      { name:'Rosto de Repouso Consciente', steps:['Observe sua expressão de repouso habitual — geralmente cheia de microexpressões.','Libere a testa: imagine a pele sendo suavemente puxada para cima e para fora.','Libere os olhos: sorriso interno suave, sem contrair os músculos oculares.','Libere a região perioral: lábios levemente separados, mandíbula caindo pela gravidade.','Pratique por 5 minutos diários. Com consistência, reestrutura as expressões habituais.'] },
+      { name:'Visualização de Reconexão', steps:['Em posição confortável, olhos fechados, respire naturalmente.','Visualize uma luz verde suave emanando do centro do peito.','Deixe esta luz se expandir para o rosto — suavizando, aquecendo, iluminando.','Imagine seu rosto na expressão de paz profunda: como você está quando está completamente bem.','Segure esta imagem por 2-3 minutos. O que você imagina com consistência começa a se manifestar.'] }
+    ]
+  }
+];
+
+const TCM_POINTS = [
+  { name:'ST6 — Jiache', zh:'足陽明胃經 · Barreira da Mandíbula', loc:'Na lateral da mandíbula, no ponto de maior proeminência do masseter ao morder.', steps:['Morda suavemente para localizar o ponto, depois relaxe completamente.','Aplique pressão firme circular com o dedo médio por 30-60 segundos.','Repita bilateralmente — ambos os lados são mais eficazes.','Finalize com pressão sustentada imóvel por mais 30 segundos.'] },
+  { name:'Yintang', zh:'印堂 · Terceiro Olho', loc:'Entre as sobrancelhas, levemente acima da linha das sobrancelhas.', steps:['Com o dedo médio, toque o ponto suavemente.','Pressão circular suave por 60 segundos, respirando fundo.','Sinta a dissolução de tensão na testa e ao redor dos olhos.','Termine com toque leve e completamente imóvel por mais 30 segundos.'] },
+  { name:'Du 20 — Baihui', zh:'督脈 · Cem Convergências', loc:'Topo exato do crânio, intersecção entre a linha das orelhas e a linha mediana.', steps:['Trace uma linha imaginária de orelha a orelha — o topo é Du 20.','Pressione com o dedo médio, firmemente, por 60 segundos.','Visualize o ponto sendo "levantado" em direção ao teto.','Respire profundamente durante toda a estimulação.'] },
+  { name:'SI17 — Tianrong', zh:'手太陽小腸經 · Celestial Aparência', loc:'Lateral do pescoço, atrás do ângulo da mandíbula, borda do esternocleidomastoideo.', steps:['Vire levemente a cabeça para o lado oposto para expor o ponto.','Com o polegar, pressione firmemente por 30-45 segundos.','Repita no outro lado.','Ponto lateral apenas — nunca pressione a linha central do pescoço.'] },
+  { name:'GB 20 — Fengchi', zh:'足少陽膽經 · Piscina do Vento', loc:'Base do crânio, nas duas covinhas ao lado da coluna cervical.', steps:['Posicione os dois polegares nas cavidades na base do crânio.','Pressão firme e sustentada por 60 segundos.','Incline levemente a cabeça para trás para intensificar.','Libere lentamente e perceba o alívio imediato na cabeça.'] },
+  { name:'LI4 — Hegu', zh:'手陽明大腸經 · Vale da União', loc:'Na mão, no ponto mais alto da membrana entre o polegar e o indicador.', steps:['Encontre o ponto na membrana entre polegar e indicador.','Pressione firmemente com o polegar da outra mão — deve haver sensação irradiante.','Mantenha por 30-60 segundos em cada mão.','Excelente para dores faciais, cefaleia e tensão geral.'] },
+  { name:'ST36 — Zusanli', zh:'足陽明胃經 · Três Milhas da Perna', loc:'Quatro dedos abaixo da patela, dois dedos externamente à tíbia.', steps:['Localize: quatro dedos abaixo do joelho, externamente à tíbia.','Pressione com o polegar por 60 segundos em cada perna.','Ponto tonificante — use quando estiver cansada, sem energia.','Complementa os pontos faciais ao melhorar a vitalidade geral.'] }
+];
+
+const LEVELS = [
+  {
+    num:'I', name:'Presença', desc:'O despertar da consciência corporal',
+    checks:0, period:'Semanas 1–2',
+    focus:['Língua no Palato','Verificação Corporal','Respiração Diafragmática'],
+    bodyChanges:'Primeiros sinais de redução de tensão na mandíbula e pescoço. O rosto começa a relaxar naturalmente.',
+    mindChanges:'Aumento gradual da autoconsciência. Você começa a notar onde carrega tensão sem perceber.',
+    milestone:'Completar 7 rituais nos primeiros dias',
+    expect:'Esta é a fase de acordar. Você vai perceber tensões que sempre existiram, mas nunca havia notado — a língua, a mandíbula, a postura. Pode parecer que há muito para observar: isso é normal e é o início de tudo.',
+    practices:['Ritual da Manhã diário','Língua no Palato','Verificação Corporal']
+  },
+  {
+    num:'II', name:'Reconexão', desc:'Os primeiros padrões começam a mudar',
+    checks:7, period:'Semanas 3–4',
+    focus:['Liberação do Masseter','Postura Cervical','Micro-Consciências'],
+    bodyChanges:'Redução visível da tensão no masseter. Linhas de expressão começam a suavizar. Pescoço mais solto.',
+    mindChanges:'As práticas criam novos padrões neurais. Você captura seus hábitos de tensão mais cedo, antes de se instalar.',
+    milestone:'Notar a primeira mudança visível no espelho',
+    expect:'A repetição começa a criar sulcos neurais. Os primeiros comentários externos podem surgir: "você está diferente, mais descansada". Isso é o método trabalhando por dentro.',
+    practices:['Ritual completo manhã + noite','Liberação do Masseter','Postura cervical']
+  },
+  {
+    num:'III', name:'Integração', desc:'As práticas se tornam naturais',
+    checks:21, period:'Semanas 5–7',
+    focus:['Fáscia Facial','Couro Cabeludo','Respiração Coerente'],
+    bodyChanges:'Melhora na tonicidade facial. Redução de bolsas e inchaço matinal. Pele com mais luminosidade.',
+    mindChanges:'As práticas deixam de ser tarefas e se tornam partes naturais do dia. A consciência corporal é constante.',
+    milestone:'Completar os 3 rituais no mesmo dia pela primeira vez',
+    expect:'O método está sendo absorvido pelo sistema nervoso. Você percebe que já está com a língua no palato sem ter lembrado conscientemente. A fáscia responde, a tensão cede mais rápido a cada sessão.',
+    practices:['3 rituais diários','Liberação fascial','Acupressão facial']
+  },
+  {
+    num:'IV', name:'Transformação', desc:'Resultados visíveis e sentidos',
+    checks:42, period:'Semanas 8–11',
+    focus:['Todos os 9 Pilares','Liberação Occipital','Medicina Chinesa'],
+    bodyChanges:'Mudanças estruturais visíveis: contorno facial mais definido, redução de flacidez, pescoço mais tonificado.',
+    mindChanges:'Profunda reconexão com o próprio corpo. A relação com o espelho muda. A autoconsciência é permanente.',
+    milestone:'Comparar foto atual com a foto da Fase I',
+    expect:'Aqui os resultados se tornam inegáveis. Não é apenas estético: é uma mudança de presença. A postura, a expressão de repouso, a forma como você habita seu corpo — tudo muda. A maioria das alunas compartilha sua jornada neste ponto.',
+    practices:['Consistência nos 3 rituais','Liberação occipital','Pontos de MTC']
+  },
+  {
+    num:'V', name:'Maestria', desc:'A reconexão se torna identidade',
+    checks:70, period:'Semanas 12–16',
+    focus:['Refinamento dos 9 pilares','Visualização','Diário de Reconexão'],
+    bodyChanges:'O rosto reflete consistentemente quem você é por dentro. A postura natural, sem esforço.',
+    mindChanges:'A relação com o envelhecimento se transforma. Você não está lutando contra — está cultivando.',
+    milestone:'Ensinar alguém sobre um dos pilares',
+    expect:'Neste nível, o método não é algo que você faz — é parte de quem você é. Momentos de estresse são reconhecidos no corpo antes de chegar à mente. A transformação é profunda e permanente.',
+    practices:['Todos os pilares integrados','Diário reflexivo diário','Compartilhar o caminho']
+  },
+  {
+    num:'VI', name:'Presença Plena', desc:'Você É o método',
+    checks:100, period:'A partir da semana 17',
+    focus:['Irradiação','Manutenção','Transmissão'],
+    bodyChanges:'O rosto que você vê no espelho é a expressão autêntica da sua vitalidade interior.',
+    mindChanges:'Você habita seu corpo com graça e consciência plena. A beleza natural é consequência do seu estado interior.',
+    milestone:'Você chegou — e isso é apenas o começo',
+    expect:'Presença Plena não é um destino: é um estado que você mantém e aprofunda continuamente. Você se tornou um exemplo vivo de que o rejuvenescimento natural é real, acessível e sustentável.',
+    practices:['Manutenção dos 3 rituais','Práticas de irradiação','Compartilhar o caminho']
+  }
+];
+
+const INTENTIONS = [
+  'A posição da minha língua sustenta a arquitetura invisível do meu rosto.',
+  'Hoje noto onde minha língua descansa — e a trago para casa.',
+  'A língua no palato é a fundação silenciosa de tudo que se vê.',
+  'Cada expiração dissolve o que não preciso mais carregar.',
+  'Hoje respiro como se o ar fosse a primeira e mais simples medicina.',
+  'O diafragma move a linfa. A linfa renova o rosto. Respiro com intenção.',
+  'Solto a mandíbula — solto o peso do mundo que carrego na face.',
+  'Hoje, nos momentos de tensão, noto meus dentes e os separo.',
+  'A mandíbula relaxada é o rosto que rejuvenesce naturalmente.',
+  'Carrego minha cabeça com leveza — o pescoço é ponte, não âncora.',
+  'Hoje, a cada tela que olho, verifico onde está minha cabeça.',
+  'Postura é presença. Presença é beleza real.',
+  'A nuca liberada abre o rosto inteiro como uma flor ao sol.',
+  'Hoje dedico atenção à base do meu crânio — onde tudo se conecta.',
+  'O occipital relaxado eleva o que o tempo tentou baixar.',
+  'A fáscia guarda a história do meu corpo — hoje escrevo um novo capítulo.',
+  'Soltar a fáscia é devolver ao rosto sua memória de leveza.',
+  'Hoje toco meu rosto com intenção, não com hábito.',
+  'O couro cabeludo é a raiz do meu rosto — hoje o cultivo com atenção.',
+  'Soltar a testa começa no hairline. Hoje começo pelo início.',
+  'Cada ponto que ativo é uma conversa com minha vitalidade mais profunda.',
+  'A medicina milenar encontra meu presente — toco e dissolvo tensões.',
+  'A tensão que não expresso, meu rosto expressa. Hoje processo.',
+  'Hoje noto qual emoção carrego na testa, nos olhos, no queixo.',
+  'Rosto de repouso consciente: o que existe antes da máscara do dia.',
+  'O que se transforma internamente, transforma o que se vê externamente.',
+  'Hoje sou simultaneamente estudante e laboratório do Método.',
+  'Cada prática é um ato de amor pelo rosto que me carrega pelo mundo.'
+];
+
+const TOMORROW_OPTS = [
+  { id:'lingua',     name:'Língua',      desc:'Manter consciência da posição ao longo do dia' },
+  { id:'postura',    name:'Postura',     desc:'Cabeça alinhada, tech neck revertido' },
+  { id:'respiracao', name:'Respiração',  desc:'Mais profunda, mais diafragmática' },
+  { id:'masseter',   name:'Mandíbula',   desc:'Dentes separados, tensão liberada' },
+  { id:'presenca',   name:'Presença',    desc:'Estar completamente no momento presente' }
+];
+
+const ACONCHEGO_MSGS = {
+  manha: {
+    I: { ritualNaoFeito: ["Você está apenas começando a se escutar. Isso já é coragem.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus.","Antes do mundo entrar, você. Que tal começar por dentro?"], ritualFeito: ["Ritual da manhã concluído. Que presença bonita a sua.","Você começou o dia por você. Isso sempre vai importar."] },
+    II: { ritualNaoFeito: ["Você já está diferente. Ainda que só você perceba — e isso é o começo de tudo.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus."], ritualFeito: ["Ritual da manhã concluído. Você já está em outro nível.","Os padrões estão mudando. Seu sistema nervoso está aprendendo uma nova linguagem."] },
+    III: { ritualNaoFeito: ["A língua já sobe automaticamente, não é? Seu ritual está esperando para aprofundar.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus."], ritualFeito: ["O que era esforço, está virando você.","Ritual concluído. Você está absorvendo o método."] },
+    IV: { ritualNaoFeito: ["O que você vê no espelho agora não é só estética. É presença. Seu ritual aguarda.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus."], ritualFeito: ["Você está diferente porque está se tornando quem sempre foi.","Ritual completo. Sua transformação é visível."] },
+    V: { ritualNaoFeito: ["Você não faz o método. Você é o método. Seu ritual continua essencial.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus."], ritualFeito: ["Você não faz o método. Você é o método.","Sua presença é percebida antes de você falar."] },
+    VI: { ritualNaoFeito: ["Você chegou. E agora você sabe que isso é apenas o começo. Mantenha vivo.","Seu ritual da manhã está esperando. Cinco práticas, dez minutos — só seus."], ritualFeito: ["O que você construiu em 6 meses, ninguém tira.","Você continua sendo a melhor versão de si mesma."] }
+  },
+  tarde: {
+    I: { universal: ["Sua língua está no palato neste momento?","Você bebeu água suficiente hoje?","Uma pausa de dois minutos agora pode mudar o resto do seu dia.","Como estão seus ombros? Solte-os. Respire.","Mandíbula relaxada. Dentes separados. Você está no método."] },
+    II: { universal: ["Sua língua está no palato neste momento?","Você bebeu água suficiente hoje?","Uma pausa de dois minutos agora pode mudar o resto do seu dia.","Os padrões estão mudando. Seu sistema nervoso está aprendendo."] },
+    III: { universal: ["Sua língua está no palato neste momento?","A língua já sobe automaticamente. Perceba.","Uma pausa de dois minutos agora pode mudar o resto do seu dia.","O que era esforço, está virando você."] },
+    IV: { universal: ["Sua língua está no palato neste momento?","O que você vê no espelho agora é presença.","Uma pausa de dois minutos agora pode mudar o resto do seu dia.","Você está diferente porque está se tornando quem sempre foi."] },
+    V: { universal: ["Sua presença é percebida antes de você falar.","Você não faz o método. Você é o método.","Uma pausa agora e continue irradiando.","No meio do caos, um minuto só seu. Você merece isso."] },
+    VI: { universal: ["O que você construiu, permanece. Mantenha a presença.","Você chegou. Continue radiando.","Uma pausa agora para integrar seu poder.","No meio do caos, um minuto só seu. Você merece isso."] }
+  },
+  noite: {
+    I: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Prepare-o agora.","O ritual da noite é o presente que você dá para o seu amanhã.","Antes de dormir, você. Três minutos para dissolver o dia."], ritualFeito: ["Todos os rituais concluídos. Você cuidou de si hoje — e isso importa.","Descanse com presença. Seu corpo vai trabalhar enquanto você dorme."] },
+    II: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Prepare-o agora.","O ritual da noite é o presente que você dá para o seu amanhã.","Antes de dormir, você. Seus padrões estão mudando."], ritualFeito: ["Todos os rituais concluídos. Os padrões estão reescrevendo sua face.","Descanse com presença. Seu sistema nervoso está aprendendo."] },
+    III: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Prepare-o agora.","O ritual da noite é o presente que você dá para o seu amanhã.","O que era esforço, está se tornando você."], ritualFeito: ["Todos os rituais concluídos. O método está sendo absorvido.","Descanse. O que você construiu está se consolidando."] },
+    IV: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Prepare-o agora.","O ritual da noite é o presente que você dá para o seu amanhã.","Você está diferente. Durma consolidando esta transformação."], ritualFeito: ["Todos os rituais concluídos. Sua transformação é visível até nos sonhos.","Descanse. O espelho não mente."] },
+    V: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Continue no método.","O ritual da noite consolida sua maestria.","Você é o método. Mantenha a presença ao dormir."], ritualFeito: ["Todos os rituais concluídos. Você é presença consolidada.","Descanse sabendo que sua presença é irreversível."] },
+    VI: { ritualNaoFeito: ["O corpo se regenera enquanto você dorme. Mantenha vivo.","O ritual da noite preserva tudo que você conquistou.","Antes de dormir, cuide de si. Você merece."], ritualFeito: ["Você chegou. E mantém a presença em repouso.","Descanse. Você é a prova de que tudo é possível."] }
+  },
+  universal: [
+    "Quando você está bem, todos ao seu redor estão melhor. Cuide-se sem culpa.",
+    "Tirar um momento para si não é egoísmo. É liderança.",
+    "Você merece a mesma atenção que dá a todos.",
+    "Esta fase da sua vida é um portal, não um fim.",
+    "Você não está envelhecendo. Você está amadurecendo para a sua melhor versão."
+  ]
+};
+
+let state = {
+  name: '',
+  startDate: null,
+  ritualsDone: {},
+  microsDone:  {},
+  tomorrowFocus: null,
+  wellnessLog: {},
+  photos: []
+};
+
+let curRitual  = null;
+let curStep    = 0;
+let curMicroId = null;
+let curPhaseIdx = null;
+let photoCaptureCtx = null;
+let breathTimer = null;
+let breathRound = 0;
+let stepTimerInterval = null;
+let selectedPhotoType = 'frontal';
+const BR_TOTAL    = 5;
+const PHOTO_TYPES = ['frontal', 'perfil-d', 'perfil-e'];
+const PHOTO_TYPE_LABELS = { 'frontal': 'Frontal', 'perfil-d': 'Perfil D', 'perfil-e': 'Perfil E' };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('rrv-v3');
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+    if (!state.wellnessLog) state.wellnessLog = {};
+    if (!state.photos) state.photos = [];
+  } catch(e) {}
+}
+
+function goOb(step) {
+  document.getElementById('ob1').style.display = 'none';
+  document.getElementById('ob2').style.display = 'none';
+  document.getElementById('ob3').style.display = 'none';
+  const ob = document.getElementById('v-onboard');
+  if (step === 2) { document.getElementById('ob2').style.display = 'flex'; }
+  else if (step === 3) { document.getElementById('ob3').style.display = 'flex'; }
+  else if (step === 4) { ob.style.display = 'flex'; }
+}
+
+function saveState() {
+  localStorage.setItem('rrv-v3', JSON.stringify(state));
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function todayKey() { return dateKey(new Date()); }
+
+loadState();
+window.addEventListener('DOMContentLoaded', () => {
+  if (state.name) initApp();
+  else {
+    document.getElementById('ob1').style.display = 'flex';
+    document.getElementById('v-onboard').style.display = 'none';
+  }
+  const inp = document.getElementById('ob-name');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') startApp(); });
+});
+
+function startApp() {
+  const inp  = document.getElementById('ob-name');
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  state.name = name;
+  state.startDate = new Date().toISOString();
+  saveState();
+  initApp();
+}
+
+function initApp() {
+  const ob = document.getElementById('v-onboard');
+  ob.classList.remove('active');
+  ob.style.display = 'none';
+  document.getElementById('nav').classList.add('visible');
+  switchTab('hoje');
+}
+
+const TAB_MAP = { hoje:'v-hoje', guias:'v-guias', evolucao:'v-evolucao', perfil:'v-perfil' };
+
+function switchTab(tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(TAB_MAP[tab]).classList.add('active');
+  document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
+  ({ hoje:renderHoje, guias:renderGuias, evolucao:renderEvolucao, perfil:renderPerfil })[tab]?.();
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+function getTodayIntention() {
+  const d = new Date();
+  const dayOfYear = Math.floor((d - new Date(d.getFullYear(),0,0))/86400000);
+  return INTENTIONS[dayOfYear % INTENTIONS.length];
+}
+
+function getDoneTodayRituals() {
+  const done = state.ritualsDone[todayKey()] || [];
+  return done;
+}
+
+function getUserPhase() {
+  const totalRitualsCount = Object.values(state.ritualsDone).reduce((a, arr) => a + arr.length, 0);
+  if (totalRitualsCount < 6) return 'I';
+  if (totalRitualsCount < 18) return 'II';
+  if (totalRitualsCount < 42) return 'III';
+  if (totalRitualsCount < 66) return 'IV';
+  if (totalRitualsCount < 96) return 'V';
+  return 'VI';
+}
+
+function getDeterministicSeed(date, hour) {
+  const dayOfYear = Math.floor((date - new Date(date.getFullYear(),0,0))/86400000);
+  return (dayOfYear * 1000 + hour) % 1000;
+}
+
+function getReminder() {
+  const now = new Date();
+  const h = now.getHours();
+  const done = getDoneTodayRituals();
+  const phase = getUserPhase();
+  const hasManha = done.includes('manha');
+  const hasNoite = done.includes('noite');
+
+  let periodo, msgs = [];
+  const seed = getDeterministicSeed(now, h);
+
+  if (h >= 5 && h < 12) {
+    periodo = 'manha';
+    const status = hasManha ? 'ritualFeito' : 'ritualNaoFeito';
+    msgs = ACONCHEGO_MSGS[periodo][phase]?.[status] || ACONCHEGO_MSGS[periodo][phase]?.universal || [];
+  } else if (h >= 12 && h < 17) {
+    periodo = 'tarde';
+    msgs = ACONCHEGO_MSGS[periodo][phase]?.universal || [];
+  } else if (h >= 17 && h < 23) {
+    periodo = 'noite';
+    const status = hasNoite ? 'ritualFeito' : 'ritualNaoFeito';
+    msgs = ACONCHEGO_MSGS[periodo][phase]?.[status] || ACONCHEGO_MSGS[periodo][phase]?.universal || [];
+  } else {
+    msgs = ACONCHEGO_MSGS.universal;
+  }
+
+  if (!msgs || msgs.length === 0) {
+    msgs = ACONCHEGO_MSGS.universal;
+  }
+
+  const idx = seed % msgs.length;
+  return msgs[idx];
+}
+
+function renderHoje() {
+  const now = new Date();
+  const meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const dias = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+
+  const v = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  const circum = 201.06;
+  const offset = circum - (v/100)*circum;
+  const vit = Math.min(100, Math.round(v * 1.42));
+
+  const streakTxt = calcStreak() > 0 ? calcStreak() + ' dias de sequência' : 'Inicie uma sequência';
+
+  const rituaisHTML = RITUALS.map(r => {
+    const done = getDoneTodayRituals().includes(r.id);
+    const now_h = new Date().getHours();
+    const isNow = now_h >= r.tStart && now_h < r.tEnd;
+    const cls = done ? 'r-done' : (isNow ? 'r-now' : '');
+    const ctaHTML = done ? `<div class="rc-done">Concluído</div>` : `<div class="rc-cta">Iniciar</div>`;
+    const pillsHTML = r.pills.map(p => `<span class="rc-pill">${p}</span>`).join('');
+    return `<div class="rit-card ${cls}" onclick="openRitual('${r.id}')">
+<div class="rc-time">${r.time}</div>
+<div class="rc-name">${r.name}</div>
+<div class="rc-desc">${r.desc}</div>
+<div class="rc-foot"><div class="rc-pills">${pillsHTML}</div>${ctaHTML}</div>
+</div>`;
+  }).join('');
+
+  const microDone = state.microsDone[todayKey()] || [];
+  const microHTML = MICRO.map(m => {
+    const d = microDone.includes(m.id);
+    return `<div class="micro-c ${d?'done':''}" onclick="openMicro('${m.id}')">
+<div class="mc-pillar">${m.pillar}</div>
+<div class="mc-name">${m.name}</div>
+<div class="mc-time">${d?'Feito':m.time}</div>
+</div>`;
+  }).join('');
+
+  const wellness = state.wellnessLog[todayKey()];
+  const wellnessHTML = !wellness ? `<div class="wellness-card">
+<div class="wellness-lbl">Como você está hoje?</div>
+<div class="w-pills">
+  <div class="w-pill" onclick="setWellness('Leve')" style="color:var(--green)">Leve</div>
+  <div class="w-pill" onclick="setWellness('Presente')" style="color:var(--green)">Presente</div>
+  <div class="w-pill" onclick="setWellness('Cansada')" style="color:var(--gold)">Cansada</div>
+  <div class="w-pill" onclick="setWellness('Ansiosa')" style="color:var(--gold)">Ansiosa</div>
+  <div class="w-pill" onclick="setWellness('Energizada')" style="color:var(--green)">Energizada</div>
+</div>
+</div>` : `<div class="wellness-card"><div style="font-size:12px;color:var(--muted)">Você está: <strong style="color:var(--green)">${wellness}</strong></div></div>`;
+
+  const reminder = getReminder();
+  const reminderHTML = `<div class="reminder-strip">${reminder}</div>`;
+
+  document.getElementById('v-hoje').innerHTML = `
+<div class="hoje-hd">
+  <div class="hoje-greet">${getGreeting()}</div>
+  <div class="hoje-name">${state.name}</div>
+  <div class="hoje-dt">${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}</div>
+</div>
+${reminderHTML}
+<div class="int-strip">
+  <div class="int-lbl">Intenção do Dia</div>
+  <div class="int-txt">${getTodayIntention()}</div>
+</div>
+${wellnessHTML}
+<div class="score-strip" style="margin-top:14px">
+  <div class="arc-wrap">
+    <svg width="64" height="64" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#3D5A3A" stroke-width="5"
+        stroke-linecap="round" stroke-dasharray="${circum}" stroke-dashoffset="${offset}"
+        transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 1s"/>
+    </svg>
+    <div class="arc-pct">${vit}</div>
+  </div>
+  <div class="score-txt">
+    <div class="score-lbl">Vitalidade</div>
+    <div class="score-val">${vit} pts</div>
+    <div class="score-streak">${streakTxt}</div>
+  </div>
+</div>
+<div class="timeline-wrap">
+  <div class="section-lbl">Rituais do Dia</div>
+  ${rituaisHTML}
+</div>
+<div class="micro-wrap">
+  <div class="section-lbl" style="margin-top:8px">Micro-Consciências</div>
+  <div class="micro-scr">${microHTML}</div>
+</div>`;
+}
+
+function setWellness(choice) {
+  state.wellnessLog[todayKey()] = choice;
+  saveState();
+  renderHoje();
+}
+
+function openRitual(ritualId) {
+  curRitual = RITUALS.find(r => r.id === ritualId);
+  if (!curRitual) return;
+  curStep = 0;
+  document.getElementById('mr-phase').textContent = curRitual.phase;
+  document.getElementById('mr-title').textContent = curRitual.name;
+  renderStep();
+  const m = document.getElementById('modal-ritual');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('open')));
+}
+
+function closeRitual() {
+  stopBreath(); stopStepTimer();
+  const m = document.getElementById('modal-ritual');
+  m.classList.remove('open');
+  setTimeout(() => { m.style.display = 'none'; }, 380);
+}
+
+function renderStep() {
+  stopStepTimer();
+  const steps = curRitual.steps;
+  const step  = steps[curStep];
+  const total = steps.length;
+
+  document.getElementById('mr-dots').innerHTML = steps.map((_,i) =>
+    `<div class="sd ${i < curStep?'done':i===curStep?'cur':''}"></div>`
+  ).join('');
+
+  let bodyHTML = `<div class="step-n">Passo ${curStep+1} de ${total}</div>
+<div class="step-nm">${step.name}</div>
+<div class="step-bd">`;
+
+  if (step.breathStep) {
+    bodyHTML += buildBreathHTML();
+  } else if (step.tcmStep) {
+    const pt = getTCMToday();
+    bodyHTML += `<p>Trabalhe o <strong>ponto do dia</strong>:</p>` + buildTCMCard(pt);
+  } else if (step.intentionStep) {
+    bodyHTML += step.body + buildIntentionOpts();
+  } else {
+    if (step.timer) bodyHTML += buildTimerHTML(step.timer);
+    bodyHTML += step.body;
+  }
+
+  bodyHTML += `</div>`;
+  document.getElementById('mr-body').innerHTML = bodyHTML;
+  document.getElementById('mr-body').scrollTop = 0;
+
+  const btn = document.getElementById('mr-btn');
+  const last = curStep === total - 1;
+  btn.textContent = last ? 'Concluir Ritual' : 'Próximo Passo';
+  btn.className   = 'btn-step' + (last ? ' finish' : '');
+
+  if (step.breathStep) setTimeout(initBreath, 200);
+  if (step.timer && !step.breathStep) setTimeout(() => startStepTimer(step.timer), 300);
+}
+
+function nextStep() {
+  stopBreath(); stopStepTimer();
+  if (curStep < curRitual.steps.length - 1) {
+    curStep++;
+    renderStep();
+  } else {
+    const sel = document.querySelector('.int-opt.selected');
+    if (sel) {
+      state.tomorrowFocus = sel.dataset.id;
+      saveState();
+    }
+    completeRitual(curRitual.id);
+    closeRitual();
+    checkLevelUp();
+    setTimeout(renderHoje, 400);
+  }
+}
+
+function completeRitual(id) {
+  const k = todayKey();
+  if (!state.ritualsDone[k]) state.ritualsDone[k] = [];
+  if (!state.ritualsDone[k].includes(id)) state.ritualsDone[k].push(id);
+  saveState();
+}
+
+function buildTimerHTML(seconds) {
+  return `<div class="timer-wrap" id="timer-wrap">
+<span class="timer-tag">Duração</span>
+<div class="timer-track"><div class="timer-fill" id="t-fill"></div></div>
+<span class="timer-cnt" id="t-cnt">${seconds}s</span>
+</div>`;
+}
+
+function startStepTimer(total) {
+  stopStepTimer();
+  const fill = document.getElementById('t-fill');
+  const cnt  = document.getElementById('t-cnt');
+  if (!fill || !cnt) return;
+  let elapsed = 0;
+  function tick() {
+    elapsed++;
+    const pct = Math.min(100, (elapsed / total) * 100);
+    fill.style.width = pct + '%';
+    cnt.textContent = Math.max(0, total - elapsed) + 's';
+    if (elapsed >= total) {
+      document.getElementById('timer-wrap')?.classList.add('timer-done');
+      fill.style.background = 'var(--green)';
+      return;
+    }
+    stepTimerInterval = setTimeout(tick, 1000);
+  }
+  stepTimerInterval = setTimeout(tick, 1000);
+}
+
+function stopStepTimer() {
+  if (stepTimerInterval) { clearTimeout(stepTimerInterval); stepTimerInterval = null; }
+}
+
+function buildIntentionOpts() {
+  const opts = TOMORROW_OPTS.map(o =>
+    `<div class="int-opt ${state.tomorrowFocus===o.id?'selected':''}" data-id="${o.id}" onclick="selectTomorrowFocus(this,'${o.id}')">
+<div class="int-opt-body">
+  <div class="int-opt-name">${o.name}</div>
+  <div class="int-opt-desc">${o.desc}</div>
+</div>
+<div class="int-opt-check"></div>
+</div>`
+  ).join('');
+  return `<div class="int-opts">${opts}</div>`;
+}
+
+function selectTomorrowFocus(el, id) {
+  document.querySelectorAll('.int-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getTCMToday() {
+  return TCM_POINTS[new Date().getDay() % TCM_POINTS.length];
+}
+
+function buildTCMCard(pt) {
+  const stepsHTML = pt.steps.map((s,i) =>
+    `<li><div class="tcm-sn">${i+1}</div><span>${s}</span></li>`
+  ).join('');
+  return `<div class="tcm-card">
+<div class="tcm-nm">${pt.name}</div>
+<div class="tcm-zh">${pt.zh}</div>
+<div class="tcm-loc">${pt.loc}</div>
+<ul class="tcm-steps">${stepsHTML}</ul>
+</div>`;
+}
+
+function buildBreathHTML() {
+  const dots = Array.from({length:BR_TOTAL}, ()=>`<div class="brd"></div>`).join('');
+  return `<div class="breath-scene">
+<div class="breath-outer">
+  <div class="breath-glow"></div>
+  <div id="breath-ring" class="contract"><div class="breath-inner"></div></div>
+</div>
+<div class="br-lbl" id="br-lbl">Toque para iniciar</div>
+<div class="br-cnt" id="br-cnt"></div>
+<div class="br-guide">5 ciclos · Inspire 5s — Expire 5s</div>
+<div class="br-dots">${dots}</div>
+</div>`;
+}
+
+function initBreath() {
+  const lbl = document.getElementById('br-lbl');
+  if (!lbl) return;
+  lbl.onclick = () => { lbl.onclick = null; breathRound = 0; doBreathCycle(); };
+}
+
+function doBreathCycle() {
+  if (breathRound >= BR_TOTAL) { finishBreath(); return; }
+  const ring = document.getElementById('breath-ring');
+  const lbl  = document.getElementById('br-lbl');
+  const cnt  = document.getElementById('br-cnt');
+  if (!ring || !lbl || !cnt) return;
+  lbl.textContent = 'Inspire'; ring.className = 'expand';
+  let c = 5; cnt.textContent = c;
+  breathTimer = setInterval(() => {
+    c--;
+    cnt.textContent = c > 0 ? c : '';
+    if (c <= 0) {
+      clearInterval(breathTimer);
+      lbl.textContent = 'Expire'; ring.className = 'contract';
+      let e = 5; cnt.textContent = e;
+      breathTimer = setInterval(() => {
+        e--;
+        cnt.textContent = e > 0 ? e : '';
+        if (e <= 0) {
+          clearInterval(breathTimer);
+          breathRound++;
+          const dots = document.querySelectorAll('.brd');
+          if (dots[breathRound-1]) dots[breathRound-1].classList.add('done');
+          cnt.textContent = '';
+          doBreathCycle();
+        }
+      }, 1000);
+    }
+  }, 1000);
+}
+
+function finishBreath() {
+  const lbl = document.getElementById('br-lbl');
+  const cnt = document.getElementById('br-cnt');
+  if (lbl) lbl.textContent = 'Completo';
+  if (cnt) cnt.textContent = '';
+}
+
+function stopBreath() {
+  if (breathTimer) { clearInterval(breathTimer); breathTimer = null; }
+  const ring = document.getElementById('breath-ring');
+  if (ring) ring.className = 'contract';
+}
+
+function openMicro(id) {
+  const m = MICRO.find(x => x.id === id);
+  if (!m) return;
+  curMicroId = id;
+  document.getElementById('mm-phase').textContent = m.pillar;
+  document.getElementById('mm-name').textContent  = m.name;
+  document.getElementById('mm-instr').textContent = m.instr;
+  document.getElementById('modal-micro').classList.add('open');
+}
+
+function completeMicro() {
+  if (curMicroId) {
+    const k = todayKey();
+    if (!state.microsDone[k]) state.microsDone[k] = [];
+    if (!state.microsDone[k].includes(curMicroId)) state.microsDone[k].push(curMicroId);
+    saveState();
+  }
+  document.getElementById('modal-micro').classList.remove('open');
+  curMicroId = null;
+  renderHoje();
+}
+
+function renderGuias() {
+  document.getElementById('pillar-list').innerHTML = PILLARS.map(p =>
+    `<div class="pillar-row" onclick="openPillar('${p.id}')">
+<div class="p-num">${p.num}</div>
+<div class="p-info"><div class="p-name">${p.name}</div><div class="p-tag">${p.tag}</div></div>
+<div class="p-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+</div>`
+  ).join('');
+}
+
+function openPillar(id) {
+  const p = PILLARS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pd-n').textContent     = `Pilar ${p.num}`;
+  document.getElementById('pd-title').textContent = p.name;
+  document.getElementById('pd-why').textContent   = p.why;
+  document.getElementById('pd-body').innerHTML = p.techs.map(t => {
+    const stepsHTML = t.steps.map((s,i) =>
+      `<li><div class="tsn">${i+1}</div><span>${s}</span></li>`
+    ).join('');
+    return `<div class="tech-item"><div class="tech-nm">${t.name}</div><ul class="tech-steps">${stepsHTML}</ul></div>`;
+  }).join('');
+  const modal = document.getElementById('modal-pillar');
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => modal.classList.add('open')));
+}
+
+function closePillar() {
+  const modal = document.getElementById('modal-pillar');
+  modal.classList.remove('open');
+  setTimeout(() => { modal.style.display = 'none'; }, 300);
+}
+
+function getPhaseStatus(idx) {
+  const total = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  const next = LEVELS[idx + 1];
+  if (next && total >= next.checks) return 'completed';
+  if (total >= LEVELS[idx].checks) return 'current';
+  return 'upcoming';
+}
+
+function renderEvolucao() {
+  const vit  = calcVitalidade();
+  const circ = 364.4;
+  document.getElementById('gauge-arc').style.strokeDashoffset = circ - (vit/100)*circ;
+  document.getElementById('gauge-n').textContent = vit;
+
+  document.getElementById('phase-timeline').innerHTML = LEVELS.map((lv, idx) => {
+    const status = getPhaseStatus(idx);
+    const isLast = idx === LEVELS.length - 1;
+    const connectorStatus = !isLast ? getPhaseStatus(idx + 1) : 'completed';
+
+    return `<div class="phase-step">
+<div class="phase-step-left">
+  <div class="phase-circle ${status}">${status === 'completed' ? '✓' : lv.num}</div>
+  ${!isLast ? `<div class="phase-connector ${status}"></div>` : ''}
+</div>
+<div class="phase-card-inner ${status}" onclick="openPhaseDetail(${idx})">
+  <div class="phase-period">${lv.period}</div>
+  <div class="phase-name-big">${lv.name}</div>
+  <div class="phase-desc-sm">${lv.desc}</div>
+  <div class="phase-status-tag ${status}">${status === 'completed' ? 'Concluída' : status === 'current' ? 'Atual' : 'Próxima'}</div>
+</div>
+</div>`;
+  }).join('');
+
+  document.getElementById('radar-wrap').innerHTML = buildRadar();
+
+  const today = new Date();
+  const dlbls = ['D','S','T','Q','Q','S','S'];
+  document.getElementById('week-row').innerHTML = Array.from({length:7}, (_,i) => {
+    const d = new Date(today); d.setDate(d.getDate() - (6-i));
+    const k = dateKey(d);
+    const hasDone = (state.ritualsDone[k]||[]).length > 0;
+    return `<div class="wd"><div class="wd-lbl">${dlbls[d.getDay()]}</div><div class="wd-dot ${hasDone?'done':''} ${i===6?'today':''}"></div></div>`;
+  }).join('');
+
+  const lv     = getCurrentLevel();
+  const lvIdx  = LEVELS.indexOf(lv);
+  const nextLv = LEVELS[lvIdx+1];
+  const total  = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  const barPct = nextLv ? Math.min(100, Math.round(((total-lv.checks)/(nextLv.checks-lv.checks))*100)) : 100;
+  document.getElementById('lv-row').innerHTML =
+    `<div class="lv-sq"><span class="lv-r">${lv.num}</span></div>
+<div class="lv-inf"><div class="lv-n">${lv.name}</div><div class="lv-d">${lv.desc}</div></div>`;
+  document.getElementById('lv-bar').style.width = barPct + '%';
+}
+
+function buildRadar() {
+  const W = 260, H = 260;
+  const cx = W/2, cy = H/2;
+  const maxR = 90, minR = 8;
+  const abbrev = ['Língua','Respir.','Masseter','Postura','Occipital','Fáscia','Couro','MTC','Mente'];
+  const scores = PILLAR_IDS.map(id => getPillarScore(id));
+
+  let gridLines = '';
+  [0.25,0.5,0.75,1].forEach(f => {
+    const r = minR + f * (maxR - minR);
+    gridLines += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>`;
+  });
+
+  let axes = '', labels = '';
+  const n = PILLAR_IDS.length;
+  PILLAR_IDS.forEach((_, i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    const ex = cx + maxR * Math.cos(angle);
+    const ey = cy + maxR * Math.sin(angle);
+    axes += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    const lx = cx + (maxR + 18) * Math.cos(angle);
+    const ly = cy + (maxR + 18) * Math.sin(angle);
+    const anchor = Math.abs(Math.cos(angle)) < 0.3 ? 'middle' : Math.cos(angle) < 0 ? 'end' : 'start';
+    labels += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="central" class="radar-lbl">${abbrev[i]}</text>`;
+  });
+
+  const points = PILLAR_IDS.map((_, i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    const r = minR + scores[i] * (maxR - minR);
+    return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+  }).join(' ');
+
+  const maxPts = PILLAR_IDS.map((_, i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    return `${cx + maxR * Math.cos(angle)},${cy + maxR * Math.sin(angle)}`;
+  }).join(' ');
+
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+${gridLines}${axes}
+<polygon points="${maxPts}" fill="none" stroke="rgba(61,90,58,0.2)" stroke-width="1"/>
+<polygon points="${points}" fill="rgba(61,90,58,0.22)" stroke="#3D5A3A" stroke-width="1.5" stroke-linejoin="round"/>
+${labels}
+</svg>`;
+}
+
+function getPillarScore(id) {
+  const allRituals = Object.values(state.ritualsDone).flat();
+  const relevantRituals = RITUALS.filter(r => r.pillarIds.includes(id));
+  const doneCount = relevantRituals.filter(r => allRituals.includes(r.id)).length;
+  return doneCount / (relevantRituals.length || 1);
+}
+
+function getCurrentLevel() {
+  const total = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  let cur = LEVELS[0];
+  for (const lv of LEVELS) { if (total >= lv.checks) cur = lv; }
+  return cur;
+}
+
+function calcVitalidade() {
+  const rituals = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  const micros = Object.values(state.microsDone).reduce((a,arr) => a+arr.length, 0);
+  return Math.min(100, Math.round(rituals * 2 + micros * 0.5));
+}
+
+function calcStreak() {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const k = dateKey(d);
+    if ((state.ritualsDone[k]||[]).length > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function checkLevelUp() {
+  const total = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  for (const lv of LEVELS) {
+    if (lv.checks > 0 && total === lv.checks) { setTimeout(() => showLU(lv), 600); break; }
+  }
+}
+
+function showLU(lv) {
+  document.getElementById('lu-r').textContent = lv.num;
+  document.getElementById('lu-n').textContent = lv.name;
+  document.getElementById('lu-d').textContent = lv.desc;
+  document.getElementById('modal-lu').classList.add('open');
+}
+
+function closeLU() { document.getElementById('modal-lu').classList.remove('open'); }
+
+function openPhaseDetail(idx) {
+  curPhaseIdx = idx;
+  const lv = LEVELS[idx];
+  document.getElementById('phd-num').textContent = 'Fase ' + lv.num;
+  document.getElementById('phd-name').textContent = lv.name;
+  document.getElementById('phd-period').textContent = lv.period;
+  renderPhaseDetailBody();
+  const m = document.getElementById('modal-phase');
+  m.style.display = 'flex';
+  requestAnimationFrame(() => requestAnimationFrame(() => m.style.transform = 'translateX(0)'));
+}
+
+function closePhaseDetail() {
+  const m = document.getElementById('modal-phase');
+  m.style.transform = 'translateX(100%)';
+  setTimeout(() => { m.style.display = 'none'; }, 300);
+}
+
+function renderPhaseDetailBody() {
+  const lv = LEVELS[curPhaseIdx];
+  const phaseNum = curPhaseIdx + 1;
+  const photos = (state.photos || []).filter(p => p.phaseNum === phaseNum);
+  const types = ['frontal','perfil-d','perfil-e'];
+  const typeLabels = {'frontal':'Frontal','perfil-d':'Perfil Direito','perfil-e':'Perfil Esquerdo'};
+
+  const photoSlots = types.map(type => {
+    const p = photos.find(x => x.type === type);
+    return `<div onclick="openPhotoCapture(${phaseNum},'${type}')" style="flex:1;aspect-ratio:3/4;background:var(--card2);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;position:relative">
+      ${p ? `<img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);text-align:center;padding:8px">${typeLabels[type]}<br/><span style="font-size:18px;display:block;margin-top:6px">+</span></div>`}
+    </div>`;
+  }).join('');
+
+  document.getElementById('phd-body').innerHTML = `
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">O que esperar</div>
+    <p style="font-size:14px;line-height:1.75;color:rgba(255,255,255,0.8);margin-bottom:20px">${lv.expect}</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:8px">Corpo</div>
+        <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.bodyChanges}</div>
+      </div>
+      <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:8px">Mente</div>
+        <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.mindChanges}</div>
+      </div>
+    </div>
+
+    <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border);margin-bottom:20px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:10px">Marco desta fase</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic">${lv.milestone}</div>
+    </div>
+
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Fotos desta fase</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Registre sua evolução — toque para adicionar ou atualizar.</div>
+    <div style="display:flex;gap:10px;margin-bottom:24px">${photoSlots}</div>
+
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Práticas desta fase</div>
+    ${lv.practices.map(p => `<div style="padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:rgba(255,255,255,0.75)">— ${p}</div>`).join('')}
+  `;
+}
+
+function openPhotoCapture(phaseNum, type) {
+  photoCaptureCtx = { phaseNum, type };
+  const inp = document.getElementById('photo-file-input');
+  inp.value = '';
+  inp.click();
+}
+
+function handlePhotoFile(event) {
+  const file = event.target.files[0];
+  if (!file || !photoCaptureCtx) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+      if (!state.photos) state.photos = [];
+      state.photos = state.photos.filter(p => !(p.phaseNum === photoCaptureCtx.phaseNum && p.type === photoCaptureCtx.type));
+      state.photos.push({ phaseNum: photoCaptureCtx.phaseNum, type: photoCaptureCtx.type, date: todayKey(), dataUrl });
+      saveState();
+      photoCaptureCtx = null;
+      if (curPhaseIdx !== null) renderPhaseDetailBody();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPerfil() {
+  document.getElementById('av-l').textContent    = state.name.charAt(0).toUpperCase();
+  document.getElementById('pf-name').textContent = state.name;
+  const start = state.startDate ? new Date(state.startDate) : new Date();
+  const days  = Math.floor((new Date()-start)/86400000) + 1;
+  document.getElementById('pf-since').textContent = `${days} dia${days!==1?'s':''} de jornada`;
+  const totalR = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
+  const totalM = Object.values(state.microsDone).reduce((a,arr) => a+arr.length, 0);
+  const streak = calcStreak();
+  const level  = getCurrentLevel();
+  const vit    = calcVitalidade();
+  document.getElementById('stats-g').innerHTML = [
+    [totalR,    'Rituais'],
+    [streak,    'Sequência'],
+    [level.num, 'Nível'],
+    [vit,       'Vitalidade']
+  ].map(([n,l]) =>
+    `<div class="st-card"><div class="st-n">${n}</div><div class="st-l">${l}</div></div>`
+  ).join('');
+}
+
+function confirmReset() {
+  if (confirm('Tem certeza? Todos os dados serão perdidos.')) {
+    localStorage.removeItem('rrv-v3');
+    location.reload();
+  }
+}
+
+function switchPhotoType(type) {
+  selectedPhotoType = type;
+  renderEvolucao();
+}
+
+function getFirstPhaseWithPhoto() {
+  for (let i = 1; i <= 6; i++) {
+    const phasePhotos = (state.photos || []).filter(p => p.phaseNum === i);
+    if (phasePhotos.length > 0) return i;
+  }
+  return null;
+}
+
+function getCurrentPhaseNum() {
+  const total = Object.values(state.ritualsDone).reduce((a, arr) => a + arr.length, 0);
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (total >= LEVELS[i].checks) return i + 1;
+  }
+  return 1;
+}
+
+function renderEvolucao() {
+  const firstPhaseWithPhoto = getFirstPhaseWithPhoto();
+  const currentPhaseNum = getCurrentPhaseNum();
+  const typeLabels = { 'frontal': 'Frontal', 'perfil-d': 'Perfil Direito', 'perfil-e': 'Perfil Esquerdo' };
+
+  document.getElementById('photo-type-selector').innerHTML = PHOTO_TYPES.map(type =>
+    `<button class="photo-type-btn ${selectedPhotoType === type ? 'active' : ''}" onclick="switchPhotoType('${type}')">${typeLabels[type]}</button>`
+  ).join('');
+
+  let comparisonHtml = '';
+  if (firstPhaseWithPhoto) {
+    const firstPhotoData = (state.photos || []).find(p => p.phaseNum === firstPhaseWithPhoto && p.type === selectedPhotoType);
+    const currentPhotoData = (state.photos || []).find(p => p.phaseNum === currentPhaseNum && p.type === selectedPhotoType);
+
+    comparisonHtml = `
+      <div class="photo-slot" style="position:relative">
+        ${firstPhotoData ? `<img src="${firstPhotoData.dataUrl}"/>` : '<div class="empty">Sem registro ainda</div>'}
+        <div class="photo-slot-label">Fase I</div>
+      </div>
+      <div class="photo-slot" style="position:relative">
+        ${currentPhotoData ? `<img src="${currentPhotoData.dataUrl}"/>` : '<div class="empty">Sem registro ainda</div>'}
+        <div class="photo-slot-label">Fase Atual</div>
+      </div>
+    `;
+  } else {
+    comparisonHtml = `
+      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">Abra uma fase e tire uma foto para começar</span></div></div>
+      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">Abra uma fase e tire uma foto para começar</span></div></div>
+    `;
+  }
+
+  document.getElementById('photo-comparison').innerHTML = comparisonHtml;
+
+  let timelineHtml = '';
+  for (let phaseNum = 1; phaseNum <= 6; phaseNum++) {
+    const lv = LEVELS[phaseNum - 1];
+    const phasePhotos = (state.photos || []).filter(p => p.phaseNum === phaseNum);
+    const isCurrent = phaseNum === currentPhaseNum;
+    const isCompleted = phaseNum < currentPhaseNum;
+    const groupClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
+
+    let photosHtml = PHOTO_TYPES.map(type => {
+      const photo = phasePhotos.find(p => p.type === type);
+      const thumbClass = selectedPhotoType === type ? 'current' : '';
+      return `<div class="photo-thumb ${thumbClass}" onclick="switchPhotoTypeAndScroll('${type}')">
+        ${photo ? `<img src="${photo.dataUrl}"/>` : ''}
+      </div>`;
+    }).join('');
+
+    timelineHtml += `
+      <div class="phase-photo-group ${groupClass}">
+        <div class="phase-num">Fase ${phaseNum}</div>
+        <div class="phase-photo-row">${photosHtml}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('timeline-phases').innerHTML = timelineHtml;
+}
+
+function switchPhotoTypeAndScroll(type) {
+  switchPhotoType(type);
+}
+
+function openPhaseForPhotos(e) {
+  e.preventDefault();
+  const currentPhaseNum = getCurrentPhaseNum();
+  openPhaseDetail(currentPhaseNum - 1);
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
