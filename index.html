@@ -1275,11 +1275,9 @@ async function syncWaterToCloud(cups) {
 }
 
 loadState();
-window.addEventListener('DOMContentLoaded', async () => {
-  /* Check if this is a password recovery redirect */
-  const hash = window.location.hash;
-  if (hash && hash.includes('type=recovery')) {
-    // Supabase restores session from hash automatically
+/* Detecta evento de recuperação de senha do Supabase v2 */
+supa.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
     document.getElementById('v-auth').style.display = 'flex';
     ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     document.getElementById('v-onboard').style.display = 'none';
@@ -1288,9 +1286,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('auth-tabs').style.display = 'none';
     document.getElementById('auth-recovery').style.display = 'none';
     document.getElementById('auth-new-password').style.display = 'flex';
-    return;
   }
+});
 
+window.addEventListener('DOMContentLoaded', async () => {
   /* Check if user already has a Supabase session */
   const { data: { session } } = await supa.auth.getSession();
   if (session) {

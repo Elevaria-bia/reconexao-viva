@@ -1779,19 +1779,18 @@
       if (e.key === 'Escape') closeModal();
     });
 
-    // ── INIT ─────────────────────────────────────────────────
-    (async function init() {
-      // Check if this is a password recovery redirect
-      const hash = window.location.hash;
-      if (hash && hash.includes('type=recovery')) {
-        // Supabase will have already restored the session from the hash
+    // Detecta evento de recuperação de senha do Supabase v2
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
         showLogin();
         document.getElementById('forgot-link-row').style.display = 'none';
         document.getElementById('recovery-form').style.display = 'none';
         document.getElementById('new-password-form').style.display = 'block';
-        return;
       }
+    });
 
+    // ── INIT ─────────────────────────────────────────────────
+    (async function init() {
       const session = await checkAuth();
       if (!session) return;
 
