@@ -393,6 +393,40 @@
   </div>
 </div>
 
+  <!-- Tela de perfil completo — aparece após cadastro -->
+  <div id="v-profile-setup" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%)">
+    <div style="font-family:'Playfair Display',serif;font-size:24px;text-align:center;margin-bottom:8px" id="ps-welcome">Bem-vinda!</div>
+    <div style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:36px;line-height:1.6">Só mais uma informação<br>para personalizar sua jornada</div>
+
+    <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:20px">
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em">Seu peso atual (kg)</label>
+        <input id="ps-weight" type="number" placeholder="Ex: 65" min="40" max="150"
+          style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;color:var(--fg);font-size:20px;width:100%;box-sizing:border-box;text-align:center">
+        <div style="font-size:12px;color:var(--muted);text-align:center">Usamos para calcular sua meta de hidratação diária</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em">Como você está agora?</label>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button onclick="selectMomento('inicio')" id="ps-inicio" class="ps-opt" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;color:var(--fg);font-size:14px;text-align:left;cursor:pointer;transition:border-color 0.2s">
+            <div style="font-weight:600;margin-bottom:2px">Estou começando agora</div>
+            <div style="font-size:12px;color:var(--muted)">Primeira vez com o método</div>
+          </button>
+          <button onclick="selectMomento('retomando')" id="ps-retomando" class="ps-opt" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;color:var(--fg);font-size:14px;text-align:left;cursor:pointer;transition:border-color 0.2s">
+            <div style="font-weight:600;margin-bottom:2px">Ja pratiquei antes</div>
+            <div style="font-size:12px;color:var(--muted)">Estou retomando a jornada</div>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="completeProfileSetup()" style="background:var(--green);color:white;border:none;border-radius:14px;padding:18px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:8px">
+        Comecar minha jornada
+      </button>
+    </div>
+  </div>
+
   <div id="ob1" style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
     <div class="ob-mark"><span class="ob-mark-r">R</span></div>
     <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
@@ -1060,7 +1094,11 @@ async function doSignup() {
   /* Update profile with age and menopausa */
   if (data.user) {
     await supa.from('profiles').upsert({ id: data.user.id, name, age, is_menopausa: meno, start_date: new Date().toISOString() });
-    await onAuthSuccess(data.user, { name, age, is_menopausa: meno });
+    currentUser = data.user;
+    state.name = name;
+    state.startDate = new Date().toISOString();
+    saveState();
+    showProfileSetup(name);
   }
   btn.textContent = 'Criar minha conta'; btn.disabled = false;
 }
@@ -1096,6 +1134,38 @@ async function onAuthSuccess(user, profileData) {
 function hideAuthScreen() {
   const auth = document.getElementById('v-auth');
   if (auth) auth.style.display = 'none';
+}
+
+let selectedMomento = 'inicio';
+function selectMomento(val) {
+  selectedMomento = val;
+  ['inicio','retomando'].forEach(id => {
+    const btn = document.getElementById('ps-' + id);
+    if (!btn) return;
+    btn.style.borderColor = id === val ? 'var(--green)' : 'var(--border)';
+    btn.style.background  = id === val ? 'rgba(61,90,58,0.12)' : 'var(--card)';
+  });
+}
+
+function showProfileSetup(userName) {
+  const welcome = document.getElementById('ps-welcome');
+  if (welcome) welcome.textContent = 'Bem-vinda, ' + (userName || '') + '!';
+  hideAuthScreen();
+  document.getElementById('v-profile-setup').style.display = 'flex';
+  selectMomento('inicio');
+}
+
+async function completeProfileSetup() {
+  const weightVal = parseFloat(document.getElementById('ps-weight').value) || null;
+  if (weightVal) {
+    state.weight = weightVal;
+    saveState();
+    if (currentUser) {
+      await supa.from('profiles').update({ weight: weightVal }).eq('id', currentUser.id);
+    }
+  }
+  document.getElementById('v-profile-setup').style.display = 'none';
+  initApp();
 }
 
 async function syncRitualToCloud(ritualId) {
