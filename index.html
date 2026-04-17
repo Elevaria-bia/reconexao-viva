@@ -98,6 +98,7 @@
     .w-pill { padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border); background: var(--card2); font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .w-pill:active { transform: scale(0.97); }
     .w-pill.sel { background: var(--green); border-color: var(--green); color: var(--white); }
+    .w-pill-sel { background: var(--green) !important; border-color: var(--green) !important; color: white !important; font-weight: 600; }
 
     .int-strip { margin: 14px 24px 0; padding: 16px 18px; background: var(--card); border-radius: 16px; border-left: 3px solid var(--green); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
     .int-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); margin-bottom: 7px; }
@@ -597,7 +598,7 @@ let currentUser = null;
 
 const RITUALS = [
   {
-    id: 'manha', phase: 'O Despertar', time: '6h — 10h',
+    id: 'manha', phase: 'O Despertar', time: '5h — 10h',
     name: 'Ritual da Manhã',
     desc: 'Desperte o corpo com intenção. Cinco práticas para ativar sua vitalidade antes do dia começar.',
     pills: ['Língua','Respiração','Occipital','Postura'],
@@ -642,7 +643,7 @@ const RITUALS = [
     ]
   },
   {
-    id: 'tarde', phase: 'Pausa de Presença', time: '12h — 17h',
+    id: 'tarde', phase: 'Pausa de Presença', time: '11h — 17h',
     name: 'Pausa da Tarde',
     desc: 'Dois minutos para descomprimir. Respiração guiada e o ponto de medicina chinesa do dia.',
     pills: ['Respiração','MTC'],
@@ -654,7 +655,7 @@ const RITUALS = [
     ]
   },
   {
-    id: 'noite', phase: 'O Recolhimento', time: '18h — 22h',
+    id: 'noite', phase: 'O Recolhimento', time: '17h — 23h',
     name: 'Ritual da Noite',
     desc: 'Dissolva o dia. Liberte a fáscia, solte o masseter e prepare o corpo para regenerar enquanto dorme.',
     pills: ['Fáscia','Masseter','Couro Cabeludo','Diário'],
@@ -1376,16 +1377,17 @@ ${missedTxt}
   }).join('');
 
   const wellness = state.wellnessLog[todayKey()];
-  const wellnessHTML = !wellness ? `<div class="wellness-card">
-<div class="wellness-lbl">Como você está hoje?</div>
-<div class="w-pills">
-  <div class="w-pill" onclick="setWellness('Leve')" style="color:var(--green)">Leve</div>
-  <div class="w-pill" onclick="setWellness('Presente')" style="color:var(--green)">Presente</div>
-  <div class="w-pill" onclick="setWellness('Cansada')" style="color:var(--gold)">Cansada</div>
-  <div class="w-pill" onclick="setWellness('Ansiosa')" style="color:var(--gold)">Ansiosa</div>
-  <div class="w-pill" onclick="setWellness('Energizada')" style="color:var(--green)">Energizada</div>
-</div>
-</div>` : `<div class="wellness-card"><div style="font-size:12px;color:var(--muted)">Você está: <strong style="color:var(--green)">${wellness}</strong></div></div>`;
+  const wellnessPills = `<div class="w-pills">
+  <div class="w-pill ${wellness==='Leve'?'w-pill-sel':''}" onclick="setWellness('Leve')" style="color:var(--green)">Leve</div>
+  <div class="w-pill ${wellness==='Presente'?'w-pill-sel':''}" onclick="setWellness('Presente')" style="color:var(--green)">Presente</div>
+  <div class="w-pill ${wellness==='Cansada'?'w-pill-sel':''}" onclick="setWellness('Cansada')" style="color:var(--gold)">Cansada</div>
+  <div class="w-pill ${wellness==='Ansiosa'?'w-pill-sel':''}" onclick="setWellness('Ansiosa')" style="color:var(--gold)">Ansiosa</div>
+  <div class="w-pill ${wellness==='Energizada'?'w-pill-sel':''}" onclick="setWellness('Energizada')" style="color:var(--green)">Energizada</div>
+</div>`;
+  const wellnessHTML = `<div class="wellness-card">
+<div class="wellness-lbl">${wellness ? 'Você está hoje — toque para mudar' : 'Como você está hoje?'}</div>
+${wellnessPills}
+</div>`;
 
   const reminder = getReminder();
   const reminderHTML = `<div class="reminder-strip">${reminder}</div>`;
@@ -1532,7 +1534,7 @@ function renderStep() {
   btn.className   = 'btn-step' + (last ? ' finish' : '');
 
   if (step.breathStep) setTimeout(initBreath, 200);
-  if (step.timer && !step.breathStep) setTimeout(() => startStepTimer(step.timer), 300);
+  /* Timer NÃO inicia automaticamente — aguarda toque da aluna */
 }
 
 function nextStep() {
@@ -1566,11 +1568,14 @@ function buildTimerHTML(seconds) {
 <span class="timer-tag">Duração</span>
 <div class="timer-track"><div class="timer-fill" id="t-fill"></div></div>
 <span class="timer-cnt" id="t-cnt">${seconds}s</span>
-</div>`;
+</div>
+<button id="btn-start-timer" onclick="startStepTimer(${seconds})" style="background:var(--green);color:white;border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:16px;width:100%">Tocar para iniciar</button>`;
 }
 
 function startStepTimer(total) {
   stopStepTimer();
+  const btnStart = document.getElementById('btn-start-timer');
+  if (btnStart) btnStart.style.display = 'none';
   const fill = document.getElementById('t-fill');
   const cnt  = document.getElementById('t-cnt');
   if (!fill || !cnt) return;
