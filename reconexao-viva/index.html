@@ -68,6 +68,11 @@
     .ob-phase-name { font-family:'Playfair Display',serif; font-size:14px; margin:1px 0; }
     .ob-phase-period { font-size:11px; color:var(--muted); }
 
+    .phase-circle.locked { background: var(--card2); border: 1px solid var(--border); color: var(--muted); }
+    .phase-card-inner.locked { opacity: 0.5; cursor: default; }
+    .phase-lock-icon { font-size: 16px; color: var(--muted); }
+    .phase-unlock-info { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
     /* NAVBAR */
     #nav { display: none; background: var(--surface); border-top: 1px solid var(--border); padding: 8px 0 calc(8px + var(--safe-b)); flex-shrink: 0; }
     #nav.visible { display: flex; }
@@ -344,6 +349,14 @@
     .lu-cl { background: var(--green); border: none; border-radius: 14px; padding: 15px 40px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--white); cursor: pointer; }
 
     ::-webkit-scrollbar { width: 0; }
+
+    /* RITUAL WINDOW STATUS */
+    .rit-card.available { border-color: rgba(232,123,106,0.5); }
+    .rit-card.done { border-color: rgba(61,90,58,0.5); }
+    .rit-card.locked { opacity: 0.5; cursor: default; }
+    .rit-card.missed { opacity: 0.35; cursor: default; }
+    .rit-window-label { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+    .rit-missed-txt { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 6px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -425,6 +438,7 @@
     <div class="pf-name" id="pf-name"></div>
     <div class="pf-since" id="pf-since"></div>
     <div class="stats-g" id="stats-g"></div>
+    <div id="water-section"></div>
     <button class="rst-btn" onclick="confirmReset()">Reiniciar dados</button>
   </div>
 
@@ -623,7 +637,7 @@ const MICRO = [
 
 const PILLAR_IDS = ['lingua','respiracao','masseter','postura','occipital','fascia','couro','mtc','mente'];
 const PILLARS = [
-  { num:'I',   id:'lingua',    name:'Língua no Palato',       tag:'O suporte invisível da estrutura facial',
+  { num:'I',   id:'lingua',    name:'Língua no Palato',       tag:'O suporte invisível da estrutura facial', phaseFrom:1,
     why:'A posição correta da língua cria uma força contínua que sustenta a arcada superior, previne o afundamento das bochechas e alinha a coluna cervical — tudo simultaneamente.',
     techs:[
       { name:'Posição de Repouso Correta', steps:['Feche os lábios sem esforço, mantendo-os completamente relaxados.','Posicione a ponta da língua logo atrás dos incisivos superiores — no ponto palatino.','Expanda o corpo da língua suavemente em direção ao palato — toda a superfície em contato.','Respire exclusivamente pelo nariz com esta posição.','Mantenha como padrão inconsciente ao longo do dia. Verifique a cada hora.'] },
@@ -631,7 +645,7 @@ const PILLARS = [
       { name:'Mewing Consciente', steps:['Posicione a língua inteira no palato — não apenas a ponta, mas todo o corpo.','Aplique uma pressão suave e constante — como empurrar o palato de dentro para cima.','Mantenha durante as atividades do dia: trabalhar, ler, dirigir, caminhar.','Se perceber que a língua caiu, reposicione sem autocrítica — é treino neural.','Com semanas de prática, a posição se torna automática e inconsciente.'] }
     ]
   },
-  { num:'II',  id:'respiracao', name:'Respiração Diafragmática', tag:'A bomba linfática e reguladora do cortisol',
+  { num:'II',  id:'respiracao', name:'Respiração Diafragmática', tag:'A bomba linfática e reguladora do cortisol', phaseFrom:1,
     why:'A respiração diafragmática profunda move a linfa — reduzindo inchaço e toxinas faciais — e ativa o nervo vago, regulando cortisol e revertendo o envelhecimento acelerado pelo estresse crônico.',
     techs:[
       { name:'Respiração 4-2-6', steps:['Deite ou sente-se com a coluna ereta. Uma mão no peito, outra no abdômen.','Inspire pelo nariz contando 4 tempos — o abdômen expande, o peito quieto.','Segure a respiração por 2 tempos.','Expire lentamente contando 6 tempos — abdômen retorna.','Pausa natural antes de inspirar novamente. Repita 8-10 ciclos.'] },
@@ -639,7 +653,7 @@ const PILLARS = [
       { name:'Ativação Linfática', steps:['Deite de costas. Coloque as mãos sobre as costelas laterais.','Inspire expandindo as costelas para os lados — sinta as mãos se afastarem.','Expire completamente, sentindo as costelas se fecharem.','Ao final de cada expiração, contraia levemente o assoalho pélvico.','Esta técnica maximiza o movimento da linfa pelo corpo e pela face.'] }
     ]
   },
-  { num:'III', id:'masseter',   name:'Masseter e Mandíbula',    tag:'O músculo mais poderoso e mais tenso do corpo',
+  { num:'III', id:'masseter',   name:'Masseter e Mandíbula',    tag:'O músculo mais poderoso e mais tenso do corpo', phaseFrom:2,
     why:'O bruxismo e a tensão crônica do masseter quadram a mandíbula, tensionam os ligamentos da face e transmitem tensão para todo o crânio. Liberar este músculo tem impacto imediato e visível.',
     techs:[
       { name:'Liberação por Pressão Sustentada', steps:['Localize o masseter: morda suavemente e sinta onde o músculo se contrai na lateral da mandíbula.','Com três dedos juntos, aplique pressão direta e firme — sem deslizar, apenas pressão sustentada.','Segure por 30-60 segundos, respirando profundamente.','Espere o "ceder" — sensação de amolecimento ou liberação de calor.','Repita nas três regiões: anterior, central e posterior (próximo à orelha).'] },
@@ -647,7 +661,7 @@ const PILLARS = [
       { name:'Protocolo Anti-Bruxismo Noturno', steps:['Antes de dormir: realize a liberação por pressão sustentada por 2 minutos.','Posicione a língua completamente no palato.','Deixe os dentes completamente separados — nenhum contato entre as arcadas.','Mantenha os lábios fechados, a mandíbula "caindo" pela gravidade.','Se acordar com mandíbula tensa, repita a liberação antes de sair da cama.'] }
     ]
   },
-  { num:'IV',  id:'postura',    name:'Postura Cervical e SCM',  tag:'Tech neck: o envelhecedor silencioso',
+  { num:'IV',  id:'postura',    name:'Postura Cervical e SCM',  tag:'Tech neck: o envelhecedor silencioso', phaseFrom:1,
     why:'Cada centímetro de avanço da cabeça adiciona 5kg de carga na coluna e traciona as estruturas faciais para baixo. O SCM tenso comprime linfonodos cervicais e tensiona a pele do pescoço.',
     techs:[
       { name:'Correção da Postura da Cabeça', steps:['Em pé ou sentada, olhe para frente, ombros relaxados.','Sem abaixar o queixo, deslize a cabeça para trás — como fazer uma leve "papada".','Sinta o alongamento imediato na base do crânio e alívio na nuca.','Esta é a posição neutra cervical. Mantenha-a como padrão ao longo do dia.','Defina lembretes a cada hora para verificar e recalibrar.'] },
@@ -655,28 +669,28 @@ const PILLARS = [
       { name:'Alongamento Cervical Completo', steps:['Flexão lateral: incline a orelha em direção ao ombro. Segure 20 segundos cada lado.','Extensão: traga o queixo levemente para cima. Segure 10 segundos.','Rotação: gire lentamente para cada lado até o limite natural. Segure 15 segundos.','Círculos: movimentos circulares muito lentos — metade do arco de cada vez.','Finalize retomando a postura correta da cabeça.'] }
     ]
   },
-  { num:'V',   id:'occipital',  name:'Liberação Occipital',     tag:'A conexão entre a nuca e o lifting facial',
+  { num:'V',   id:'occipital',  name:'Liberação Occipital',     tag:'A conexão entre a nuca e o lifting facial', phaseFrom:2,
     why:'Os músculos suboccipitais conectam-se à aponeurose epicraniana — a fáscia que recobre o crânio e se estende até o músculo frontal da testa. Liberá-los produz um lifting não cirúrgico real.',
     techs:[
       { name:'Compressão Isquêmica Suboccipital', steps:['Deite de costas sem travesseiro (ou com um enrolado fino).','Entrelaçe os dedos e posicione-os na base do crânio — onde o osso termina.','O peso da cabeça cria pressão natural sobre os dedos. Não force nada.','Permaneça imóvel, respirando profundamente, por 3-5 minutos.','Ao terminar, mova a cabeça muito lentamente antes de se levantar.'] },
       { name:'Mobilização da Aponeurose', steps:['Posicione os polegares na base do crânio, na linha média.','Aplique pressão firme e deslize muito lentamente em direção ao topo do crânio.','Sinta a fáscia se deslocando sob os polegares.','Continue até o hairline. Repita 3 vezes.','Continue com a liberação do couro cabeludo para completar a cadeia fascial.'] }
     ]
   },
-  { num:'VI',  id:'fascia',     name:'Fáscia Facial',           tag:'A rede que sustenta ou afunda a face',
+  { num:'VI',  id:'fascia',     name:'Fáscia Facial',           tag:'A rede que sustenta ou afunda a face', phaseFrom:3,
     why:'A fáscia superficial da face é a camada entre a pele e os músculos. Adesões fasciais criam dobras, bolsas e ptose. Liberar a fáscia restaura a estrutura tridimensional do rosto.',
     techs:[
       { name:'Liberação por Pinçamento', steps:['Com o polegar e o indicador, pince gentilmente a pele e o tecido subjacente.','Segure o tecido sem deslizar — pressão sustentada, não movimento.','Trabalhe ao longo dos zigomáticos, das têmporas e do contorno da mandíbula.','Quando sentir resistência, mantenha por 10-15 segundos até o tecido ceder.','A sensação correta é pressão moderada. Nunca dor ou vermelhidão intensa.'] },
       { name:'Deslizamento Miofascial', steps:['Com as palmas abertas, posicione as mãos nas bochechas sem pressionar.','Com extrema lentidão, deslize para cima e para fora — em direção às orelhas.','O movimento deve ser ultra-lento: 1 centímetro por segundo.','Repita nos quadrantes: bochechas, queixo/mandíbula, testa/temporais.','Cada zona: 3 deslizamentos lentos. Total: 3-5 minutos por sessão.'] }
     ]
   },
-  { num:'VII', id:'couro',      name:'Couro Cabeludo',          tag:'O músculo frontal começa no hairline',
+  { num:'VII', id:'couro',      name:'Couro Cabeludo',          tag:'O músculo frontal começa no hairline', phaseFrom:3,
     why:'O músculo frontal — que cria rugas na testa — continua pelo couro cabeludo. Tensão aqui perpetua linhas de expressão e comprime os vasos que nutrem rosto e folículos capilares.',
     techs:[
       { name:'Mobilização do Couro Cabeludo', steps:['Posicione as pontas dos dez dedos no couro cabeludo.','Sem deslizar os dedos: mova o couro cabeludo sobre o crânio.','Teste a mobilidade: se o couro não se move, há tensão e aderência.','Movimentos para frente/trás, lado/lado e circulares. Três zonas: frontal, lateral, occipital.','Leve os dedos sistematicamente por todo o couro, liberando cada área.'] },
       { name:'Acupressão dos Pontos Cranianos', steps:['Du 20 (Baihui): topo do crânio. Pressione com o dedo médio por 60 segundos.','GB 20 (Fengchi): nas duas covinhas na base do crânio. Polegares por 60 segundos.','Bladder 10: logo abaixo do GB 20, no hairline da nuca. Polegares por 30 segundos.','Finalize com suaves deslizamentos da nuca em direção ao topo do crânio.','Estes pontos aliviam cefaleia tensional e melhoram a circulação craniana.'] }
     ]
   },
-  { num:'VIII',id:'mtc',        name:'Medicina Chinesa',        tag:'Pontos ancestrais para tensão moderna',
+  { num:'VIII',id:'mtc',        name:'Medicina Chinesa',        tag:'Pontos ancestrais para tensão moderna', phaseFrom:4,
     why:'Os meridianos de acupuntura percorrem a face e o crânio. A pressão nos pontos corretos dissolve o Qi bloqueado — que se manifesta como tensão, inchaço e ptose facial.',
     techs:[
       { name:'ST6 — Jiache (Barreira da Mandíbula)', steps:['Localize: na lateral da mandíbula, onde o masseter forma a maior proeminência ao morder.','Com o dedo médio, aplique pressão firme e circular por 30-60 segundos.','Indicações: tensão da mandíbula, bruxismo, dor de ouvido, tensão facial.','Repita bilateralmente — ambos os lados simultaneamente é mais eficaz.','Complemento: após ST6, mova para ST7 (onde a mandíbula articula).'] },
@@ -684,7 +698,7 @@ const PILLARS = [
       { name:'Du 20 — Baihui (Cem Convergências)', steps:['Localize: topo exato do crânio, intersecção da linha entre orelhas com a linha mediana.','Com o dedo médio, aplique pressão firme por 60 segundos.','Ao pressionar, visualize o ponto sendo "levantado" em direção ao teto.','Indicações: ptose facial, fadiga, pressão craniana.','Du 20 é o ponto de maior yang do corpo — ativa e "levanta" a estrutura facial.'] }
     ]
   },
-  { num:'IX',  id:'mente',      name:'Mente e Observação',      tag:'Emoções não processadas se instalam na face',
+  { num:'IX',  id:'mente',      name:'Mente e Observação',      tag:'Emoções não processadas se instalam na face', phaseFrom:5,
     why:'Cada emoção ativa padrões musculares específicos no rosto. Emoções repetidas ou suprimidas criam tensão crônica que se manifesta como rugas, sulcos e assimetrias. A consciência emocional é técnica de rejuvenescimento.',
     techs:[
       { name:'Varredura de Tensão Emocional', steps:['Feche os olhos e respire profundamente três vezes.','Pergunte: qual emoção está presente agora? Não julgue a resposta.','Localize onde esta emoção se manifesta no rosto: testa? queixo? olhos?','Inspire e, na expiração, solte conscientemente a tensão nesta região.','Repita: onde mais esta emoção está guardada no corpo?'] },
@@ -767,6 +781,48 @@ const LEVELS = [
   }
 ];
 
+const PHASE_UNLOCK_DAYS = [0, 14, 28, 49, 77, 112];
+
+/* Foco específico de cada fase para cada ritual */
+const PHASE_RITUAL_FOCUS = {
+  I: {
+    manha: { title:'Fase I — O Despertar', focus:'Sua única tarefa agora é observar. Antes de cada passo, pare um momento: onde há tensão? Mandíbula, nuca, testa. O ato de notar já é o início da transformação.' },
+    tarde: { title:'Fase I — Primeira Pausa', focus:'Observe como você chegou aqui. Tensa? Agitada? Sem julgamento. Esta pausa existe para criar um hábito: o de voltar para si mesma no meio do dia.' },
+    noite: { title:'Fase I — Primeira Dissolução', focus:'O rosto carregou expressões o dia inteiro. Antes de começar, posicione os dedos na mandíbula e perceba: ela está contraída? Apenas perceba — isso já é prática.' }
+  },
+  II: {
+    manha: { title:'Fase II — Aprofundando a Consciência', focus:'Você já conhece os passos. Agora aprofunde. Na Verificação Corporal, dê 30 segundos extras para a mandíbula e pescoço — as áreas que a Reconexão trabalha esta semana.' },
+    tarde: { title:'Fase II — Pausa com Intenção', focus:'Observe o padrão da semana: você está chegando aqui já percebendo a tensão, ou só percebe ao parar? Esse momento de observação é inteligência corporal se desenvolvendo.' },
+    noite: { title:'Fase II — Liberando Padrões', focus:'Na Liberação do Masseter, procure o ponto exato de maior resistência. Sustente a pressão suave nesse ponto até sentir a primeira "entrega" do tecido. Pode levar 1 a 2 minutos — vale.' }
+  },
+  III: {
+    manha: { title:'Fase III — A Fáscia Responde', focus:'Sua fáscia já tem memória das sessões anteriores. Na Liberação Occipital, sustente por 10 segundos a mais do que parece necessário. É aí que a fáscia profunda cede.' },
+    tarde: { title:'Fase III — Integração Profunda', focus:'Na Respiração Coerente, tente manter o rosto completamente relaxado durante toda a prática: queixo solto, testa lisa, língua no palato. Observe se um padrão de tensão retorna sozinho.' },
+    noite: { title:'Fase III — Comparando com o Início', focus:'Observe: a Liberação da Fáscia agora acontece mais rápido do que nas primeiras semanas? Isso é plasticidade do tecido conjuntivo respondendo à consistência.' }
+  },
+  IV: {
+    manha: { title:'Fase IV — Transformação Visível', focus:'Hoje, após a Verificação Corporal, abra os olhos e olhe para si por 10 segundos. Não para analisar — para ver. Registre no Diário da Noite o que você notou.' },
+    tarde: { title:'Fase IV — Presença no Pico do Dia', focus:'Esta é a fase onde os resultados se tornam visíveis para os outros antes de você perceber. Preste atenção em comentários. Eles são dados, não apenas gentilezas.' },
+    noite: { title:'Fase IV — Diário de Transformação', focus:'No Diário de Reconexão desta fase, adicione uma quarta pergunta espontânea: "O que eu vi diferente hoje quando me olhei?" A relação com o espelho está mudando.' }
+  },
+  V: {
+    manha: { title:'Fase V — Maestria', focus:'O ritual da manhã agora é parte de quem você é. O desafio não é lembrar de fazer — é aprofundar a qualidade da presença. Tente um minuto de silêncio completo antes de começar.' },
+    tarde: { title:'Fase V — Transmitindo Presença', focus:'A consciência que você carrega já é visível. Como você entra em uma sala, como escuta, como se move — tudo mudou. Esta pausa é para reconhecer isso com clareza.' },
+    noite: { title:'Fase V — Rituais que Ensinam', focus:'Considere: você conseguiria explicar uma dessas práticas para alguém que ama? Nesta fase, compartilhar o que você aprendeu se torna parte natural do ritual.' }
+  },
+  VI: {
+    manha: { title:'Fase VI — Presença Plena', focus:'Você chegou. E este é apenas o início de uma prática que vai continuar se aprofundando. O ritual da manhã agora é seu retorno diário para si mesma — não uma obrigação.' },
+    tarde: { title:'Fase VI — Irradiação', focus:'A mulher que você é hoje — como habita o rosto, o corpo, o dia — é o resultado de meses de prática consciente. Isso é permanente. Este momento é para sentir isso.' },
+    noite: { title:'Fase VI — O Caminho Continua', focus:'O Diário de hoje tem uma pergunta diferente: "Como eu estava antes da Fase I? E como estou agora?" Escreva. Este testemunho é seu — e pode iluminar o caminho de outra mulher.' }
+  }
+};
+
+const RITUAL_WINDOWS = {
+  'manha': { start: 5,  end: 10, label: '5h — 10h' },
+  'tarde': { start: 11, end: 17, label: '11h — 17h' },
+  'noite': { start: 17, end: 23, label: '17h — 23h' }
+};
+
 const INTENTIONS = [
   'A posição da minha língua sustenta a arquitetura invisível do meu rosto.',
   'Hoje noto onde minha língua descansa — e a trago para casa.',
@@ -840,6 +896,9 @@ const ACONCHEGO_MSGS = {
   ]
 };
 
+const ML_PER_CUP = 250;
+const ML_PER_KG  = 35;
+
 let state = {
   name: '',
   startDate: null,
@@ -847,7 +906,10 @@ let state = {
   microsDone:  {},
   tomorrowFocus: null,
   wellnessLog: {},
-  photos: []
+  photos: [],
+  weight: null,
+  waterLog: {},
+  waterReminder: false
 };
 
 let curRitual  = null;
@@ -863,12 +925,37 @@ const BR_TOTAL    = 5;
 const PHOTO_TYPES = ['frontal', 'perfil-d', 'perfil-e'];
 const PHOTO_TYPE_LABELS = { 'frontal': 'Frontal', 'perfil-d': 'Perfil D', 'perfil-e': 'Perfil E' };
 
+function getWaterGoal() {
+  if (!state.weight) return 8;
+  return Math.round((state.weight * ML_PER_KG) / ML_PER_CUP);
+}
+function getWaterToday() {
+  return state.waterLog[todayKey()] || 0;
+}
+function addWaterCup() {
+  const k = todayKey();
+  if (!state.waterLog[k]) state.waterLog[k] = 0;
+  const goal = getWaterGoal();
+  if (state.waterLog[k] < goal + 2) state.waterLog[k]++;
+  saveState();
+  renderHoje();
+}
+function removeWaterCup() {
+  const k = todayKey();
+  if (!state.waterLog[k]) return;
+  if (state.waterLog[k] > 0) state.waterLog[k]--;
+  saveState();
+  renderHoje();
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem('rrv-v3');
     if (raw) state = Object.assign(state, JSON.parse(raw));
     if (!state.wellnessLog) state.wellnessLog = {};
     if (!state.photos) state.photos = [];
+    if (!state.waterLog) state.waterLog = {};
+    if (state.waterReminder === undefined) state.waterReminder = false;
   } catch(e) {}
 }
 
@@ -914,6 +1001,7 @@ function startApp() {
 }
 
 function initApp() {
+  if (!state.startDate) { state.startDate = new Date().toISOString(); saveState(); }
   const ob = document.getElementById('v-onboard');
   ob.classList.remove('active');
   ob.style.display = 'none';
@@ -1011,17 +1099,48 @@ function renderHoje() {
   const streakTxt = calcStreak() > 0 ? calcStreak() + ' dias de sequência' : 'Inicie uma sequência';
 
   const rituaisHTML = RITUALS.map(r => {
-    const done = getDoneTodayRituals().includes(r.id);
-    const now_h = new Date().getHours();
-    const isNow = now_h >= r.tStart && now_h < r.tEnd;
-    const cls = done ? 'r-done' : (isNow ? 'r-now' : '');
-    const ctaHTML = done ? `<div class="rc-done">Concluído</div>` : `<div class="rc-cta">Iniciar</div>`;
+    const ws = getRitualWindowStatus(r.id);
+    const w = RITUAL_WINDOWS[r.id];
+    const windowLabel = w ? w.label : r.time;
+
+    let cardCls = 'rit-card';
+    let ctaHTML = '';
+    let windowTxt = '';
+    let missedTxt = '';
+    let onclickAttr = '';
+
+    if (ws === 'done') {
+      cardCls += ' r-done done';
+      ctaHTML = `<div class="rc-done">Concluído</div>`;
+      windowTxt = `<div class="rit-window-label">${windowLabel}</div>`;
+    } else if (ws === 'available') {
+      cardCls += ' r-now available';
+      ctaHTML = `<div class="rc-cta">Iniciar agora</div>`;
+      windowTxt = `<div class="rit-window-label">${windowLabel}</div>`;
+      onclickAttr = `onclick="openRitual('${r.id}')"`;
+    } else if (ws === 'locked') {
+      cardCls += ' locked';
+      const opensAt = w ? w.start + 'h' : '';
+      ctaHTML = `<div class="rc-cta" style="color:var(--muted)">Abre às ${opensAt}</div>`;
+      windowTxt = `<div class="rit-window-label">${windowLabel}</div>`;
+      onclickAttr = `onclick="(function(){var el=document.createElement('div');el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--muted);z-index:300';el.textContent='Este ritual abre às ${w ? w.start + 'h' : ''}';document.body.appendChild(el);setTimeout(()=>el.remove(),2200);})()"`;
+    } else {
+      // missed
+      cardCls += ' missed';
+      const nextAt = w ? w.start + 'h' : '';
+      ctaHTML = `<div class="rc-cta" style="color:rgba(255,255,255,0.25)">Não realizado hoje</div>`;
+      windowTxt = `<div class="rit-window-label">${windowLabel}</div>`;
+      missedTxt = `<div class="rit-missed-txt">Retorna amanhã às ${nextAt}</div>`;
+    }
+
     const pillsHTML = r.pills.map(p => `<span class="rc-pill">${p}</span>`).join('');
-    return `<div class="rit-card ${cls}" onclick="openRitual('${r.id}')">
+    return `<div class="${cardCls}" ${onclickAttr}>
 <div class="rc-time">${r.time}</div>
+${windowTxt}
 <div class="rc-name">${r.name}</div>
 <div class="rc-desc">${r.desc}</div>
 <div class="rc-foot"><div class="rc-pills">${pillsHTML}</div>${ctaHTML}</div>
+${missedTxt}
 </div>`;
   }).join('');
 
@@ -1050,6 +1169,32 @@ function renderHoje() {
   const reminder = getReminder();
   const reminderHTML = `<div class="reminder-strip">${reminder}</div>`;
 
+  const waterToday = getWaterToday();
+  const waterGoal  = getWaterGoal();
+  const waterPct   = Math.min(100, Math.round((waterToday / waterGoal) * 100));
+  const waterMl    = waterToday * ML_PER_CUP;
+  const goalMl     = waterGoal  * ML_PER_CUP;
+  const waterMsg   = waterToday === 0 ? 'Comece agora — sua pele agradece.'
+                   : waterToday < waterGoal ? `${goalMl - waterMl}ml para atingir sua meta.`
+                   : 'Meta atingida. Sua fascia agradece.';
+
+  const waterHTML = `<div style="margin:14px 24px 0;background:var(--card);border-radius:16px;border:1px solid var(--border);padding:16px 18px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:2px">Hidratacao</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85)">${waterToday} de ${waterGoal} copos <span style="color:var(--muted);font-size:11px">(${waterMl}ml / ${goalMl}ml)</span></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="removeWaterCup()" style="width:32px;height:32px;border-radius:50%;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
+      <button onclick="addWaterCup()" style="width:32px;height:32px;border-radius:50%;background:var(--green);border:none;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">+</button>
+    </div>
+  </div>
+  <div style="height:6px;background:var(--card2);border-radius:100px;overflow:hidden;margin-bottom:8px">
+    <div style="height:100%;width:${waterPct}%;background:${waterToday >= waterGoal ? 'var(--green)' : 'var(--accent)'};border-radius:100px;transition:width 0.4s"></div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);font-style:italic">${waterMsg}</div>
+</div>`;
+
   document.getElementById('v-hoje').innerHTML = `
 <div class="hoje-hd">
   <div class="hoje-greet">${getGreeting()}</div>
@@ -1057,6 +1202,7 @@ function renderHoje() {
   <div class="hoje-dt">${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}</div>
 </div>
 ${reminderHTML}
+${waterHTML}
 <div class="int-strip">
   <div class="int-lbl">Intenção do Dia</div>
   <div class="int-txt">${getTodayIntention()}</div>
@@ -1095,6 +1241,8 @@ function setWellness(choice) {
 }
 
 function openRitual(ritualId) {
+  const ws = getRitualWindowStatus(ritualId);
+  if (ws === 'locked' || ws === 'missed' || ws === 'done') return;
   curRitual = RITUALS.find(r => r.id === ritualId);
   if (!curRitual) return;
   curStep = 0;
@@ -1123,7 +1271,20 @@ function renderStep() {
     `<div class="sd ${i < curStep?'done':i===curStep?'cur':''}"></div>`
   ).join('');
 
-  let bodyHTML = `<div class="step-n">Passo ${curStep+1} de ${total}</div>
+  /* Foco da Fase — shown before step 1 */
+  let focusCardHTML = '';
+  if (curStep === 0) {
+    const phaseKey = ['I','II','III','IV','V','VI'][getCurrentPhaseNum() - 1] || 'I';
+    const focusData = PHASE_RITUAL_FOCUS[phaseKey]?.[curRitual.id];
+    if (focusData) {
+      focusCardHTML = `<div style="background:rgba(61,90,58,0.08);border:1px solid rgba(61,90,58,0.2);border-radius:14px;padding:14px 16px;margin-bottom:18px">
+<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--green);margin-bottom:6px;font-weight:600">${focusData.title}</div>
+<div style="font-size:13px;color:var(--fg);line-height:1.6">${focusData.focus}</div>
+</div>`;
+    }
+  }
+
+  let bodyHTML = focusCardHTML + `<div class="step-n">Passo ${curStep+1} de ${total}</div>
 <div class="step-nm">${step.name}</div>
 <div class="step-bd">`;
 
@@ -1330,14 +1491,31 @@ function completeMicro() {
   renderHoje();
 }
 
+function getCurrentPhaseNum() {
+  /* Returns 1-6 based on how many phases have been unlocked */
+  for (let i = PHASE_UNLOCK_DAYS.length - 1; i >= 0; i--) {
+    if (isPhaseUnlocked(i)) return i + 1;
+  }
+  return 1;
+}
+
 function renderGuias() {
-  document.getElementById('pillar-list').innerHTML = PILLARS.map(p =>
-    `<div class="pillar-row" onclick="openPillar('${p.id}')">
+  const curPhase = getCurrentPhaseNum();
+  document.getElementById('pillar-list').innerHTML = PILLARS.map(p => {
+    const locked = (p.phaseFrom || 1) > curPhase;
+    if (locked) {
+      return `<div class="pillar-row" style="opacity:0.45;cursor:default">
+<div class="p-num" style="color:var(--muted)">${p.num}</div>
+<div class="p-info"><div class="p-name" style="color:var(--muted)">${p.name}</div><div class="p-tag" style="color:var(--border)">Disponivel na Fase ${p.phaseFrom}</div></div>
+<div class="p-arrow" style="color:var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+</div>`;
+    }
+    return `<div class="pillar-row" onclick="openPillar('${p.id}')">
 <div class="p-num">${p.num}</div>
 <div class="p-info"><div class="p-name">${p.name}</div><div class="p-tag">${p.tag}</div></div>
 <div class="p-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
-</div>`
-  ).join('');
+</div>`;
+  }).join('');
 }
 
 function openPillar(id) {
@@ -1364,11 +1542,9 @@ function closePillar() {
 }
 
 function getPhaseStatus(idx) {
-  const total = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
-  const next = LEVELS[idx + 1];
-  if (next && total >= next.checks) return 'completed';
-  if (total >= LEVELS[idx].checks) return 'current';
-  return 'upcoming';
+  if (!isPhaseUnlocked(idx)) return 'locked';
+  if (idx < LEVELS.length - 1 && isPhaseUnlocked(idx + 1)) return 'completed';
+  return 'current';
 }
 
 function renderEvolucao() {
@@ -1380,18 +1556,22 @@ function renderEvolucao() {
   document.getElementById('phase-timeline').innerHTML = LEVELS.map((lv, idx) => {
     const status = getPhaseStatus(idx);
     const isLast = idx === LEVELS.length - 1;
-    const connectorStatus = !isLast ? getPhaseStatus(idx + 1) : 'completed';
+    const locked = status === 'locked';
+    const circleContent = locked ? '&#128274;' : (status === 'completed' ? '&#10003;' : lv.num);
+    const statusLabel = locked ? `Desbloqueia em ${daysToUnlock(idx)} dias` : (status === 'completed' ? 'Concluída' : 'Atual');
+    const clickHandler = locked ? `showLockedMsg(${idx})` : `openPhaseDetail(${idx})`;
 
     return `<div class="phase-step">
 <div class="phase-step-left">
-  <div class="phase-circle ${status}">${status === 'completed' ? '✓' : lv.num}</div>
+  <div class="phase-circle ${status}">${circleContent}</div>
   ${!isLast ? `<div class="phase-connector ${status}"></div>` : ''}
 </div>
-<div class="phase-card-inner ${status}" onclick="openPhaseDetail(${idx})">
+<div class="phase-card-inner ${status}" onclick="${clickHandler}">
   <div class="phase-period">${lv.period}</div>
   <div class="phase-name-big">${lv.name}</div>
   <div class="phase-desc-sm">${lv.desc}</div>
-  <div class="phase-status-tag ${status}">${status === 'completed' ? 'Concluída' : status === 'current' ? 'Atual' : 'Próxima'}</div>
+  <div class="phase-status-tag ${status}">${statusLabel}</div>
+  ${locked ? `<div class="phase-unlock-info">Dia ${PHASE_UNLOCK_DAYS[idx]} da sua jornada</div>` : ''}
 </div>
 </div>`;
   }).join('');
@@ -1512,7 +1692,43 @@ function showLU(lv) {
 
 function closeLU() { document.getElementById('modal-lu').classList.remove('open'); }
 
+function getRitualWindowStatus(ritualId) {
+  const h = new Date().getHours();
+  const w = RITUAL_WINDOWS[ritualId];
+  if (!w) return 'available';
+  const done = (state.ritualsDone[todayKey()] || []).includes(ritualId);
+  if (done) return 'done';
+  if (h >= w.start && h < w.end) return 'available';
+  if (h >= w.end) return 'missed';
+  return 'locked';
+}
+
+function getDaysSinceStart() {
+  if (!state.startDate) return 0;
+  const start = new Date(state.startDate);
+  const now = new Date();
+  return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+}
+
+function isPhaseUnlocked(idx) {
+  return getDaysSinceStart() >= PHASE_UNLOCK_DAYS[idx];
+}
+
+function daysToUnlock(idx) {
+  return Math.max(0, PHASE_UNLOCK_DAYS[idx] - getDaysSinceStart());
+}
+
+function showLockedMsg(idx) {
+  const days = daysToUnlock(idx);
+  const lv = LEVELS[idx];
+  document.getElementById('lu-r').textContent = lv.num;
+  document.getElementById('lu-n').textContent = lv.name + ' — Bloqueada';
+  document.getElementById('lu-d').textContent = `Esta fase desbloqueia em ${days} dia${days !== 1 ? 's' : ''}. Continue praticando — o tempo na fase atual é parte da transformação.`;
+  document.getElementById('modal-lu').classList.add('open');
+}
+
 function openPhaseDetail(idx) {
+  if (!isPhaseUnlocked(idx)) { showLockedMsg(idx); return; }
   curPhaseIdx = idx;
   const lv = LEVELS[idx];
   document.getElementById('phd-num').textContent = 'Fase ' + lv.num;
@@ -1628,6 +1844,29 @@ function renderPerfil() {
   ].map(([n,l]) =>
     `<div class="st-card"><div class="st-n">${n}</div><div class="st-l">${l}</div></div>`
   ).join('');
+
+  const weightSection = `
+<div style="margin:0 0 16px;background:var(--card);border-radius:16px;border:1px solid var(--border);padding:16px 18px">
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Hidratacao Personalizada</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:10px">Informe seu peso para calcular sua meta diaria de agua.</div>
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+    <input id="weight-input" type="number" placeholder="Peso em kg" value="${state.weight || ''}"
+      style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--white);outline:none"
+      oninput="updateWeight(this.value)"/>
+    <div style="font-size:13px;color:var(--muted)">kg</div>
+  </div>
+  ${state.weight ? `<div style="font-size:13px;color:var(--green)">Meta: ${getWaterGoal()} copos — ${state.weight * ML_PER_KG}ml por dia</div>` : ''}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+    <div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85)">Lembretes de hidratacao</div>
+      <div style="font-size:11px;color:var(--muted)">Notificacoes as 7h, 9h, 11h, 13h, 15h, 17h, 19h</div>
+    </div>
+    <div onclick="toggleWaterReminder()" style="width:44px;height:24px;border-radius:100px;background:${state.waterReminder ? 'var(--green)' : 'var(--card2)'};border:1px solid var(--border);cursor:pointer;position:relative;transition:background 0.3s">
+      <div style="width:18px;height:18px;border-radius:50%;background:white;position:absolute;top:2px;${state.waterReminder ? 'right:3px' : 'left:3px'};transition:all 0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>
+    </div>
+  </div>
+</div>`;
+  document.getElementById('water-section').innerHTML = weightSection;
 }
 
 function confirmReset() {
@@ -1635,6 +1874,25 @@ function confirmReset() {
     localStorage.removeItem('rrv-v3');
     location.reload();
   }
+}
+
+function updateWeight(val) {
+  const w = parseFloat(val);
+  if (w > 0 && w < 300) { state.weight = w; saveState(); }
+  else if (!val) { state.weight = null; saveState(); }
+  const meta = document.querySelector('[data-water-meta]');
+  if (meta && state.weight) meta.textContent = `Meta: ${getWaterGoal()} copos — ${state.weight * ML_PER_KG}ml por dia`;
+}
+
+function toggleWaterReminder() {
+  state.waterReminder = !state.waterReminder;
+  saveState();
+  if (state.waterReminder) {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  }
+  renderPerfil();
 }
 
 function switchPhotoType(type) {
