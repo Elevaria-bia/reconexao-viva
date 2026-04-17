@@ -378,6 +378,30 @@
     <input id="login-pass" type="password" placeholder="Senha" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
     <button onclick="doLogin()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Entrar</button>
     <div id="login-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
+    <div style="text-align:center;margin-top:8px">
+      <a href="#" onclick="showForgotForm();return false;" style="font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer">Esqueceu a senha?</a>
+    </div>
+  </div>
+
+  <!-- Recovery form -->
+  <div id="auth-recovery" style="width:100%;max-width:320px;display:none;flex-direction:column;gap:12px">
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:4px">Enviaremos um link para redefinir sua senha</div>
+    <input id="recovery-email" type="email" placeholder="Seu email" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <button onclick="sendAppRecovery()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Enviar link</button>
+    <div id="recovery-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
+    <div id="recovery-ok" style="color:#3D5A3A;font-size:12px;text-align:center;display:none">Verifique seu e-mail — enviamos o link de recuperação.</div>
+    <div style="text-align:center;margin-top:4px">
+      <a href="#" onclick="hideRecovery();return false;" style="font-size:12px;color:var(--muted);text-decoration:underline;cursor:pointer">Voltar ao login</a>
+    </div>
+  </div>
+
+  <!-- New password form (after clicking recovery link in email) -->
+  <div id="auth-new-password" style="width:100%;max-width:320px;display:none;flex-direction:column;gap:12px">
+    <div style="font-family:'Playfair Display',serif;font-size:18px;text-align:center;margin-bottom:4px">Nova senha</div>
+    <input id="new-pass-1" type="password" placeholder="Nova senha (mínimo 6 caracteres)" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <input id="new-pass-2" type="password" placeholder="Confirmar nova senha" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <button onclick="doUpdatePassword()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Atualizar senha</button>
+    <div id="new-pass-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
   </div>
 
   <div id="auth-signup" style="width:100%;max-width:320px;display:none;flex-direction:column;gap:12px">
@@ -1075,6 +1099,68 @@ async function doLogin() {
   await onAuthSuccess(data.user);
 }
 
+function showForgotForm() {
+  document.getElementById('auth-login').style.display = 'none';
+  document.getElementById('auth-signup').style.display = 'none';
+  document.getElementById('auth-tabs').style.display = 'none';
+  document.getElementById('auth-recovery').style.display = 'flex';
+  document.getElementById('auth-new-password').style.display = 'none';
+  // Pre-fill email if already typed
+  const emailVal = document.getElementById('login-email').value.trim();
+  if (emailVal) document.getElementById('recovery-email').value = emailVal;
+}
+
+function hideRecovery() {
+  document.getElementById('auth-recovery').style.display = 'none';
+  document.getElementById('auth-tabs').style.display = 'flex';
+  document.getElementById('recovery-ok').style.display = 'none';
+  document.getElementById('recovery-err').style.display = 'none';
+  showAuthTab('login');
+}
+
+async function sendAppRecovery() {
+  const email = document.getElementById('recovery-email').value.trim();
+  const errEl = document.getElementById('recovery-err');
+  const okEl  = document.getElementById('recovery-ok');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if (!email) { errEl.textContent = 'Digite seu e-mail.'; errEl.style.display = 'block'; return; }
+  const btn = document.querySelector('#auth-recovery button');
+  btn.textContent = 'Enviando...'; btn.disabled = true;
+  const { error } = await supa.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://elevaria-bia.github.io/reconexao-viva/'
+  });
+  btn.textContent = 'Enviar link'; btn.disabled = false;
+  if (error) { errEl.textContent = 'Erro ao enviar. Verifique o e-mail.'; errEl.style.display = 'block'; }
+  else { okEl.style.display = 'block'; btn.style.display = 'none'; }
+}
+
+async function doUpdatePassword() {
+  const p1 = document.getElementById('new-pass-1').value;
+  const p2 = document.getElementById('new-pass-2').value;
+  const errEl = document.getElementById('new-pass-err');
+  errEl.style.display = 'none';
+  if (!p1 || p1.length < 6) { errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.'; errEl.style.display = 'block'; return; }
+  if (p1 !== p2) { errEl.textContent = 'As senhas não coincidem.'; errEl.style.display = 'block'; return; }
+  const btn = document.querySelector('#auth-new-password button');
+  btn.textContent = 'Atualizando...'; btn.disabled = true;
+  const { error } = await supa.auth.updateUser({ password: p1 });
+  btn.textContent = 'Atualizar senha'; btn.disabled = false;
+  if (error) { errEl.textContent = 'Erro ao atualizar senha. Tente novamente.'; errEl.style.display = 'block'; }
+  else {
+    // Sign out and show login with success message
+    await supa.auth.signOut();
+    document.getElementById('auth-new-password').style.display = 'none';
+    document.getElementById('auth-tabs').style.display = 'flex';
+    showAuthTab('login');
+    history.replaceState(null, '', window.location.pathname);
+    const err = document.getElementById('login-err');
+    err.textContent = 'Senha atualizada! Faça login com a nova senha.';
+    err.style.color = '#3D5A3A';
+    err.style.display = 'block';
+  }
+}
+
 async function doSignup() {
   const name  = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
@@ -1190,6 +1276,21 @@ async function syncWaterToCloud(cups) {
 
 loadState();
 window.addEventListener('DOMContentLoaded', async () => {
+  /* Check if this is a password recovery redirect */
+  const hash = window.location.hash;
+  if (hash && hash.includes('type=recovery')) {
+    // Supabase restores session from hash automatically
+    document.getElementById('v-auth').style.display = 'flex';
+    ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    document.getElementById('v-onboard').style.display = 'none';
+    document.getElementById('auth-login').style.display = 'none';
+    document.getElementById('auth-signup').style.display = 'none';
+    document.getElementById('auth-tabs').style.display = 'none';
+    document.getElementById('auth-recovery').style.display = 'none';
+    document.getElementById('auth-new-password').style.display = 'flex';
+    return;
+  }
+
   /* Check if user already has a Supabase session */
   const { data: { session } } = await supa.auth.getSession();
   if (session) {

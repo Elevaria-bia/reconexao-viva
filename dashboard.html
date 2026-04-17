@@ -866,6 +866,38 @@
       <button class="btn-primary" id="btn-login">Entrar</button>
 
       <div class="error-msg" id="login-error"></div>
+
+      <div id="forgot-link-row" style="text-align:center;margin-top:14px;">
+        <a href="#" id="link-forgot" style="font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer;">Esqueceu a senha?</a>
+      </div>
+
+      <!-- Recovery form (hidden by default) -->
+      <div id="recovery-form" style="display:none;margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label" for="recovery-email">Digite seu e-mail</label>
+          <input type="email" id="recovery-email" class="form-input" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <button class="btn-primary" id="btn-send-recovery">Enviar link de recuperação</button>
+        <div class="error-msg" id="recovery-error"></div>
+        <div id="recovery-success" style="display:none;text-align:center;margin-top:14px;font-size:13px;color:#3D5A3A;">Verifique seu e-mail — enviamos o link de recuperação.</div>
+        <div style="text-align:center;margin-top:12px;">
+          <a href="#" id="link-back-login" style="font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer;">Voltar ao login</a>
+        </div>
+      </div>
+
+      <!-- New password form (shown after clicking recovery link) -->
+      <div id="new-password-form" style="display:none;margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label" for="new-password">Nova senha</label>
+          <input type="password" id="new-password" class="form-input" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm-password">Confirmar nova senha</label>
+          <input type="password" id="confirm-password" class="form-input" placeholder="Repita a senha" />
+        </div>
+        <button class="btn-primary" id="btn-update-password">Atualizar senha</button>
+        <div class="error-msg" id="new-password-error"></div>
+      </div>
     </div>
   </div>
 
@@ -1163,6 +1195,110 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Entrar';
+      }
+    }
+
+    function showRecoveryForm() {
+      document.getElementById('forgot-link-row').style.display = 'none';
+      document.getElementById('recovery-form').style.display = 'block';
+      document.getElementById('new-password-form').style.display = 'none';
+      // Pre-fill email if already typed
+      const emailVal = document.getElementById('email').value.trim();
+      if (emailVal) document.getElementById('recovery-email').value = emailVal;
+    }
+
+    function showLoginForm() {
+      document.getElementById('forgot-link-row').style.display = 'block';
+      document.getElementById('recovery-form').style.display = 'none';
+      document.getElementById('new-password-form').style.display = 'none';
+      document.getElementById('recovery-success').style.display = 'none';
+      document.getElementById('recovery-error').classList.remove('visible');
+    }
+
+    async function sendRecovery() {
+      const email = document.getElementById('recovery-email').value.trim();
+      const errorEl = document.getElementById('recovery-error');
+      const btn = document.getElementById('btn-send-recovery');
+      errorEl.classList.remove('visible');
+      document.getElementById('recovery-success').style.display = 'none';
+
+      if (!email) {
+        errorEl.textContent = 'Digite seu e-mail.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://elevaria-bia.github.io/reconexao-viva/dashboard.html'
+        });
+
+        if (error) {
+          errorEl.textContent = 'Erro ao enviar. Verifique o e-mail digitado.';
+          errorEl.classList.add('visible');
+        } else {
+          document.getElementById('recovery-success').style.display = 'block';
+          btn.style.display = 'none';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Erro de conexão. Tente novamente.';
+        errorEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        if (btn.style.display !== 'none') btn.textContent = 'Enviar link de recuperação';
+      }
+    }
+
+    async function updatePassword() {
+      const newPwd = document.getElementById('new-password').value;
+      const confirmPwd = document.getElementById('confirm-password').value;
+      const errorEl = document.getElementById('new-password-error');
+      const btn = document.getElementById('btn-update-password');
+      errorEl.classList.remove('visible');
+
+      if (!newPwd || newPwd.length < 6) {
+        errorEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+        errorEl.classList.add('visible');
+        return;
+      }
+      if (newPwd !== confirmPwd) {
+        errorEl.textContent = 'As senhas não coincidem.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Atualizando...';
+
+      try {
+        const { error } = await db.auth.updateUser({ password: newPwd });
+
+        if (error) {
+          errorEl.textContent = 'Erro ao atualizar senha. Tente novamente.';
+          errorEl.classList.add('visible');
+        } else {
+          // Success — hide new password form, show login
+          document.getElementById('new-password-form').style.display = 'none';
+          document.getElementById('forgot-link-row').style.display = 'block';
+          document.getElementById('login-error').textContent = 'Senha atualizada. Faça login com a nova senha.';
+          document.getElementById('login-error').style.background = 'rgba(61,90,58,0.12)';
+          document.getElementById('login-error').style.borderColor = 'rgba(61,90,58,0.3)';
+          document.getElementById('login-error').style.color = '#3D5A3A';
+          document.getElementById('login-error').classList.add('visible');
+          // Clear hash from URL
+          history.replaceState(null, '', window.location.pathname);
+          // Sign out the recovery session so user must log in fresh
+          await db.auth.signOut();
+        }
+      } catch (err) {
+        errorEl.textContent = 'Erro de conexão. Tente novamente.';
+        errorEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Atualizar senha';
       }
     }
 
@@ -1598,6 +1734,14 @@
 
     // ── EVENT LISTENERS ──────────────────────────────────────
     document.getElementById('btn-login').addEventListener('click', login);
+    document.getElementById('link-forgot').addEventListener('click', e => { e.preventDefault(); showRecoveryForm(); });
+    document.getElementById('link-back-login').addEventListener('click', e => { e.preventDefault(); showLoginForm(); });
+    document.getElementById('btn-send-recovery').addEventListener('click', sendRecovery);
+    document.getElementById('btn-update-password').addEventListener('click', updatePassword);
+
+    document.getElementById('recovery-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendRecovery();
+    });
 
     document.getElementById('email').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('password').focus();
@@ -1637,6 +1781,17 @@
 
     // ── INIT ─────────────────────────────────────────────────
     (async function init() {
+      // Check if this is a password recovery redirect
+      const hash = window.location.hash;
+      if (hash && hash.includes('type=recovery')) {
+        // Supabase will have already restored the session from the hash
+        showLogin();
+        document.getElementById('forgot-link-row').style.display = 'none';
+        document.getElementById('recovery-form').style.display = 'none';
+        document.getElementById('new-password-form').style.display = 'block';
+        return;
+      }
+
       const session = await checkAuth();
       if (!session) return;
 
