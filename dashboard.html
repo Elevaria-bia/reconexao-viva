@@ -1237,7 +1237,7 @@
         });
 
         if (error) {
-          errorEl.textContent = 'Erro ao enviar. Verifique o e-mail digitado.';
+          errorEl.textContent = error.message || 'Erro ao enviar. Tente novamente.';
           errorEl.classList.add('visible');
         } else {
           document.getElementById('recovery-success').style.display = 'block';

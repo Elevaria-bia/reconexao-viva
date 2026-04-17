@@ -1131,7 +1131,7 @@ async function sendAppRecovery() {
     redirectTo: 'https://app.biafaceyoga.workers.dev/reset-password.html'
   });
   btn.textContent = 'Enviar link'; btn.disabled = false;
-  if (error) { errEl.textContent = 'Erro ao enviar. Verifique o e-mail.'; errEl.style.display = 'block'; }
+  if (error) { errEl.textContent = error.message || 'Erro ao enviar. Tente novamente.'; errEl.style.display = 'block'; }
   else { okEl.style.display = 'block'; btn.style.display = 'none'; }
 }
 
