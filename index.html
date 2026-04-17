@@ -1128,7 +1128,7 @@ async function sendAppRecovery() {
   const btn = document.querySelector('#auth-recovery button');
   btn.textContent = 'Enviando...'; btn.disabled = true;
   const { error } = await supa.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://elevaria-bia.github.io/reconexao-viva/'
+    redirectTo: 'https://reconexao-viva.fabianagrigorio-tech.workers.dev/'
   });
   btn.textContent = 'Enviar link'; btn.disabled = false;
   if (error) { errEl.textContent = 'Erro ao enviar. Verifique o e-mail.'; errEl.style.display = 'block'; }
