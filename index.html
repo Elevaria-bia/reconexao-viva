@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#0A0A0A"/>
   <link rel="manifest" href="manifest.json"/>
   <title>Método Reconexão Viva</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -362,6 +363,36 @@
 <body>
 <div id="app">
 
+  <div id="v-auth" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%)">
+  <div style="font-family:'Playfair Display',serif;font-size:28px;text-align:center;margin-bottom:8px">Reconexão Viva</div>
+  <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:40px">Método Reconexão Facial</div>
+
+  <div id="auth-tabs" style="display:flex;gap:0;border:1px solid var(--border);border-radius:10px;margin-bottom:28px;overflow:hidden">
+    <button onclick="showAuthTab('login')" id="tab-login" style="flex:1;padding:10px 24px;border:none;background:var(--green);color:white;font-size:13px;cursor:pointer">Entrar</button>
+    <button onclick="showAuthTab('signup')" id="tab-signup" style="flex:1;padding:10px 24px;border:none;background:transparent;color:var(--muted);font-size:13px;cursor:pointer">Criar conta</button>
+  </div>
+
+  <div id="auth-login" style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px">
+    <input id="login-email" type="email" placeholder="Seu email" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <input id="login-pass" type="password" placeholder="Senha" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <button onclick="doLogin()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Entrar</button>
+    <div id="login-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
+  </div>
+
+  <div id="auth-signup" style="width:100%;max-width:320px;display:none;flex-direction:column;gap:12px">
+    <input id="signup-name" type="text" placeholder="Seu nome" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <input id="signup-email" type="email" placeholder="Seu email" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <input id="signup-pass" type="password" placeholder="Senha (mínimo 6 caracteres)" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <input id="signup-age" type="number" placeholder="Sua idade" min="30" max="70" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 0">
+      <input type="checkbox" id="signup-meno" style="width:18px;height:18px;accent-color:var(--green)">
+      <label for="signup-meno" style="font-size:13px;color:var(--muted)">Estou na menopausa ou perimenopausa</label>
+    </div>
+    <button onclick="doSignup()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Criar minha conta</button>
+    <div id="signup-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
+  </div>
+</div>
+
   <div id="ob1" style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
     <div class="ob-mark"><span class="ob-mark-r">R</span></div>
     <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
@@ -525,6 +556,11 @@
 <input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFile(event)">
 
 <script>
+const SUPA_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWn3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
+
 const RITUALS = [
   {
     id: 'manha', phase: 'O Despertar', time: '6h — 10h',
@@ -938,6 +974,7 @@ function addWaterCup() {
   const goal = getWaterGoal();
   if (state.waterLog[k] < goal + 2) state.waterLog[k]++;
   saveState();
+  syncWaterToCloud(state.waterLog[k]);
   renderHoje();
 }
 function removeWaterCup() {
@@ -945,6 +982,7 @@ function removeWaterCup() {
   if (!state.waterLog[k]) return;
   if (state.waterLog[k] > 0) state.waterLog[k]--;
   saveState();
+  syncWaterToCloud(state.waterLog[k] || 0);
   renderHoje();
 }
 
@@ -979,11 +1017,119 @@ function dateKey(d) {
 
 function todayKey() { return dateKey(new Date()); }
 
+function showAuthTab(tab) {
+  document.getElementById('auth-login').style.display = tab === 'login' ? 'flex' : 'none';
+  document.getElementById('auth-signup').style.display = tab === 'signup' ? 'flex' : 'none';
+  document.getElementById('tab-login').style.background = tab === 'login' ? 'var(--green)' : 'transparent';
+  document.getElementById('tab-login').style.color = tab === 'login' ? 'white' : 'var(--muted)';
+  document.getElementById('tab-signup').style.background = tab === 'signup' ? 'var(--green)' : 'transparent';
+  document.getElementById('tab-signup').style.color = tab === 'signup' ? 'white' : 'var(--muted)';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const err   = document.getElementById('login-err');
+  err.style.display = 'none';
+  if (!email || !pass) { err.textContent = 'Preencha email e senha.'; err.style.display = 'block'; return; }
+  const btn = document.querySelector('#auth-login button');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Entrar'; btn.disabled = false;
+  if (error) { err.textContent = 'Email ou senha incorretos.'; err.style.display = 'block'; return; }
+  await onAuthSuccess(data.user);
+}
+
+async function doSignup() {
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass  = document.getElementById('signup-pass').value;
+  const age   = parseInt(document.getElementById('signup-age').value) || null;
+  const meno  = document.getElementById('signup-meno').checked;
+  const err   = document.getElementById('signup-err');
+  err.style.display = 'none';
+  if (!name || !email || !pass) { err.textContent = 'Preencha nome, email e senha.'; err.style.display = 'block'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha deve ter pelo menos 6 caracteres.'; err.style.display = 'block'; return; }
+  const btn = document.querySelector('#auth-signup button');
+  btn.textContent = 'Criando conta...'; btn.disabled = true;
+  const { data, error } = await supa.auth.signUp({
+    email, password: pass,
+    options: { data: { name } }
+  });
+  if (error) { err.textContent = error.message; err.style.display = 'block'; btn.textContent = 'Criar minha conta'; btn.disabled = false; return; }
+  /* Update profile with age and menopausa */
+  if (data.user) {
+    await supa.from('profiles').upsert({ id: data.user.id, name, age, is_menopausa: meno, start_date: new Date().toISOString() });
+    await onAuthSuccess(data.user, { name, age, is_menopausa: meno });
+  }
+  btn.textContent = 'Criar minha conta'; btn.disabled = false;
+}
+
+async function onAuthSuccess(user, profileData) {
+  currentUser = user;
+  /* Load profile from Supabase into local state */
+  const { data: profile } = await supa.from('profiles').select('*').eq('id', user.id).single();
+  if (profile) {
+    state.name = profile.name;
+    state.startDate = profile.start_date || new Date().toISOString();
+    if (profile.weight) state.weight = profile.weight;
+  } else if (profileData) {
+    state.name = profileData.name;
+  }
+  /* Load today's ritual completions */
+  const today = todayKey();
+  const { data: rituals } = await supa.from('ritual_completions').select('ritual_id').eq('user_id', user.id).eq('date', today);
+  if (rituals && rituals.length > 0) {
+    state.ritualsDone[today] = rituals.map(r => r.ritual_id);
+  }
+  /* Load today's wellness */
+  const { data: wellness } = await supa.from('wellness_logs').select('choice').eq('user_id', user.id).eq('date', today).single();
+  if (wellness) state.wellnessLog[today] = wellness.choice;
+  /* Load today's water */
+  const { data: water } = await supa.from('water_logs').select('cups').eq('user_id', user.id).eq('date', today).single();
+  if (water) state.waterLog[today] = water.cups;
+  saveState();
+  hideAuthScreen();
+  initApp();
+}
+
+function hideAuthScreen() {
+  const auth = document.getElementById('v-auth');
+  if (auth) auth.style.display = 'none';
+}
+
+async function syncRitualToCloud(ritualId) {
+  if (!currentUser) return;
+  await supa.from('ritual_completions').upsert({
+    user_id: currentUser.id,
+    date: todayKey(),
+    ritual_id: ritualId
+  }, { onConflict: 'user_id,date,ritual_id', ignoreDuplicates: true });
+}
+
+async function syncWellnessToCloud(choice) {
+  if (!currentUser) return;
+  await supa.from('wellness_logs').upsert({ user_id: currentUser.id, date: todayKey(), choice }, { onConflict: 'user_id,date' });
+}
+
+async function syncWaterToCloud(cups) {
+  if (!currentUser) return;
+  await supa.from('water_logs').upsert({ user_id: currentUser.id, date: todayKey(), cups }, { onConflict: 'user_id,date' });
+}
+
 loadState();
-window.addEventListener('DOMContentLoaded', () => {
-  if (state.name) initApp();
-  else {
-    document.getElementById('ob1').style.display = 'flex';
+window.addEventListener('DOMContentLoaded', async () => {
+  /* Check if user already has a Supabase session */
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) {
+    await onAuthSuccess(session.user);
+  } else if (state.name) {
+    /* Legacy: local state without account — go to app but prompt to create account later */
+    initApp();
+  } else {
+    /* Show auth screen */
+    document.getElementById('v-auth').style.display = 'flex';
+    ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     document.getElementById('v-onboard').style.display = 'none';
   }
   const inp = document.getElementById('ob-name');
@@ -1242,6 +1388,7 @@ ${wellnessHTML}
 function setWellness(choice) {
   state.wellnessLog[todayKey()] = choice;
   saveState();
+  syncWellnessToCloud(choice);
   renderHoje();
 }
 
@@ -1341,6 +1488,7 @@ function completeRitual(id) {
   if (!state.ritualsDone[k]) state.ritualsDone[k] = [];
   if (!state.ritualsDone[k].includes(id)) state.ritualsDone[k].push(id);
   saveState();
+  syncRitualToCloud(id);
 }
 
 function buildTimerHTML(seconds) {
