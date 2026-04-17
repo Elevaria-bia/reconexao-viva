@@ -635,7 +635,7 @@ const MICRO = [
   { id: 'm5', pillar: 'Mente', pillarId: 'mente', name: 'Observação Neutra', time: '60 seg', instr: 'Observe seu rosto como está agora — sem julgamento. Qual expressão você carrega? O que ela diz? Deixe o rosto amolecer completamente por um momento. Perceba a diferença.' }
 ];
 
-const PILLAR_IDS = ['lingua','respiracao','masseter','postura','occipital','fascia','couro','mtc','mente'];
+const PILLAR_IDS = ['lingua','respiracao','postura','masseter','occipital','fascia','couro','mtc','mente'];
 const PILLARS = [
   { num:'I',   id:'lingua',    name:'Língua no Palato',       tag:'O suporte invisível da estrutura facial', phaseFrom:1,
     why:'A posição correta da língua cria uma força contínua que sustenta a arcada superior, previne o afundamento das bochechas e alinha a coluna cervical — tudo simultaneamente.',
@@ -653,7 +653,7 @@ const PILLARS = [
       { name:'Ativação Linfática', steps:['Deite de costas. Coloque as mãos sobre as costelas laterais.','Inspire expandindo as costelas para os lados — sinta as mãos se afastarem.','Expire completamente, sentindo as costelas se fecharem.','Ao final de cada expiração, contraia levemente o assoalho pélvico.','Esta técnica maximiza o movimento da linfa pelo corpo e pela face.'] }
     ]
   },
-  { num:'III', id:'masseter',   name:'Masseter e Mandíbula',    tag:'O músculo mais poderoso e mais tenso do corpo', phaseFrom:2,
+  { num:'IV',  id:'masseter',   name:'Masseter e Mandíbula',    tag:'O músculo mais poderoso e mais tenso do corpo', phaseFrom:2,
     why:'O bruxismo e a tensão crônica do masseter quadram a mandíbula, tensionam os ligamentos da face e transmitem tensão para todo o crânio. Liberar este músculo tem impacto imediato e visível.',
     techs:[
       { name:'Liberação por Pressão Sustentada', steps:['Localize o masseter: morda suavemente e sinta onde o músculo se contrai na lateral da mandíbula.','Com três dedos juntos, aplique pressão direta e firme — sem deslizar, apenas pressão sustentada.','Segure por 30-60 segundos, respirando profundamente.','Espere o "ceder" — sensação de amolecimento ou liberação de calor.','Repita nas três regiões: anterior, central e posterior (próximo à orelha).'] },
@@ -661,7 +661,7 @@ const PILLARS = [
       { name:'Protocolo Anti-Bruxismo Noturno', steps:['Antes de dormir: realize a liberação por pressão sustentada por 2 minutos.','Posicione a língua completamente no palato.','Deixe os dentes completamente separados — nenhum contato entre as arcadas.','Mantenha os lábios fechados, a mandíbula "caindo" pela gravidade.','Se acordar com mandíbula tensa, repita a liberação antes de sair da cama.'] }
     ]
   },
-  { num:'IV',  id:'postura',    name:'Postura Cervical e SCM',  tag:'Tech neck: o envelhecedor silencioso', phaseFrom:1,
+  { num:'III', id:'postura',    name:'Postura Cervical e SCM',  tag:'Tech neck: o envelhecedor silencioso', phaseFrom:1,
     why:'Cada centímetro de avanço da cabeça adiciona 5kg de carga na coluna e traciona as estruturas faciais para baixo. O SCM tenso comprime linfonodos cervicais e tensiona a pele do pescoço.',
     techs:[
       { name:'Correção da Postura da Cabeça', steps:['Em pé ou sentada, olhe para frente, ombros relaxados.','Sem abaixar o queixo, deslize a cabeça para trás — como fazer uma leve "papada".','Sinta o alongamento imediato na base do crânio e alívio na nuca.','Esta é a posição neutra cervical. Mantenha-a como padrão ao longo do dia.','Defina lembretes a cada hora para verificar e recalibrar.'] },
@@ -1002,6 +1002,11 @@ function startApp() {
 
 function initApp() {
   if (!state.startDate) { state.startDate = new Date().toISOString(); saveState(); }
+  /* Esconde todas as telas de onboarding */
+  ['ob1','ob2','ob3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   const ob = document.getElementById('v-onboard');
   ob.classList.remove('active');
   ob.style.display = 'none';
