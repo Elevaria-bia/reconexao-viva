@@ -1002,6 +1002,11 @@ function startApp() {
 
 function initApp() {
   if (!state.startDate) { state.startDate = new Date().toISOString(); saveState(); }
+  /* Esconde todas as telas de onboarding */
+  ['ob1','ob2','ob3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   const ob = document.getElementById('v-onboard');
   ob.classList.remove('active');
   ob.style.display = 'none';
