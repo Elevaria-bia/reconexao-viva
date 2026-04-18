@@ -20,5 +20,5 @@ crons = [
 
 [vars]
 VAPID_SUBJECT  = "mailto:fabianagrigorio.tech@gmail.com"
-VAPID_PUBLIC_KEY = "BCE4L-gs7JqoDaU1pbEIRDqO1sBfPW_c_UMups0lWqRy_FUXOmtwh9o8WQHg0helo0HPVZbCm7MFFpr80MMCOAE"
+VAPID_PUBLIC_KEY = "BITOWyO7vhEwnSh8MkwO64O6AR3gZX9SByMa-Anc4MM0C0a9IkgAazthxj_dP1x33h4tA9u9cmmfZNigjkeIRE8"
 SUPABASE_URL   = "https://ihprxmuzqbhysohcmcqy.supabase.co"
