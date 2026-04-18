@@ -182,29 +182,30 @@
     .photo-thumb.current { border-color: var(--green); box-shadow: 0 0 0 2px rgba(61,90,58,0.3); }
     .phase-photo-group.completed .phase-num { color: var(--green); }
 
-    .phase-timeline { display: flex; flex-direction: column; }
-    .phase-step { display: flex; gap: 14px; cursor: pointer; margin-bottom: 0; }
-    .phase-step-left { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
-    .phase-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; flex-shrink: 0; transition: box-shadow 0.3s; }
-    .phase-circle.completed { background: var(--green); color: white; }
-    .phase-circle.current { background: var(--accent); color: white; animation: pulse-acc 2s infinite; }
-    .phase-circle.upcoming { background: var(--faint); border: 1px solid var(--border); color: var(--muted); }
-    .phase-connector { width: 2px; flex: 1; min-height: 16px; margin: 4px 0; }
-    .phase-connector.completed { background: var(--green); }
-    .phase-connector.current { background: linear-gradient(to bottom, var(--accent), var(--faint)); }
-    .phase-connector.upcoming { background: var(--faint); }
-    .phase-card-inner { flex: 1; background: var(--card2); border-radius: 14px; border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 14px; transition: transform 0.15s; }
-    .phase-card-inner:active { transform: scale(0.98); }
-    .phase-card-inner.completed { border-color: rgba(61,90,58,0.35); }
-    .phase-card-inner.current { border-color: rgba(232,123,106,0.35); }
-    .phase-card-inner.upcoming { opacity: 0.6; }
-    .phase-period { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; }
-    .phase-name-big { font-family: 'Playfair Display', serif; font-size: 17px; margin-bottom: 2px; }
-    .phase-desc-sm { font-size: 12px; color: var(--muted); }
-    .phase-status-tag { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 100px; margin-top: 8px; }
-    .phase-status-tag.completed { background: var(--green-lt); color: var(--green); }
-    .phase-status-tag.current { background: var(--acc-lt); color: var(--accent); }
-    @keyframes pulse-acc { 0%,100%{box-shadow:0 0 0 0 rgba(232,123,106,0.4)} 50%{box-shadow:0 0 0 8px rgba(232,123,106,0)} }
+    /* JORNADA PATH */
+    .path-journey { position: relative; padding: 8px 0 20px; }
+    .path-row { display: flex; margin-bottom: 0; }
+    .path-row.p-left  { justify-content: flex-start; padding-left: 28px; }
+    .path-row.p-right { justify-content: flex-end; padding-right: 28px; }
+    .path-node { display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 108px; -webkit-tap-highlight-color: transparent; }
+    .path-node.locked { cursor: default; }
+    .path-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 700; position: relative; transition: transform 0.15s; flex-shrink: 0; }
+    .path-circle:active { transform: scale(0.93); }
+    .path-circle.completed { background: var(--green); color: white; box-shadow: 0 6px 18px rgba(61,90,58,0.45); }
+    .path-circle.current  { background: var(--accent); color: white; box-shadow: 0 6px 18px rgba(232,123,106,0.4); animation: path-pulse 2.2s ease-in-out infinite; }
+    .path-circle.locked   { background: var(--card2); border: 2px solid var(--border); color: var(--muted); }
+    .path-gold-dot { position: absolute; top: 1px; right: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); border: 2.5px solid var(--bg); }
+    .path-lock-dot { position: absolute; bottom: 1px; right: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--card2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; }
+    @keyframes path-pulse { 0%,100%{box-shadow:0 6px 18px rgba(232,123,106,0.4),0 0 0 0 rgba(232,123,106,0.3)} 50%{box-shadow:0 6px 18px rgba(232,123,106,0.4),0 0 0 14px rgba(232,123,106,0)} }
+    .path-node-name   { font-family: 'Playfair Display', serif; font-size: 13px; margin-top: 9px; text-align: center; line-height: 1.3; }
+    .path-node-period { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; text-align: center; }
+    .path-node-badge  { display: inline-block; margin-top: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; padding: 3px 10px; border-radius: 100px; }
+    .path-node-badge.completed { background: var(--green-lt); color: var(--green); }
+    .path-node-badge.current   { background: var(--acc-lt);  color: var(--accent); }
+    .path-node-badge.locked    { background: var(--faint);   color: var(--muted);  }
+    .path-conn { height: 52px; position: relative; overflow: visible; }
+    .path-conn svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; }
+    .path-timeline { display: none; }
 
     .gauge-outer { display: flex; align-items: center; justify-content: center; }
     .gauge-rel { position: relative; }
@@ -518,7 +519,12 @@
   </div>
 
   <div id="v-evolucao" class="view">
-    <h2 class="evol-h">Evolução</h2>
+    <h2 class="evol-h">Sua Jornada</h2>
+
+    <div class="e-card" style="padding:16px 0 8px">
+      <div class="e-card-lbl" style="padding:0 22px">Caminho das Fases</div>
+      <div id="jornada-path"></div>
+    </div>
 
     <div class="e-card">
       <div class="e-card-lbl">Comparação Fotográfica</div>
@@ -1910,56 +1916,7 @@ function getPhaseStatus(idx) {
   return 'current';
 }
 
-function renderEvolucao() {
-  const vit  = calcVitalidade();
-  const circ = 364.4;
-  document.getElementById('gauge-arc').style.strokeDashoffset = circ - (vit/100)*circ;
-  document.getElementById('gauge-n').textContent = vit;
 
-  document.getElementById('phase-timeline').innerHTML = LEVELS.map((lv, idx) => {
-    const status = getPhaseStatus(idx);
-    const isLast = idx === LEVELS.length - 1;
-    const locked = status === 'locked';
-    const circleContent = locked ? '&#128274;' : (status === 'completed' ? '&#10003;' : lv.num);
-    const statusLabel = locked ? `Desbloqueia em ${daysToUnlock(idx)} dias` : (status === 'completed' ? 'Concluída' : 'Atual');
-    const clickHandler = locked ? `showLockedMsg(${idx})` : `openPhaseDetail(${idx})`;
-
-    return `<div class="phase-step">
-<div class="phase-step-left">
-  <div class="phase-circle ${status}">${circleContent}</div>
-  ${!isLast ? `<div class="phase-connector ${status}"></div>` : ''}
-</div>
-<div class="phase-card-inner ${status}" onclick="${clickHandler}">
-  <div class="phase-period">${lv.period}</div>
-  <div class="phase-name-big">${lv.name}</div>
-  <div class="phase-desc-sm">${lv.desc}</div>
-  <div class="phase-status-tag ${status}">${statusLabel}</div>
-  ${locked ? `<div class="phase-unlock-info">Dia ${PHASE_UNLOCK_DAYS[idx]} da sua jornada</div>` : ''}
-</div>
-</div>`;
-  }).join('');
-
-  document.getElementById('radar-wrap').innerHTML = buildRadar();
-
-  const today = new Date();
-  const dlbls = ['D','S','T','Q','Q','S','S'];
-  document.getElementById('week-row').innerHTML = Array.from({length:7}, (_,i) => {
-    const d = new Date(today); d.setDate(d.getDate() - (6-i));
-    const k = dateKey(d);
-    const hasDone = (state.ritualsDone[k]||[]).length > 0;
-    return `<div class="wd"><div class="wd-lbl">${dlbls[d.getDay()]}</div><div class="wd-dot ${hasDone?'done':''} ${i===6?'today':''}"></div></div>`;
-  }).join('');
-
-  const lv     = getCurrentLevel();
-  const lvIdx  = LEVELS.indexOf(lv);
-  const nextLv = LEVELS[lvIdx+1];
-  const total  = Object.values(state.ritualsDone).reduce((a,arr) => a+arr.length, 0);
-  const barPct = nextLv ? Math.min(100, Math.round(((total-lv.checks)/(nextLv.checks-lv.checks))*100)) : 100;
-  document.getElementById('lv-row').innerHTML =
-    `<div class="lv-sq"><span class="lv-r">${lv.num}</span></div>
-<div class="lv-inf"><div class="lv-n">${lv.name}</div><div class="lv-d">${lv.desc}</div></div>`;
-  document.getElementById('lv-bar').style.width = barPct + '%';
-}
 
 function buildRadar() {
   const W = 260, H = 260;
@@ -2345,7 +2302,56 @@ function getCurrentPhaseNum() {
   return 1;
 }
 
+function renderJornadaPath() {
+  const positions = ['p-left','p-right','p-left','p-right','p-left','p-right'];
+  let html = '<div class="path-journey">';
+
+  LEVELS.forEach(function(lv, idx) {
+    const status    = getPhaseStatus(idx);
+    const pos       = positions[idx];
+    const isLast    = idx === LEVELS.length - 1;
+    const handler   = status === 'locked' ? 'showLockedMsg(' + idx + ')' : 'openPhaseDetail(' + idx + ')';
+    const badgeTxt  = status === 'completed' ? 'Concluída'
+                    : status === 'current'   ? 'Em progresso'
+                    : 'Dia ' + PHASE_UNLOCK_DAYS[idx];
+
+    const goldDot   = status === 'completed'
+      ? '<div class="path-gold-dot"></div>' : '';
+    const lockDot   = status === 'locked'
+      ? '<div class="path-lock-dot"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>' : '';
+
+    html += '<div class="path-row ' + pos + '">'
+          + '<div class="path-node ' + status + '" onclick="' + handler + '">'
+          + '<div class="path-circle ' + status + '">' + lv.num + goldDot + lockDot + '</div>'
+          + '<div class="path-node-name">' + lv.name + '</div>'
+          + '<div class="path-node-period">' + lv.period + '</div>'
+          + '<span class="path-node-badge ' + status + '">' + badgeTxt + '</span>'
+          + '</div></div>';
+
+    if (!isLast) {
+      const nxStatus = getPhaseStatus(idx + 1);
+      const done     = (nxStatus === 'completed' || nxStatus === 'current');
+      const stroke   = done ? 'rgba(61,90,58,0.65)' : 'rgba(255,255,255,0.08)';
+      const dash     = done ? '' : 'stroke-dasharray="6 5"';
+      const fromLeft = (pos === 'p-left');
+      const x1 = fromLeft ? 19 : 81;
+      const x2 = fromLeft ? 81 : 19;
+      const pathD = 'M ' + x1 + ',0 C ' + x1 + ',26 ' + x2 + ',26 ' + x2 + ',52';
+      html += '<div class="path-conn">'
+            + '<svg viewBox="0 0 100 52" preserveAspectRatio="none">'
+            + '<path d="' + pathD + '" stroke="' + stroke + '" stroke-width="2.5" ' + dash + ' fill="none" stroke-linecap="round"/>'
+            + '</svg></div>';
+    }
+  });
+
+  html += '</div>';
+  return html;
+}
+
 function renderEvolucao() {
+  // render Duolingo-style path
+  document.getElementById('jornada-path').innerHTML = renderJornadaPath();
+
   const firstPhaseWithPhoto = getFirstPhaseWithPhoto();
   const currentPhaseNum = getCurrentPhaseNum();
   const typeLabels = { 'frontal': 'Frontal', 'perfil-d': 'Perfil Direito', 'perfil-e': 'Perfil Esquerdo' };
