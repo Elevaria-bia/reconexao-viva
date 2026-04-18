@@ -1179,7 +1179,10 @@
 
         if (profileError || !profile || !profile.is_mentor) {
           await db.auth.signOut();
-          errorEl.textContent = 'Acesso restrito a mentora.';
+          const msg = profileError
+            ? `Erro perfil: ${profileError.message}`
+            : (!profile ? 'Perfil não encontrado no banco.' : 'is_mentor = false no banco.');
+          errorEl.textContent = msg;
           errorEl.classList.add('visible');
           return;
         }
