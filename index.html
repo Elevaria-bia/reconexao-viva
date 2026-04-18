@@ -210,6 +210,9 @@
     .cam-capture:active { transform: scale(0.9); background: rgba(255,255,255,0.35); }
     .cam-capture-inner { width: 50px; height: 50px; border-radius: 50%; background: white; }
     .cam-no-support { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; text-align: center; gap: 16px; }
+    .cam-instruction { position: absolute; top: calc(var(--safe-t) + 72px); left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.62); backdrop-filter: blur(6px); border: 1px solid rgba(196,168,122,0.35); border-radius: 12px; padding: 9px 16px; white-space: nowrap; z-index: 10; pointer-events: none; }
+    .cam-instr-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-weight: 600; }
+    .cam-instr-text { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; }
 
     /* JORNADA PATH */
     .path-journey { position: relative; padding: 8px 0 20px; }
@@ -677,6 +680,10 @@
   </div>
   <div class="cam-video-wrap">
     <video id="cam-video" autoplay playsinline muted></video>
+    <div class="cam-instruction" id="cam-instruction">
+      <div class="cam-instr-icon" id="cam-instr-icon">Frontal</div>
+      <div class="cam-instr-text" id="cam-instr-text">Olhe direto para a camera</div>
+    </div>
     <div class="cam-grid">
       <div class="cam-hl1"></div>
       <div class="cam-hl2"></div>
@@ -690,15 +697,11 @@
       <div class="cam-corner bl"></div>
       <div class="cam-corner br"></div>
     </div>
-    <div class="cam-oval-wrap">
+    <div class="cam-oval-wrap" id="cam-oval-wrap">
       <svg width="72%" viewBox="0 0 220 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- face oval -->
         <ellipse cx="110" cy="118" rx="72" ry="92" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/>
-        <!-- shoulder line -->
         <path d="M 20,260 Q 110,230 200,260" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/>
-        <!-- center vertical guide inside oval -->
         <line x1="110" y1="26" x2="110" y2="300" stroke="rgba(61,90,58,0.4)" stroke-width="1" stroke-dasharray="4 4"/>
-        <!-- eye line hint -->
         <line x1="50" y1="90" x2="170" y2="90" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
       </svg>
     </div>
@@ -2265,6 +2268,21 @@ function openCameraModal(phaseNum, type) {
   };
   document.getElementById('cam-title').textContent = labels[type] || 'Registrar Foto';
   document.getElementById('cam-hint').textContent  = hints[type]  || 'Alinhe o rosto no oval dourado.';
+
+  // Instruction card
+  const instrIcons = { 'frontal': 'Foto Frontal', 'perfil-d': 'Perfil Direito', 'perfil-e': 'Perfil Esquerdo' };
+  const instrTexts = { 'frontal': 'Olhe direto para a camera', 'perfil-d': 'Vire o rosto para a DIREITA', 'perfil-e': 'Vire o rosto para a ESQUERDA' };
+  document.getElementById('cam-instr-icon').textContent = instrIcons[type] || '';
+  document.getElementById('cam-instr-text').textContent = instrTexts[type] || '';
+
+  // Oval guide per type
+  const ovals = {
+    'frontal': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="110" cy="118" rx="72" ry="92" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><path d="M 20,260 Q 110,230 200,260" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><line x1="110" y1="26" x2="110" y2="300" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><line x1="50" y1="90" x2="170" y2="90" stroke="rgba(255,255,255,0.15)" stroke-width="1"/></svg>',
+    'perfil-d': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="140" cy="118" rx="60" ry="88" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><line x1="140" y1="20" x2="140" y2="210" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><path d="M 60,252 Q 140,228 210,245" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><text x="110" y="270" font-size="11" fill="rgba(196,168,122,0.7)" text-anchor="middle" font-family="DM Sans,sans-serif">nariz na linha</text></svg>',
+    'perfil-e': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="80" cy="118" rx="60" ry="88" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><line x1="80" y1="20" x2="80" y2="210" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><path d="M 10,245 Q 80,228 160,252" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><text x="110" y="270" font-size="11" fill="rgba(196,168,122,0.7)" text-anchor="middle" font-family="DM Sans,sans-serif">nariz na linha</text></svg>'
+  };
+  document.getElementById('cam-oval-wrap').innerHTML = ovals[type] || ovals['frontal'];
+
   const modal = document.getElementById('modal-camera');
   modal.style.display = 'flex';
   requestAnimationFrame(() => modal.classList.add('open'));
