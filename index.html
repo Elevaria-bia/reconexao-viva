@@ -405,7 +405,6 @@
   </div>
 
   <div id="auth-signup" style="width:100%;max-width:320px;display:none;flex-direction:column;gap:12px">
-    <div style="background:rgba(61,90,58,0.1);border:1px solid rgba(61,90,58,0.22);border-radius:10px;padding:10px 14px;font-size:12px;color:rgba(61,90,58,0.9);text-align:center;letter-spacing:0.04em">Exclusivo para mulheres</div>
     <input id="signup-name" type="text" placeholder="Seu nome" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
     <input id="signup-email" type="email" placeholder="Seu email" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
     <input id="signup-pass" type="password" placeholder="Senha (mínimo 6 caracteres)" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box">
@@ -414,11 +413,6 @@
       <input type="checkbox" id="signup-meno" style="width:18px;height:18px;accent-color:var(--green)">
       <label for="signup-meno" style="font-size:13px;color:var(--muted)">Estou na menopausa ou perimenopausa</label>
     </div>
-    <select id="signup-gender" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--fg);font-size:14px;width:100%;box-sizing:border-box;appearance:auto">
-      <option value="" disabled selected>Selecione seu gênero</option>
-      <option value="mulher">Mulher</option>
-      <option value="outro">Outro</option>
-    </select>
     <button onclick="doSignup()" style="background:var(--green);color:white;border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;width:100%">Criar minha conta</button>
     <div id="signup-err" style="color:#E87B6A;font-size:12px;text-align:center;display:none"></div>
   </div>
@@ -1189,15 +1183,9 @@ async function doSignup() {
   const age   = parseInt(document.getElementById('signup-age').value) || null;
   const meno  = document.getElementById('signup-meno').checked;
   const err   = document.getElementById('signup-err');
-  const gender = document.getElementById('signup-gender').value;
   err.style.display = 'none';
   if (!name || !email || !pass) { err.textContent = 'Preencha nome, email e senha.'; err.style.display = 'block'; return; }
   if (pass.length < 6) { err.textContent = 'Senha deve ter pelo menos 6 caracteres.'; err.style.display = 'block'; return; }
-  if (!gender) { err.textContent = 'Selecione seu gênero para continuar.'; err.style.display = 'block'; return; }
-  if (gender !== 'mulher') {
-    err.textContent = 'O Método Reconexão Facial é exclusivo para mulheres.';
-    err.style.display = 'block'; return;
-  }
   const btn = document.querySelector('#auth-signup button');
   btn.textContent = 'Criando conta...'; btn.disabled = true;
   const { data, error } = await supa.auth.signUp({
