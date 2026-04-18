@@ -197,12 +197,7 @@
     .cam-vl1 { position: absolute; top: 0; bottom: 0; left: 33.33%; width: 1px; background: rgba(255,255,255,0.22); }
     .cam-vl2 { position: absolute; top: 0; bottom: 0; left: 66.66%; width: 1px; background: rgba(255,255,255,0.22); }
     .cam-vlc { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: rgba(61,90,58,0.55); }
-    .cam-corners { position: absolute; inset: 0; pointer-events: none; }
-    .cam-corner { position: absolute; width: 22px; height: 22px; }
-    .cam-corner.tl { top: 20%; left: 22%; border-top: 2px solid rgba(196,168,122,0.7); border-left: 2px solid rgba(196,168,122,0.7); }
-    .cam-corner.tr { top: 20%; right: 22%; border-top: 2px solid rgba(196,168,122,0.7); border-right: 2px solid rgba(196,168,122,0.7); }
-    .cam-corner.bl { bottom: 28%; left: 22%; border-bottom: 2px solid rgba(196,168,122,0.7); border-left: 2px solid rgba(196,168,122,0.7); }
-    .cam-corner.br { bottom: 28%; right: 22%; border-bottom: 2px solid rgba(196,168,122,0.7); border-right: 2px solid rgba(196,168,122,0.7); }
+
     /* oval replaced by canvas face detection */
     .cam-foot { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 28px calc(24px + var(--safe-b)); background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
     .cam-hint { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.55; flex: 1; }
@@ -691,12 +686,7 @@
       <div class="cam-vl2"></div>
       <div class="cam-vlc"></div>
     </div>
-    <div class="cam-corners">
-      <div class="cam-corner tl"></div>
-      <div class="cam-corner tr"></div>
-      <div class="cam-corner bl"></div>
-      <div class="cam-corner br"></div>
-    </div>
+
     <canvas id="cam-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
     <div id="cam-no-face" style="display:none;position:absolute;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);border:1px solid rgba(196,168,122,0.3);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;pointer-events:none">Aproxime o rosto da camera</div>
   </div>
@@ -2312,7 +2302,6 @@ function initFaceDetection() {
 }
 
 function drawStaticGuide(canvas) {
-  // No face detection: draw a simple static guide box (no confusing oval)
   const vid = document.getElementById('cam-video');
   if (!canvas || !vid.offsetWidth) return;
   canvas.width = vid.offsetWidth;
@@ -2320,20 +2309,24 @@ function drawStaticGuide(canvas) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  // Draw target zone bracket corners (face area: center 56% wide, top 15% to 82%)
-  const fx = w * 0.22, fy = h * 0.10, fw = w * 0.56, fh = h * 0.72;
-  const cs = 22; // corner size
-  ctx.strokeStyle = 'rgba(196,168,122,0.7)';
-  ctx.lineWidth = 2;
+  // Face zone: center horizontally, upper 70% vertically
+  const fx = w * 0.18, fy = h * 0.06, fw = w * 0.64, fh = h * 0.70;
+  const cs = 20;
+  ctx.strokeStyle = 'rgba(196,168,122,0.75)';
+  ctx.lineWidth = 2.2;
   ctx.setLineDash([]);
-  // top-left
   ctx.beginPath(); ctx.moveTo(fx, fy+cs); ctx.lineTo(fx, fy); ctx.lineTo(fx+cs, fy); ctx.stroke();
-  // top-right
   ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy); ctx.lineTo(fx+fw, fy); ctx.lineTo(fx+fw, fy+cs); ctx.stroke();
-  // bottom-left
   ctx.beginPath(); ctx.moveTo(fx, fy+fh-cs); ctx.lineTo(fx, fy+fh); ctx.lineTo(fx+cs, fy+fh); ctx.stroke();
-  // bottom-right
   ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy+fh); ctx.lineTo(fx+fw, fy+fh); ctx.lineTo(fx+fw, fy+fh-cs); ctx.stroke();
+  // Oval guide inside box
+  ctx.strokeStyle = 'rgba(196,168,122,0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([7, 5]);
+  ctx.beginPath();
+  ctx.ellipse(fx+fw/2, fy+fh*0.45, fw*0.38, fh*0.42, 0, 0, 2*Math.PI);
+  ctx.stroke();
+  ctx.setLineDash([]);
 }
 
 function faceDetectLoop() {
