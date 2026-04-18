@@ -203,7 +203,7 @@
     .cam-corner.tr { top: 20%; right: 22%; border-top: 2px solid rgba(196,168,122,0.7); border-right: 2px solid rgba(196,168,122,0.7); }
     .cam-corner.bl { bottom: 28%; left: 22%; border-bottom: 2px solid rgba(196,168,122,0.7); border-left: 2px solid rgba(196,168,122,0.7); }
     .cam-corner.br { bottom: 28%; right: 22%; border-bottom: 2px solid rgba(196,168,122,0.7); border-right: 2px solid rgba(196,168,122,0.7); }
-    .cam-oval-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-bottom: 10%; pointer-events: none; }
+    /* oval replaced by canvas face detection */
     .cam-foot { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 28px calc(24px + var(--safe-b)); background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
     .cam-hint { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.55; flex: 1; }
     .cam-capture { width: 68px; height: 68px; border-radius: 50%; border: 3.5px solid white; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.12s, background 0.12s; flex-shrink: 0; }
@@ -697,14 +697,8 @@
       <div class="cam-corner bl"></div>
       <div class="cam-corner br"></div>
     </div>
-    <div class="cam-oval-wrap" id="cam-oval-wrap">
-      <svg width="72%" viewBox="0 0 220 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="110" cy="118" rx="72" ry="92" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/>
-        <path d="M 20,260 Q 110,230 200,260" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/>
-        <line x1="110" y1="26" x2="110" y2="300" stroke="rgba(61,90,58,0.4)" stroke-width="1" stroke-dasharray="4 4"/>
-        <line x1="50" y1="90" x2="170" y2="90" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-      </svg>
-    </div>
+    <canvas id="cam-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+    <div id="cam-no-face" style="display:none;position:absolute;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);border:1px solid rgba(196,168,122,0.3);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;pointer-events:none">Aproxime o rosto da camera</div>
   </div>
   <div class="cam-foot">
     <div class="cam-hint" id="cam-hint">Centralize o rosto no oval. Mantenha os ombros paralelos ao chao.</div>
@@ -1119,6 +1113,9 @@ let curPhaseIdx = null;
 let photoCaptureCtx = null;
 let camStream = null;
 let camFacing = 'user';
+let faceDetector = null;
+let faceDetectTimer = null;
+let faceDetectSupported = false;
 let breathTimer = null;
 let breathRound = 0;
 let stepTimerInterval = null;
@@ -2275,14 +2272,6 @@ function openCameraModal(phaseNum, type) {
   document.getElementById('cam-instr-icon').textContent = instrIcons[type] || '';
   document.getElementById('cam-instr-text').textContent = instrTexts[type] || '';
 
-  // Oval guide per type
-  const ovals = {
-    'frontal': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="110" cy="118" rx="72" ry="92" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><path d="M 20,260 Q 110,230 200,260" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><line x1="110" y1="26" x2="110" y2="300" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><line x1="50" y1="90" x2="170" y2="90" stroke="rgba(255,255,255,0.15)" stroke-width="1"/></svg>',
-    'perfil-d': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="140" cy="118" rx="60" ry="88" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><line x1="140" y1="20" x2="140" y2="210" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><path d="M 60,252 Q 140,228 210,245" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><text x="110" y="270" font-size="11" fill="rgba(196,168,122,0.7)" text-anchor="middle" font-family="DM Sans,sans-serif">nariz na linha</text></svg>',
-    'perfil-e': '<svg width="72%" viewBox="0 0 220 300" fill="none"><ellipse cx="80" cy="118" rx="60" ry="88" stroke="rgba(196,168,122,0.6)" stroke-width="1.8" stroke-dasharray="7 5"/><line x1="80" y1="20" x2="80" y2="210" stroke="rgba(61,90,58,0.45)" stroke-width="1.2" stroke-dasharray="4 4"/><path d="M 10,245 Q 80,228 160,252" stroke="rgba(196,168,122,0.35)" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/><text x="110" y="270" font-size="11" fill="rgba(196,168,122,0.7)" text-anchor="middle" font-family="DM Sans,sans-serif">nariz na linha</text></svg>'
-  };
-  document.getElementById('cam-oval-wrap').innerHTML = ovals[type] || ovals['frontal'];
-
   const modal = document.getElementById('modal-camera');
   modal.style.display = 'flex';
   requestAnimationFrame(() => modal.classList.add('open'));
@@ -2291,23 +2280,138 @@ function openCameraModal(phaseNum, type) {
 }
 
 function startCameraStream() {
-  if (camStream) {
-    camStream.getTracks().forEach(t => t.stop());
-    camStream = null;
-  }
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  if (faceDetectTimer) { clearTimeout(faceDetectTimer); faceDetectTimer = null; }
+
   navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing, width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false })
     .then(stream => {
       camStream = stream;
       const vid = document.getElementById('cam-video');
       vid.srcObject = stream;
+      vid.onloadedmetadata = () => { initFaceDetection(); };
     })
     .catch(() => {
       closeCameraModal();
-      photoCaptureCtx = photoCaptureCtx;
       const inp = document.getElementById('photo-file-input');
       inp.value = '';
       inp.click();
     });
+}
+
+function initFaceDetection() {
+  faceDetectSupported = ('FaceDetector' in window);
+  const canvas = document.getElementById('cam-canvas');
+  if (faceDetectSupported) {
+    try {
+      faceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+      faceDetectLoop();
+    } catch(e) { faceDetectSupported = false; drawStaticGuide(canvas); }
+  } else {
+    drawStaticGuide(canvas);
+  }
+}
+
+function drawStaticGuide(canvas) {
+  // No face detection: draw a simple static guide box (no confusing oval)
+  const vid = document.getElementById('cam-video');
+  if (!canvas || !vid.offsetWidth) return;
+  canvas.width = vid.offsetWidth;
+  canvas.height = vid.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  // Draw target zone bracket corners (face area: center 56% wide, top 15% to 82%)
+  const fx = w * 0.22, fy = h * 0.10, fw = w * 0.56, fh = h * 0.72;
+  const cs = 22; // corner size
+  ctx.strokeStyle = 'rgba(196,168,122,0.7)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  // top-left
+  ctx.beginPath(); ctx.moveTo(fx, fy+cs); ctx.lineTo(fx, fy); ctx.lineTo(fx+cs, fy); ctx.stroke();
+  // top-right
+  ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy); ctx.lineTo(fx+fw, fy); ctx.lineTo(fx+fw, fy+cs); ctx.stroke();
+  // bottom-left
+  ctx.beginPath(); ctx.moveTo(fx, fy+fh-cs); ctx.lineTo(fx, fy+fh); ctx.lineTo(fx+cs, fy+fh); ctx.stroke();
+  // bottom-right
+  ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy+fh); ctx.lineTo(fx+fw, fy+fh); ctx.lineTo(fx+fw, fy+fh-cs); ctx.stroke();
+}
+
+function faceDetectLoop() {
+  if (!camStream || !faceDetector) return;
+  const vid = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
+  if (!canvas || !vid.videoWidth) { faceDetectTimer = setTimeout(faceDetectLoop, 200); return; }
+
+  canvas.width  = vid.offsetWidth;
+  canvas.height = vid.offsetHeight;
+
+  faceDetector.detect(vid).then(faces => {
+    const ctx = canvas.getContext('2d');
+    const cw = canvas.width, ch = canvas.height;
+    ctx.clearRect(0, 0, cw, ch);
+
+    // Scale from video coords to display coords (object-fit:cover)
+    const vw = vid.videoWidth, vh = vid.videoHeight;
+    const scale = Math.max(cw / vw, ch / vh);
+    const ox = (cw - vw * scale) / 2;
+    const oy = (ch - vh * scale) / 2;
+
+    const noFaceEl = document.getElementById('cam-no-face');
+
+    if (faces.length > 0) {
+      noFaceEl && (noFaceEl.style.display = 'none');
+      const bb = faces[0].boundingBox;
+      const dx = ox + bb.x * scale;
+      const dy = oy + bb.y * scale;
+      const dw = bb.width  * scale;
+      const dh = bb.height * scale;
+      const cx = dx + dw/2;
+      const cy = dy + dh/2;
+      const rx = dw * 0.58;
+      const ry = dh * 0.72;
+
+      // Glow ring
+      ctx.save();
+      ctx.shadowColor = 'rgba(196,168,122,0.5)';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = 'rgba(196,168,122,0.85)';
+      ctx.lineWidth = 2.2;
+      ctx.setLineDash([8, 5]);
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.restore();
+
+      // Chin to center line
+      ctx.strokeStyle = 'rgba(61,90,58,0.55)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(cx, dy - ry * 0.1);
+      ctx.lineTo(cx, dy + dh + ry * 0.2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Corner brackets
+      const cs = 14;
+      ctx.strokeStyle = 'rgba(196,168,122,0.9)';
+      ctx.lineWidth = 2;
+      const bx = cx-rx, by = cy-ry, bw = rx*2, bh = ry*2;
+      ctx.beginPath(); ctx.moveTo(bx,by+cs); ctx.lineTo(bx,by); ctx.lineTo(bx+cs,by); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx+bw-cs,by); ctx.lineTo(bx+bw,by); ctx.lineTo(bx+bw,by+cs); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+bh); ctx.lineTo(bx+cs,by+bh); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx+bw-cs,by+bh); ctx.lineTo(bx+bw,by+bh); ctx.lineTo(bx+bw,by+bh-cs); ctx.stroke();
+
+    } else {
+      noFaceEl && (noFaceEl.style.display = 'block');
+      // Draw static guide when no face
+      drawStaticGuide(canvas);
+    }
+
+    faceDetectTimer = setTimeout(faceDetectLoop, 150);
+  }).catch(() => {
+    faceDetectTimer = setTimeout(faceDetectLoop, 300);
+  });
 }
 
 function flipCamera() {
@@ -2316,7 +2420,11 @@ function flipCamera() {
 }
 
 function closeCameraModal() {
+  if (faceDetectTimer) { clearTimeout(faceDetectTimer); faceDetectTimer = null; }
+  faceDetector = null;
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  const canvas = document.getElementById('cam-canvas');
+  if (canvas) { const ctx = canvas.getContext('2d'); ctx && ctx.clearRect(0,0,canvas.width,canvas.height); }
   const modal = document.getElementById('modal-camera');
   modal.classList.remove('open');
   modal.style.display = 'none';
