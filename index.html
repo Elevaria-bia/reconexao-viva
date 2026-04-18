@@ -688,7 +688,7 @@
     </div>
 
     <canvas id="cam-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
-    <div id="cam-no-face" style="display:none;position:absolute;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);border:1px solid rgba(196,168,122,0.3);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.65);white-space:nowrap;pointer-events:none">Aproxime o rosto da camera</div>
+
   </div>
   <div class="cam-foot">
     <div class="cam-hint" id="cam-hint">Centralize o rosto no oval. Mantenha os ombros paralelos ao chao.</div>
@@ -1103,9 +1103,6 @@ let curPhaseIdx = null;
 let photoCaptureCtx = null;
 let camStream = null;
 let camFacing = 'user';
-let faceDetector = null;
-let faceDetectTimer = null;
-let faceDetectSupported = false;
 let breathTimer = null;
 let breathRound = 0;
 let stepTimerInterval = null;
@@ -2271,14 +2268,12 @@ function openCameraModal(phaseNum, type) {
 
 function startCameraStream() {
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-  if (faceDetectTimer) { clearTimeout(faceDetectTimer); faceDetectTimer = null; }
-
   navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing, width: { ideal: 1280 }, height: { ideal: 1280 } }, audio: false })
     .then(stream => {
       camStream = stream;
       const vid = document.getElementById('cam-video');
       vid.srcObject = stream;
-      vid.onloadedmetadata = () => { initFaceDetection(); };
+      vid.onloadedmetadata = () => { drawGuide(); };
     })
     .catch(() => {
       closeCameraModal();
@@ -2288,136 +2283,41 @@ function startCameraStream() {
     });
 }
 
-function initFaceDetection() {
-  faceDetectSupported = ('FaceDetector' in window);
+function drawGuide() {
   const canvas = document.getElementById('cam-canvas');
-  if (faceDetectSupported) {
-    try {
-      faceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
-      faceDetectLoop();
-    } catch(e) { faceDetectSupported = false; drawStaticGuide(canvas); }
-  } else {
-    drawStaticGuide(canvas);
-  }
-}
-
-function drawStaticGuide(canvas) {
-  const vid = document.getElementById('cam-video');
+  const vid    = document.getElementById('cam-video');
   if (!canvas || !vid.offsetWidth) return;
-  canvas.width = vid.offsetWidth;
+  canvas.width  = vid.offsetWidth;
   canvas.height = vid.offsetHeight;
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
-  // Face zone: center horizontally, upper 70% vertically
-  const fx = w * 0.18, fy = h * 0.06, fw = w * 0.64, fh = h * 0.70;
-  const cs = 20;
-  ctx.strokeStyle = 'rgba(196,168,122,0.75)';
-  ctx.lineWidth = 2.2;
+
+  // Face zone: centro horizontal, parte superior da tela
+  const fx = w * 0.16, fy = h * 0.05, fw = w * 0.68, fh = h * 0.68;
+  const cs = 22;
+
+  // Oval tracejado sutil (referencia de enquadramento)
+  ctx.strokeStyle = 'rgba(196,168,122,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([7, 5]);
+  ctx.beginPath();
+  ctx.ellipse(fx + fw/2, fy + fh * 0.44, fw * 0.36, fh * 0.42, 0, 0, 2 * Math.PI);
+  ctx.stroke();
   ctx.setLineDash([]);
+
+  // Cantos dourados
+  ctx.strokeStyle = 'rgba(196,168,122,0.85)';
+  ctx.lineWidth = 2.2;
   ctx.beginPath(); ctx.moveTo(fx, fy+cs); ctx.lineTo(fx, fy); ctx.lineTo(fx+cs, fy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy); ctx.lineTo(fx+fw, fy); ctx.lineTo(fx+fw, fy+cs); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(fx, fy+fh-cs); ctx.lineTo(fx, fy+fh); ctx.lineTo(fx+cs, fy+fh); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(fx+fw-cs, fy+fh); ctx.lineTo(fx+fw, fy+fh); ctx.lineTo(fx+fw, fy+fh-cs); ctx.stroke();
-  // Oval guide inside box
-  ctx.strokeStyle = 'rgba(196,168,122,0.45)';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([7, 5]);
-  ctx.beginPath();
-  ctx.ellipse(fx+fw/2, fy+fh*0.45, fw*0.38, fh*0.42, 0, 0, 2*Math.PI);
-  ctx.stroke();
-  ctx.setLineDash([]);
 }
 
-function faceDetectLoop() {
-  if (!camStream || !faceDetector) return;
-  const vid = document.getElementById('cam-video');
-  const canvas = document.getElementById('cam-canvas');
-  if (!canvas || !vid.videoWidth) { faceDetectTimer = setTimeout(faceDetectLoop, 200); return; }
-
-  canvas.width  = vid.offsetWidth;
-  canvas.height = vid.offsetHeight;
-
-  faceDetector.detect(vid).then(faces => {
-    const ctx = canvas.getContext('2d');
-    const cw = canvas.width, ch = canvas.height;
-    ctx.clearRect(0, 0, cw, ch);
-
-    // Scale from video coords to display coords (object-fit:cover)
-    const vw = vid.videoWidth, vh = vid.videoHeight;
-    const scale = Math.max(cw / vw, ch / vh);
-    const ox = (cw - vw * scale) / 2;
-    const oy = (ch - vh * scale) / 2;
-
-    const noFaceEl = document.getElementById('cam-no-face');
-
-    if (faces.length > 0) {
-      noFaceEl && (noFaceEl.style.display = 'none');
-      const bb = faces[0].boundingBox;
-      const dx = ox + bb.x * scale;
-      const dy = oy + bb.y * scale;
-      const dw = bb.width  * scale;
-      const dh = bb.height * scale;
-      const cx = dx + dw/2;
-      const cy = dy + dh/2;
-      const rx = dw * 0.58;
-      const ry = dh * 0.72;
-
-      // Glow ring
-      ctx.save();
-      ctx.shadowColor = 'rgba(196,168,122,0.5)';
-      ctx.shadowBlur = 12;
-      ctx.strokeStyle = 'rgba(196,168,122,0.85)';
-      ctx.lineWidth = 2.2;
-      ctx.setLineDash([8, 5]);
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
-      ctx.stroke();
-      ctx.restore();
-
-      // Chin to center line
-      ctx.strokeStyle = 'rgba(61,90,58,0.55)';
-      ctx.lineWidth = 1.2;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(cx, dy - ry * 0.1);
-      ctx.lineTo(cx, dy + dh + ry * 0.2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Corner brackets
-      const cs = 14;
-      ctx.strokeStyle = 'rgba(196,168,122,0.9)';
-      ctx.lineWidth = 2;
-      const bx = cx-rx, by = cy-ry, bw = rx*2, bh = ry*2;
-      ctx.beginPath(); ctx.moveTo(bx,by+cs); ctx.lineTo(bx,by); ctx.lineTo(bx+cs,by); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(bx+bw-cs,by); ctx.lineTo(bx+bw,by); ctx.lineTo(bx+bw,by+cs); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(bx,by+bh-cs); ctx.lineTo(bx,by+bh); ctx.lineTo(bx+cs,by+bh); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(bx+bw-cs,by+bh); ctx.lineTo(bx+bw,by+bh); ctx.lineTo(bx+bw,by+bh-cs); ctx.stroke();
-
-    } else {
-      noFaceEl && (noFaceEl.style.display = 'block');
-      // Draw static guide when no face
-      drawStaticGuide(canvas);
-    }
-
-    faceDetectTimer = setTimeout(faceDetectLoop, 150);
-  }).catch(() => {
-    faceDetectTimer = setTimeout(faceDetectLoop, 300);
-  });
-}
-
-function flipCamera() {
-  camFacing = (camFacing === 'user') ? 'environment' : 'user';
-  startCameraStream();
-}
 
 function closeCameraModal() {
-  if (faceDetectTimer) { clearTimeout(faceDetectTimer); faceDetectTimer = null; }
-  faceDetector = null;
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-  const canvas = document.getElementById('cam-canvas');
-  if (canvas) { const ctx = canvas.getContext('2d'); ctx && ctx.clearRect(0,0,canvas.width,canvas.height); }
   const modal = document.getElementById('modal-camera');
   modal.classList.remove('open');
   modal.style.display = 'none';
