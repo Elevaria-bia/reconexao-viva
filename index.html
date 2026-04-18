@@ -544,6 +544,7 @@
     <div class="stats-g" id="stats-g"></div>
     <div id="water-section"></div>
     <button class="rst-btn" onclick="confirmReset()">Reiniciar dados</button>
+    <button class="rst-btn" onclick="doAppLogout()" style="margin-top:10px;border-color:rgba(232,123,106,0.25);color:rgba(232,123,106,0.6)">Sair da conta</button>
   </div>
 
   <nav id="nav">
@@ -2237,6 +2238,18 @@ function confirmReset() {
     localStorage.removeItem('rrv-v3');
     location.reload();
   }
+}
+
+async function doAppLogout() {
+  await supa.auth.signOut();
+  isMentor = false;
+  currentUser = null;
+  document.getElementById('nav').classList.remove('visible');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('v-auth').style.display = 'flex';
+  ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  document.getElementById('v-onboard').style.display = 'none';
+  document.getElementById('v-pending').style.display = 'none';
 }
 
 function updateWeight(val) {
