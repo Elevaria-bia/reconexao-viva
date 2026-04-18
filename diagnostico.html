@@ -461,7 +461,7 @@
 
     <div class="authority-bar" style="margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.07);">
       <div class="auth-item">
-        <span class="auth-num">30K</span>
+        <span class="auth-num">29.8K</span>
         <span class="auth-label">mulheres na jornada</span>
       </div>
       <div class="auth-item">
@@ -869,7 +869,7 @@
 ══════════════════════════════════════ -->
 <script>
   const SUPA_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MDIyNzIsImV4cCI6MjA2MDQ3ODI3Mn0.aCFMNypZRLNBJHLDHFLoCt49ByPtBJ9taGbGKiS_bYU';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWn3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
   const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
   const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-form','s-obrigada'];
@@ -1026,18 +1026,15 @@
     btn.textContent = 'Enviando…';
 
     // Salva no Supabase
-    try {
-      await supa.from('leads').insert({
-        nome,
-        whatsapp: whats,
-        email,
-        perfil,
-        pontuacao,
-        respostas: scores
-      });
-    } catch(err) {
-      console.error('Supabase error:', err);
-    }
+    const { error: sbErr } = await supa.from('leads').insert({
+      nome,
+      whatsapp: whats,
+      email,
+      perfil,
+      pontuacao,
+      respostas: scores
+    });
+    if (sbErr) console.error('Supabase error:', sbErr.message, sbErr);
 
     // Envia para Netlify Forms
     const formData = new FormData(e.target);
