@@ -634,6 +634,7 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 window._supa = supa; // exposto para o modulo de push notifications
 let currentUser = null;
+let isMentor = false;
 
 const RITUALS = [
   {
@@ -1213,8 +1214,9 @@ async function onAuthSuccess(user, profileData) {
     state.name = profile.name;
     state.startDate = profile.start_date || new Date().toISOString();
     if (profile.weight) state.weight = profile.weight;
-    /* Verificar aprovação */
-    if (profile.approved === false) {
+    isMentor = profile.is_mentor === true;
+    /* Verificar aprovação — mentora bypassa */
+    if (!isMentor && profile.approved === false) {
       hideAuthScreen();
       document.getElementById('v-pending').style.display = 'flex';
       return;
@@ -1863,7 +1865,7 @@ function getCurrentPhaseNum() {
 function renderGuias() {
   const curPhase = getCurrentPhaseNum();
   document.getElementById('pillar-list').innerHTML = PILLARS.map(p => {
-    const locked = (p.phaseFrom || 1) > curPhase;
+    const locked = !isMentor && (p.phaseFrom || 1) > curPhase;
     if (locked) {
       return `<div class="pillar-row" style="opacity:0.45;cursor:default">
 <div class="p-num" style="color:var(--muted)">${p.num}</div>
@@ -2072,6 +2074,7 @@ function getDaysSinceStart() {
 }
 
 function isPhaseUnlocked(idx) {
+  if (isMentor) return true;
   return getDaysSinceStart() >= PHASE_UNLOCK_DAYS[idx];
 }
 
