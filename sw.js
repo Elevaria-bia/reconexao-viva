@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'reconexao-viva-v6';
+const CACHE = 'reconexao-viva-v7';
 
 // ── INSTALL ──────────────────────────────────────────────────
 self.addEventListener('install', e => {
