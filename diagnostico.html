@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagnóstico Facial Gratuito — @biafaceyoga</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;0,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --dark: #1C1C1C;
+      --green: #3D5A3A;
+      --accent: #E87B6A;
+      --warm: #5C3D2E;
+      --offwhite: #F5EDE0;
+      --white: #FFFFFF;
+      --gray: #888;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── PROGRESS ─── */
+    #prog-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.06); z-index: 200; }
+    #prog-bar  { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; }
+
+    /* ─── SCREENS ─── */
+    .screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 40px;
+      text-align: center;
+      animation: up 0.55s ease both;
+    }
+    .screen.active { display: flex; }
+    @keyframes up {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── TYPE ─── */
+    .serif { font-family: 'Playfair Display', serif; }
+    .accent-color { color: var(--accent); }
+    .muted { color: rgba(255,255,255,0.5); }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(34px, 8vw, 58px);
+      line-height: 1.12;
+      margin-bottom: 22px;
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 5.5vw, 42px);
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+    .lead {
+      font-size: clamp(16px, 3vw, 19px);
+      color: rgba(255,255,255,0.75);
+      line-height: 1.75;
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+
+    /* ─── PILL TAGS ─── */
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 7px 18px;
+      border-radius: 50px;
+      margin-bottom: 28px;
+    }
+    .pill-accent { background: rgba(232,123,106,0.12); border: 1px solid rgba(232,123,106,0.35); color: var(--accent); }
+    .pill-green  { background: rgba(61,90,58,0.2); border: 1px solid rgba(61,90,58,0.5); color: #7ab872; }
+
+    /* ─── AUTHORITY BAR ─── */
+    .authority-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      margin: 28px auto 36px;
+      max-width: 480px;
+    }
+    .auth-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .auth-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .auth-label { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.5px; }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.4px;
+      padding: 18px 44px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      text-decoration: none;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #d9695a; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,123,106,0.4); }
+    .btn-ghost { background: transparent; color: rgba(255,255,255,0.45); font-size: 14px; padding: 12px 24px; border: 1px solid rgba(255,255,255,0.15); border-radius: 50px; margin-top: 14px; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: white; }
+    .btn-full { width: 100%; }
+
+    /* ─── SCARCITY BANNER ─── */
+    .scarcity {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(232,123,106,0.09);
+      border: 1px solid rgba(232,123,106,0.25);
+      border-radius: 50px;
+      padding: 10px 22px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 28px;
+      max-width: 380px;
+    }
+    .scarcity .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.6s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(1.4);} }
+
+    /* ─── HERO SCREEN ─── */
+    #s-hero { background: radial-gradient(ellipse at 50% 0%, #2a3b28 0%, var(--dark) 65%); }
+    .hero-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.15); margin: 0 auto 20px; }
+
+    /* ─── PHOTO SCREEN ─── */
+    #s-foto { background: var(--dark); }
+    .upload-circle {
+      width: min(300px, 80vw);
+      height: min(300px, 80vw);
+      border-radius: 50%;
+      border: 2px dashed rgba(232,123,106,0.4);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 28px auto;
+      position: relative;
+      overflow: hidden;
+      background: rgba(232,123,106,0.03);
+    }
+    .upload-circle:hover { border-color: var(--accent); background: rgba(232,123,106,0.07); }
+    .upload-circle img#preview { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+    .upload-icon { margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+    .upload-icon svg { width: 42px; height: 42px; opacity: 0.7; }
+    .upload-hint { font-size: 13px; color: rgba(255,255,255,0.4); }
+    .upload-hint strong { display: block; color: var(--accent); font-size: 15px; margin-bottom: 4px; }
+    #file-input { display: none; }
+    .privacy-note { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    /* ─── ANÁLISE SCREEN ─── */
+    #s-analise { background: radial-gradient(ellipse at center, #201a17 0%, var(--dark) 70%); }
+    .analysis-ring {
+      width: 200px; height: 200px; border-radius: 50%;
+      margin: 0 auto 32px;
+      position: relative;
+      border: 2px solid rgba(232,123,106,0.15);
+      overflow: hidden;
+    }
+    .analysis-ring img { width: 100%; height: 100%; object-fit: cover; }
+    .scan-line {
+      position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      animation: scan 2.2s linear infinite;
+      opacity: 0.7;
+    }
+    @keyframes scan { 0%{top:0;} 100%{top:100%;} }
+    .steps-list { list-style: none; text-align: left; max-width: 300px; margin: 24px auto 0; }
+    .steps-list li {
+      padding: 11px 0;
+      font-size: 14px;
+      color: rgba(255,255,255,0.35);
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: color 0.4s;
+    }
+    .steps-list li.done { color: rgba(255,255,255,0.9); }
+    .steps-list li .step-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: rgba(255,255,255,0.12); flex-shrink: 0;
+      transition: background 0.4s;
+    }
+    .steps-list li.done .step-dot { background: var(--accent); }
+
+    /* ─── PERGUNTAS ─── */
+    .q-screen { background: var(--dark); }
+    .q-num { font-size: 11px; letter-spacing: 2px; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 14px; }
+    .q-text { font-family: 'Playfair Display', serif; font-size: clamp(22px, 5vw, 34px); line-height: 1.3; max-width: 600px; margin: 0 auto 10px; }
+    .q-sub { font-size: 14px; color: rgba(255,255,255,0.38); margin-bottom: 36px; max-width: 480px; }
+    .opts { display: flex; flex-direction: column; gap: 12px; width: min(500px, 100%); margin: 0 auto; }
+    .opt {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px 22px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.22s;
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .opt:hover { border-color: var(--accent); background: rgba(232,123,106,0.07); }
+    .opt.sel { border-color: var(--accent); background: rgba(232,123,106,0.12); }
+    .opt-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(232,123,106,0.4);
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .opt-label { font-size: 15px; font-weight: 600; display: block; margin-bottom: 2px; }
+    .opt-desc { font-size: 13px; color: rgba(255,255,255,0.42); line-height: 1.4; }
+
+    /* ─── RESULTADO ─── */
+    #s-resultado { background: radial-gradient(ellipse at 50% 0%, #243a22 0%, var(--dark) 60%); }
+    .result-photo {
+      width: 90px; height: 90px; border-radius: 50%;
+      margin: 0 auto 20px;
+      border: 2px solid var(--accent);
+      overflow: hidden;
+    }
+    .result-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .result-badge {
+      display: inline-block;
+      background: rgba(232,123,106,0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 18px; border-radius: 50px;
+      margin-bottom: 20px;
+    }
+    .result-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 12px;
+      max-width: 600px;
+      margin: 24px auto 32px;
+      text-align: left;
+    }
+    .result-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .result-card .rc-title { font-size: 10px; letter-spacing: 1.2px; color: var(--accent); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    .result-card .rc-body { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.55; }
+    .transform-box {
+      background: rgba(61,90,58,0.18);
+      border: 1px solid rgba(61,90,58,0.45);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+    .transform-box .tb-label { font-size: 11px; letter-spacing: 1.2px; color: #7ab872; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+    .transform-box p { font-size: 15px; line-height: 1.75; color: rgba(255,255,255,0.88); }
+
+    /* ─── PROVA SOCIAL ─── */
+    .testimonials {
+      max-width: 560px;
+      margin: 0 auto 36px;
+      text-align: left;
+    }
+    .testimonials-title {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.35);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .testimonial {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 10px;
+    }
+    .testimonial .stars { color: var(--accent); font-size: 13px; margin-bottom: 8px; font-style: normal; }
+    .testimonial .t-text { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.6; font-style: italic; margin-bottom: 10px; }
+    .testimonial .t-author { display: flex; align-items: center; gap: 10px; }
+    .testimonial .t-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(232,123,106,0.25);
+      border: 1px solid rgba(232,123,106,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .testimonial .t-name { font-size: 13px; font-weight: 600; }
+    .testimonial .t-meta { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ─── FORMULÁRIO ─── */
+    #s-form { background: var(--dark); }
+    .form-wrap { width: min(520px, 100%); text-align: left; }
+    .form-header { text-align: center; margin-bottom: 32px; }
+    .spots-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 28px;
+    }
+    .spots-bar {
+      display: flex; gap: 4px;
+    }
+    .spot {
+      width: 20px; height: 8px; border-radius: 4px;
+      background: rgba(255,255,255,0.12);
+    }
+    .spot.filled { background: var(--accent); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); margin-bottom: 8px; letter-spacing: 0.4px; }
+    .form-group input, .form-group select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      transition: border-color 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-group select option { background: #1C1C1C; color: white; }
+    .form-note { font-size: 12px; color: rgba(255,255,255,0.28); text-align: center; margin-top: 14px; line-height: 1.6; }
+    .guarantee-text {
+      text-align: center;
+      font-size: 13px;
+      color: rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    /* ─── OBRIGADA ─── */
+    #s-obrigada { background: radial-gradient(ellipse at center, #243a22 0%, var(--dark) 60%); }
+    .check-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(232,123,106,0.12); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0 auto 28px; }
+    .next-steps { max-width: 440px; margin: 28px auto; text-align: left; }
+    .next-step { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+    .ns-num { width: 28px; height: 28px; border-radius: 50%; background: rgba(232,123,106,0.2); border: 1px solid rgba(232,123,106,0.4); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+    .ns-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+    /* ─── FOOTER ─── */
+    .footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 24px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.15); pointer-events: none; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 480px) {
+      .screen { padding: 52px 20px 36px; }
+      .authority-bar { gap: 16px; }
+      h1 { font-size: clamp(30px, 9vw, 42px); }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="prog-wrap"><div id="prog-bar"></div></div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1 — HISTÓRIA DA BIA
+══════════════════════════════════════ -->
+<div class="screen active" id="s-hero">
+  <div style="max-width:560px; width:100%;">
+
+    <div class="pill pill-accent" style="margin-bottom:32px;">@biafaceyoga</div>
+
+    <h1 style="font-size:clamp(30px,7vw,50px); margin-bottom:24px;">
+      Não eram as rugas.<br>
+      <em style="font-style:italic; color:var(--accent);">Era o olhar.</em>
+    </h1>
+
+    <div style="
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 16px 16px 0;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      text-align: left;
+    ">
+      <p style="font-size:15px; line-height:1.8; color:rgba(255,255,255,0.85); font-style:italic;">
+        "8 de agosto de 2025. Eu olhei para uma foto minha e não reconheci a mulher ali.
+        Um olhar que gritava cansaço e desconexão."
+      </p>
+    </div>
+
+    <p style="font-size:clamp(15px,3vw,17px); line-height:1.8; color:rgba(255,255,255,0.72); text-align:left; margin-bottom:20px;">
+      Sou especialista em estética há <strong style="color:white;">15 anos</strong>. Eu sabia cuidar da pele de todo mundo — menos da minha.
+      Aos 42 anos, me perdi entre perdas difíceis, exigências da rotina e o esquecimento de mim mesma.
+    </p>
+
+    <p style="font-size:clamp(15px,3vw,17px); line-height:1.8; color:rgba(255,255,255,0.72); text-align:left; margin-bottom:28px;">
+      O que mudou não foi milagre. Foi a decisão de que eu merecia <strong style="color:white;">5 minutos de presença por dia.</strong>
+      O Face Yoga foi o caminho. A <em style="color:var(--accent);">reconexão</em> foi o verdadeiro resultado.
+    </p>
+
+    <div style="
+      background: rgba(61,90,58,0.2);
+      border: 1px solid rgba(61,90,58,0.4);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+      text-align: left;
+    ">
+      <p style="font-size:14px; color:rgba(255,255,255,0.55); letter-spacing:1px; text-transform:uppercase; font-weight:700; margin-bottom:8px;">hoje, aos 43 anos</p>
+      <p style="font-size:16px; line-height:1.7; color:rgba(255,255,255,0.9);">
+        A minha melhor versão não estava no passado — estava na presença que decidi dedicar a mim.
+        E se você chegou aqui, acredito que você também está pronta para se reencontrar.
+      </p>
+    </div>
+
+    <div class="scarcity" style="margin: 0 auto 24px;">
+      <span class="dot-live"></span>
+      Apenas <strong>&nbsp;4 vagas&nbsp;</strong> disponíveis este mês
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="goTo('s-diagnostico')">
+      Quero me reencontrar — fazer o diagnóstico →
+    </button>
+    <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:14px; text-align:center;">Grátis · sem compromisso · 3 minutos</p>
+
+    <div class="authority-bar" style="margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.07);">
+      <div class="auth-item">
+        <span class="auth-num">29.8K</span>
+        <span class="auth-label">mulheres na jornada</span>
+      </div>
+      <div class="auth-item">
+        <span class="auth-num">15</span>
+        <span class="auth-label">anos de especialidade</span>
+      </div>
+      <div class="auth-item">
+        <span class="auth-num">100%</span>
+        <span class="auth-label">individual</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1B — DIAGNÓSTICO (ponte)
+══════════════════════════════════════ -->
+<div class="screen" id="s-diagnostico">
+  <div style="max-width:520px; width:100%;">
+    <div class="pill pill-green" style="margin-bottom:24px;">diagnóstico gratuito</div>
+    <h2 style="margin-bottom:16px;">Como funciona</h2>
+    <p class="lead" style="margin-bottom:32px;">
+      Em 3 etapas simples, vou identificar qual padrão de tensão está bloqueando
+      sua vitalidade — e o que você pode fazer a respeito, de forma natural.
+    </p>
+
+    <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:36px; text-align:left;">
+      <div style="display:flex; align-items:flex-start; gap:16px;">
+        <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">1</div>
+        <div>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Envie uma foto do seu rosto</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Natural, sem filtro — para eu ver onde a tensão se manifesta</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:16px;">
+        <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">2</div>
+        <div>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Responda 5 perguntas rápidas</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Sobre como você acorda, onde sente tensão e o que deseja sentir</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:16px;">
+        <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">3</div>
+        <div>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Receba seu perfil personalizado</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Com o que está acontecendo no seu corpo e o próximo passo para você</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="goTo('s-foto')">
+      Começar o diagnóstico →
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 2 — FOTO
+══════════════════════════════════════ -->
+<div class="screen" id="s-foto">
+  <div class="pill pill-accent">passo 1 de 2</div>
+  <h2>Envie uma foto do seu rosto</h2>
+  <p class="lead">
+    Vou usar para criar o seu diagnóstico personalizado.<br>
+    Foto natural, sem filtro, boa iluminação.
+  </p>
+
+  <div class="upload-circle" onclick="document.getElementById('file-input').click()">
+    <img id="preview" src="" alt="Preview" />
+    <div id="upload-placeholder">
+      <div class="upload-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="upload-hint">
+        <strong>Toque para adicionar foto</strong>
+        JPG ou PNG · frontal · boa luz
+      </div>
+    </div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" onchange="handlePhoto(event)" />
+  <p class="privacy-note">Sua foto é usada só aqui e não é salva em nenhum servidor</p>
+
+  <button class="btn btn-primary" id="btn-foto" style="display:none; margin-top:24px;" onclick="goTo('s-analise'); startAnalise()">
+    Analisar meu rosto →
+  </button>
+  <button class="btn btn-ghost" onclick="skipPhoto()">Continuar sem foto</button>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 3 — ANÁLISE
+══════════════════════════════════════ -->
+<div class="screen" id="s-analise">
+  <div class="pill pill-accent">analisando…</div>
+  <div class="analysis-ring">
+    <img id="analysis-img" src="" alt="Análise" />
+    <div class="scan-line"></div>
+  </div>
+  <h2>Mapeando seus padrões</h2>
+  <p class="lead" style="margin-bottom:0">Aguarde enquanto identifico os pontos de tensão e bloqueio.</p>
+
+  <ul class="steps-list" id="steps">
+    <li id="step-1"><span class="step-dot"></span> Estrutura óssea e postura cervical</li>
+    <li id="step-2"><span class="step-dot"></span> Tensão miofascial e masseter</li>
+    <li id="step-3"><span class="step-dot"></span> Padrão de respiração e drenagem</li>
+    <li id="step-4"><span class="step-dot"></span> Vitalidade e tônus muscular</li>
+    <li id="step-5"><span class="step-dot"></span> Relatório de perfil pronto</li>
+  </ul>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 4 — PERGUNTA 1
+══════════════════════════════════════ -->
+<div class="screen q-screen" id="s-q1">
+  <div class="q-num">Pergunta 1 de 5</div>
+  <h2 class="q-text">Como você acorda de manhã?</h2>
+  <p class="q-sub">Pense nos últimos 30 dias</p>
+  <div class="opts">
+    <div class="opt" onclick="selectOpt(this,1,1)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Descansada e leve</span><span class="opt-desc">Rosto relaxado, disposição boa</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,1,2)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Normal, mas demoro a engrenar</span><span class="opt-desc">Preciso de um tempo para "acordar de vez"</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,1,3)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Rosto marcado e corpo pesado</span><span class="opt-desc">Maxilar tenso, olheiras, inchaço</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 5 — PERGUNTA 2
+══════════════════════════════════════ -->
+<div class="screen q-screen" id="s-q2">
+  <div class="q-num">Pergunta 2 de 5</div>
+  <h2 class="q-text">Onde você sente mais tensão no seu corpo?</h2>
+  <p class="q-sub">Pode marcar o que aparece com mais frequência</p>
+  <div class="opts">
+    <div class="opt" onclick="selectOpt(this,2,1)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Sinto pouca tensão no geral</span><span class="opt-desc">Corpo relativamente solto e relaxado</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,2,2)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Pescoço e ombros</span><span class="opt-desc">Especialmente depois de telas ou stress</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,2,3)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Maxilar, têmporas ou nuca</span><span class="opt-desc">Às vezes acordo com dor de cabeça ou bruxismo</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 6 — PERGUNTA 3
+══════════════════════════════════════ -->
+<div class="screen q-screen" id="s-q3">
+  <div class="q-num">Pergunta 3 de 5</div>
+  <h2 class="q-text">Como está sua respiração no dia a dia?</h2>
+  <p class="q-sub">Preste atenção agora e responda com honestidade</p>
+  <div class="opts">
+    <div class="opt" onclick="selectOpt(this,3,1)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Profunda e abdominal</span><span class="opt-desc">Respiro bem, raramente me falta fôlego</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,3,2)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Só lembro de respirar quando me lembram</span><span class="opt-desc">Às vezes prendo sem perceber</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,3,3)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Superficial e no peito</span><span class="opt-desc">Sinto aperto, ansiedade ou falta de ar</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 7 — PERGUNTA 4
+══════════════════════════════════════ -->
+<div class="screen q-screen" id="s-q4">
+  <div class="q-num">Pergunta 4 de 5</div>
+  <h2 class="q-text">O que você já tentou para se sentir melhor no próprio corpo?</h2>
+  <p class="q-sub">Seja honesta — não existe resposta certa</p>
+  <div class="opts">
+    <div class="opt" onclick="selectOpt(this,4,1)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Nunca precisei, me sinto bem</span><span class="opt-desc">Só quero ir mais fundo agora</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,4,2)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Cremes, massagens e spa</span><span class="opt-desc">Ajudam no momento, mas o efeito não dura</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,4,3)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Já tentei muita coisa e ainda me busco</span><span class="opt-desc">Sinto que falta uma abordagem que realmente mude</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 8 — PERGUNTA 5
+══════════════════════════════════════ -->
+<div class="screen q-screen" id="s-q5">
+  <div class="q-num">Pergunta 5 de 5</div>
+  <h2 class="q-text">O que você mais quer sentir daqui a 3 meses?</h2>
+  <p class="q-sub">Escolha o que ressoa mais verdadeiro</p>
+  <div class="opts">
+    <div class="opt" onclick="selectOpt(this,5,1)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Leveza e presença no rosto</span><span class="opt-desc">Acordar e me reconhecer no espelho</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,5,2)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Vitalidade real no corpo</span><span class="opt-desc">Energia que vem de dentro, não de esforço</span></div>
+    </div>
+    <div class="opt" onclick="selectOpt(this,5,3)">
+      <span class="opt-dot"></span>
+      <div><span class="opt-label">Me sentir inteira — por dentro e por fora</span><span class="opt-desc">Corpo, rosto e mente em harmonia</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 9 — RESULTADO
+══════════════════════════════════════ -->
+<div class="screen" id="s-resultado">
+  <div class="result-photo">
+    <img id="result-img" src="" alt="" />
+  </div>
+  <div class="result-badge" id="result-badge">Seu Perfil</div>
+  <h2 id="result-title">Título do Perfil</h2>
+  <p class="lead" id="result-lead" style="margin-bottom:24px;"></p>
+
+  <div class="result-cards" id="result-cards"></div>
+
+  <div class="transform-box" id="transform-box">
+    <div class="tb-label">✦ O que muda com acompanhamento</div>
+    <p id="transform-text"></p>
+  </div>
+
+  <!-- Prova social -->
+  <div class="testimonials">
+    <div class="testimonials-title">o que outras mulheres dizem</div>
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="t-text">"Em 6 semanas meu rosto ficou visivelmente mais relaxado. O maxilar parou de doer e eu acordo com outra energia. Nunca pensei que a solução estava na respiração."</p>
+      <div class="t-author">
+        <div class="t-avatar">M</div>
+        <div>
+          <div class="t-name">Mariana S.</div>
+          <div class="t-meta">47 anos · São Paulo</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="t-text">"Achei que era vaidade querer me sentir bem no meu rosto. A Bia me mostrou que era saúde. Mudou minha forma de me olhar no espelho — para sempre."</p>
+      <div class="t-author">
+        <div class="t-avatar">R</div>
+        <div>
+          <div class="t-name">Roberta L.</div>
+          <div class="t-meta">52 anos · Rio de Janeiro</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="t-text">"Tentei yoga facial por conta própria sem resultado. Com a mentoria individual da Bia, em 3 meses vi diferença que anos de creme não fizeram."</p>
+      <div class="t-author">
+        <div class="t-avatar">C</div>
+        <div>
+          <div class="t-name">Cláudia M.</div>
+          <div class="t-meta">44 anos · Belo Horizonte</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="goTo('s-form')">
+    Quero minha vaga →
+  </button>
+  <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:12px;">Aplicação gratuita · sem compromisso</p>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 10 — FORMULÁRIO
+══════════════════════════════════════ -->
+<div class="screen" id="s-form">
+  <div class="form-wrap">
+    <div class="form-header">
+      <div class="pill pill-accent" style="margin-bottom:16px;">última etapa</div>
+      <h2>Sua vaga na mentoria</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:16px;">
+        A mentoria é <strong>100% individual</strong> — por isso aceito pouquíssimas alunas.
+        Preencha abaixo e entrarei em contato em até 24h.
+      </p>
+    </div>
+
+    <!-- Indicador de vagas -->
+    <div class="spots-indicator">
+      <div class="spots-bar">
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot filled"></div>
+        <div class="spot"></div>
+        <div class="spot"></div>
+      </div>
+      <span>8 de 10 vagas preenchidas</span>
+    </div>
+
+    <form id="apply-form" name="aplicacao-mentoria" data-netlify="true" netlify-honeypot="bot-field" onsubmit="submitForm(event)">
+      <input type="hidden" name="form-name" value="aplicacao-mentoria" />
+      <input type="hidden" name="perfil" id="f-perfil" value="" />
+      <input type="hidden" name="pontuacao" id="f-pontuacao" value="" />
+      <p style="display:none;"><label>Não preencha: <input name="bot-field" /></label></p>
+
+      <div class="form-group">
+        <label>Seu nome completo</label>
+        <input type="text" id="f-nome" name="nome" placeholder="Como posso te chamar?" required />
+      </div>
+      <div class="form-group">
+        <label>WhatsApp com DDD</label>
+        <input type="tel" id="f-whats" name="whatsapp" placeholder="(11) 99999-9999" required />
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="f-email" name="email" placeholder="seu@email.com" required />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">
+        Enviar minha aplicação ✦
+      </button>
+    </form>
+
+    <div class="guarantee-text">
+      Seus dados são confidenciais. Zero spam.
+    </div>
+    <p class="form-note">
+      Ao enviar, você confirma que é maior de 18 anos e aceita ser contatada pela equipe @biafaceyoga para avaliar sua vaga.
+    </p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 11 — OBRIGADA
+══════════════════════════════════════ -->
+<div class="screen" id="s-obrigada">
+  <div class="check-icon">✦</div>
+  <div class="pill pill-green">aplicação recebida</div>
+  <h2>Sua aplicação chegou!</h2>
+  <p class="lead">
+    Analisei seu diagnóstico e entro em contato pelo WhatsApp em até <strong>24 horas</strong>.
+    Fique de olho.
+  </p>
+
+  <div class="next-steps">
+    <div class="next-step">
+      <div class="ns-num">1</div>
+      <div class="ns-text">Verifique seu WhatsApp e e-mail — vou confirmar o recebimento da sua aplicação.</div>
+    </div>
+    <div class="next-step">
+      <div class="ns-num">2</div>
+      <div class="ns-text">Farei uma análise cuidadosa do seu perfil antes de entrar em contato.</div>
+    </div>
+    <div class="next-step">
+      <div class="ns-num">3</div>
+      <div class="ns-text">Se houver compatibilidade, agendaremos uma conversa para entender seus objetivos.</div>
+    </div>
+  </div>
+
+  <a href="https://instagram.com/biafaceyoga" target="_blank" class="btn btn-primary">
+    Seguir @biafaceyoga no Instagram
+  </a>
+  <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-top:16px;">
+    Enquanto aguarda, explore os conteúdos do perfil ✦
+  </p>
+</div>
+
+<div class="footer">@biafaceyoga · método reconexão facial</div>
+
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+  const SUPA_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5MDIyNzIsImV4cCI6MjA2MDQ3ODI3Mn0.aCFMNypZRLNBJHLDHFLoCt49ByPtBJ9taGbGKiS_bYU';
+  const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-form','s-obrigada'];
+  let scores = {1:0,2:0,3:0,4:0,5:0};
+  let photoSrc = '';
+  let currentScreen = 's-hero';
+
+  // Perfis baseados em pontuação
+  const PROFILES = {
+    high: {
+      badge: 'Tensão Crônica Acumulada',
+      title: 'Seu corpo está gritando por atenção',
+      lead: 'Os padrões que identifiquei mostram uma tensão que se instalou há algum tempo — maxilar, respiração, postura. A boa notícia: é reversível com a abordagem certa.',
+      cards: [
+        { title: 'Padrão identificado', body: 'Tensão miofascial e bruxismo noturno como resposta ao estresse acumulado' },
+        { title: 'Impacto no rosto', body: 'Descida de contorno, inchaço facial, expressão de cansaço mesmo descansada' },
+        { title: 'Prioridade', body: 'Trabalho de liberação do masseter, fáscia cervical e reeducação respiratória' }
+      ],
+      transform: 'Com acompanhamento individual, mulheres com seu perfil relatam sentir o rosto mais leve nas primeiras 3 semanas — seguido de melhora progressiva no sono, na energia e no contorno facial nos 2-3 meses seguintes.'
+    },
+    mid: {
+      badge: 'Desconexão Corpo-Rosto',
+      title: 'Você se adaptou à tensão — mas ela está lá',
+      lead: 'Você funciona bem, mas tem sinais de que seu corpo aprendeu a "conviver" com padrões que drenam energia sem que você perceba. Está na hora de reconectar.',
+      cards: [
+        { title: 'Padrão identificado', body: 'Tensão crônica leve no pescoço, respiração parcial e início de perda de tônus' },
+        { title: 'Impacto no rosto', body: 'Falta de definição, olhar cansado, expressão menos viva do que você se sente' },
+        { title: 'Prioridade', body: 'Ativação muscular, consciência postural e técnicas de drenagem natural' }
+      ],
+      transform: 'Mulheres com seu perfil costumam ter resultados rápidos — porque o corpo ainda tem muito potencial de resposta. Em 6 a 8 semanas de prática orientada, a diferença é notável no espelho e na energia do dia a dia.'
+    },
+    low: {
+      badge: 'Pronta para Aprofundar',
+      title: 'Você já tem consciência corporal — e pode ir muito mais fundo',
+      lead: 'Seus hábitos mostram que você cuida de si. Agora é o momento de ir além da superfície e trabalhar os padrões mais sutis que definem a vitalidade a longo prazo.',
+      cards: [
+        { title: 'Padrão identificado', body: 'Base sólida — tensões pontuais que precisam de refinamento e precisão técnica' },
+        { title: 'Potencial', body: 'Com metodologia específica, você pode alcançar resultados que surpreendem mesmo quem já está bem' },
+        { title: 'Prioridade', body: 'Aprofundamento em fáscia, liberação miofascial avançada e integração sistêmica' }
+      ],
+      transform: 'Sua consciência corporal é um diferencial enorme. Com acompanhamento individual e técnicas avançadas, você pode alcançar uma qualidade de presença e vitalidade que vai além do que qualquer prática genérica oferece.'
+    }
+  };
+
+  function goTo(id) {
+    const cur = document.getElementById(currentScreen);
+    const nxt = document.getElementById(id);
+    if (cur) cur.classList.remove('active');
+    nxt.classList.add('active');
+    currentScreen = id;
+    updateProgress(id);
+    window.scrollTo(0,0);
+  }
+
+  function updateProgress(id) {
+    const idx = SCREENS.indexOf(id);
+    const pct = idx < 0 ? 0 : Math.round((idx / (SCREENS.length - 1)) * 100);
+    document.getElementById('prog-bar').style.width = pct + '%';
+  }
+
+  function handlePhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      photoSrc = ev.target.result;
+      const prev = document.getElementById('preview');
+      prev.src = photoSrc;
+      prev.style.display = 'block';
+      document.getElementById('upload-placeholder').style.display = 'none';
+      document.getElementById('btn-foto').style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function skipPhoto() {
+    photoSrc = '';
+    goTo('s-analise');
+    startAnalise();
+  }
+
+  function startAnalise() {
+    // Mostrar foto na tela de análise
+    const img = document.getElementById('analysis-img');
+    if (photoSrc) {
+      img.src = photoSrc;
+      img.parentElement.style.display = 'block';
+    } else {
+      img.parentElement.style.display = 'none';
+    }
+
+    // Animar steps um a um
+    const steps = [1,2,3,4,5];
+    steps.forEach((n, i) => {
+      setTimeout(() => {
+        document.getElementById('step-' + n).classList.add('done');
+        if (n === 5) {
+          setTimeout(() => goTo('s-q1'), 700);
+        }
+      }, 900 + i * 700);
+    });
+  }
+
+  function selectOpt(el, qNum, score) {
+    // Marca selecionado
+    el.closest('.opts').querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+    scores[qNum] = score;
+
+    // Avança automaticamente após breve delay
+    setTimeout(() => {
+      const map = {1:'s-q2', 2:'s-q3', 3:'s-q4', 4:'s-q5', 5:'s-resultado'};
+      if (qNum === 5) buildResult();
+      goTo(map[qNum]);
+    }, 420);
+  }
+
+  function buildResult() {
+    const total = Object.values(scores).reduce((a,b) => a+b, 0);
+    let p;
+    if (total >= 12) p = PROFILES.high;
+    else if (total >= 8) p = PROFILES.mid;
+    else p = PROFILES.low;
+
+    // Foto no resultado
+    const ri = document.getElementById('result-img');
+    if (photoSrc) { ri.src = photoSrc; } else { ri.parentElement.style.display = 'none'; }
+
+    document.getElementById('result-badge').textContent = p.badge;
+    document.getElementById('result-title').textContent = p.title;
+    document.getElementById('result-lead').textContent = p.lead;
+    document.getElementById('transform-text').textContent = p.transform;
+
+    const cardsEl = document.getElementById('result-cards');
+    cardsEl.innerHTML = p.cards.map(c =>
+      `<div class="result-card"><div class="rc-title">${c.title}</div><div class="rc-body">${c.body}</div></div>`
+    ).join('');
+  }
+
+  async function submitForm(e) {
+    e.preventDefault();
+    const nome  = document.getElementById('f-nome').value.trim();
+    const whats = document.getElementById('f-whats').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const total = Object.values(scores).reduce((a,b) => a+b, 0);
+    const perfil = total >= 12 ? 'Tensão Crônica Acumulada' : total >= 8 ? 'Desconexão Corpo-Rosto' : 'Pronta para Aprofundar';
+    const pontuacao = `Total: ${total}/15 | Q1:${scores[1]} Q2:${scores[2]} Q3:${scores[3]} Q4:${scores[4]} Q5:${scores[5]}`;
+
+    document.getElementById('f-perfil').value = perfil;
+    document.getElementById('f-pontuacao').value = pontuacao;
+
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    // Salva no Supabase
+    try {
+      await supa.from('leads').insert({
+        nome,
+        whatsapp: whats,
+        email,
+        perfil,
+        pontuacao,
+        respostas: scores
+      });
+    } catch(err) {
+      console.error('Supabase error:', err);
+    }
+
+    // Envia para Netlify Forms
+    const formData = new FormData(e.target);
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString()
+    })
+    .then(() => goTo('s-obrigada'))
+    .catch(() => goTo('s-obrigada'));
+  }
+
+  // Init
+  updateProgress('s-hero');
+</script>
+
+</body>
+</html>
