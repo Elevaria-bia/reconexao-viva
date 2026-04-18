@@ -618,6 +618,7 @@
 const SUPA_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWn3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+window._supa = supa; // exposto para o modulo de push notifications
 let currentUser = null;
 
 const RITUALS = [
@@ -1661,6 +1662,9 @@ function completeRitual(id) {
   if (!state.ritualsDone[k].includes(id)) state.ritualsDone[k].push(id);
   saveState();
   syncRitualToCloud(id);
+  // Pede permissao de notificacao apos o 1o ritual completo (momento de engajamento)
+  const totalDone = Object.values(state.ritualsDone).reduce((acc, arr) => acc + arr.length, 0);
+  if (totalDone === 1 && window.askPushPermission) window.askPushPermission();
 }
 
 function buildTimerHTML(seconds) {
@@ -2314,8 +2318,85 @@ function openPhaseForPhotos(e) {
   openPhaseDetail(currentPhaseNum - 1);
 }
 
+// ── SERVICE WORKER + PUSH NOTIFICATIONS ─────────────────────
+
+const VAPID_PUBLIC_KEY = 'BCE4L-gs7JqoDaU1pbEIRDqO1sBfPW_c_UMups0lWqRy_FUXOmtwh9o8WQHg0helo0HPVZbCm7MFFpr80MMCOAE';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function savePushSubscription(subscription) {
+  if (!window._supa) return;
+  const { data: { user } } = await window._supa.auth.getUser();
+  if (!user) return;
+  const subJson = subscription.toJSON();
+  await window._supa.from('push_subscriptions').upsert(
+    { user_id: user.id, subscription: subJson },
+    { onConflict: 'user_id' }
+  );
+}
+
+async function setupPushNotifications(swReg) {
+  if (!('PushManager' in window)) return;
+
+  try {
+    // Verificar permissao atual
+    let permission = Notification.permission;
+
+    // Se ainda nao perguntamos, aguardar o usuario fazer a primeira acao no app
+    if (permission === 'default') return; // sera pedido no momento certo via askPushPermission()
+    if (permission === 'denied') return;
+
+    // Permissao ja concedida — garantir subscription ativa
+    const existing = await swReg.pushManager.getSubscription();
+    if (existing) {
+      await savePushSubscription(existing);
+      return;
+    }
+
+    const sub = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    await savePushSubscription(sub);
+  } catch (err) {
+    console.warn('Push setup error:', err);
+  }
+}
+
+// Chamado na primeira vez que usuario completa um ritual (momento engajado)
+window.askPushPermission = async function() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (Notification.permission !== 'default') return;
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+
+    const swReg = await navigator.serviceWorker.ready;
+    const sub = await swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    await savePushSubscription(sub);
+  } catch (err) {
+    console.warn('Push permission error:', err);
+  }
+};
+
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+  window.addEventListener('load', async () => {
+    try {
+      const swReg = await navigator.serviceWorker.register('/sw.js');
+      await setupPushNotifications(swReg);
+    } catch (e) {
+      console.warn('SW register error:', e);
+    }
+  });
 }
 </script>
 </body>

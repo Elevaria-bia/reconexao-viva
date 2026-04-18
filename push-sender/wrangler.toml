@@ -1,0 +1,24 @@
+name = "elevaria-push-sender"
+main = "index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Crons no horario de Brasilia (UTC-3)
+# 7h  BRT = 10h UTC
+# 11h BRT = 14h UTC  (lembrete agua manha)
+# 14h BRT = 17h UTC
+# 19h BRT = 22h UTC  (lembrete agua tarde)
+# 21h BRT = 00h UTC  (dia seguinte)
+[triggers]
+crons = [
+  "0 10 * * *",
+  "0 14 * * *",
+  "0 17 * * *",
+  "0 22 * * *",
+  "0 0 * * *"
+]
+
+[vars]
+VAPID_SUBJECT  = "mailto:fabianagrigorio.tech@gmail.com"
+VAPID_PUBLIC_KEY = "BCE4L-gs7JqoDaU1pbEIRDqO1sBfPW_c_UMups0lWqRy_FUXOmtwh9o8WQHg0helo0HPVZbCm7MFFpr80MMCOAE"
+SUPABASE_URL   = "https://ihprxmuzqbhysohcmcqy.supabase.co"
