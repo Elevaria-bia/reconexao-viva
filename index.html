@@ -418,6 +418,20 @@
   </div>
 </div>
 
+  <!-- Tela de aguardando aprovação -->
+  <div id="v-pending" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.18) 0%,transparent 70%)">
+    <div style="width:72px;height:72px;border-radius:50%;background:rgba(61,90,58,0.15);border:1.5px solid rgba(61,90,58,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:28px">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:26px;margin-bottom:12px">Quase lá</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;max-width:280px;margin-bottom:32px">Seu cadastro foi recebido. A mentora vai revisar e liberar seu acesso em breve.</div>
+    <div style="background:rgba(61,90,58,0.1);border:1px solid rgba(61,90,58,0.25);border-radius:16px;padding:18px 22px;max-width:280px;width:100%;margin-bottom:28px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(61,90,58,0.8);margin-bottom:6px">Próximo passo</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6">Quando aprovada, você receberá acesso completo ao método. Volte aqui e faça login.</div>
+    </div>
+    <button onclick="doPendingLogout()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer">Sair</button>
+  </div>
+
   <!-- Tela de perfil completo — aparece após cadastro -->
   <div id="v-profile-setup" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%)">
     <div style="font-family:'Playfair Display',serif;font-size:24px;text-align:center;margin-bottom:8px" id="ps-welcome">Bem-vinda!</div>
@@ -1199,6 +1213,12 @@ async function onAuthSuccess(user, profileData) {
     state.name = profile.name;
     state.startDate = profile.start_date || new Date().toISOString();
     if (profile.weight) state.weight = profile.weight;
+    /* Verificar aprovação */
+    if (profile.approved === false) {
+      hideAuthScreen();
+      document.getElementById('v-pending').style.display = 'flex';
+      return;
+    }
   } else if (profileData) {
     state.name = profileData.name;
   }
@@ -1217,6 +1237,14 @@ async function onAuthSuccess(user, profileData) {
   saveState();
   hideAuthScreen();
   initApp();
+}
+
+async function doPendingLogout() {
+  await supa.auth.signOut();
+  document.getElementById('v-pending').style.display = 'none';
+  document.getElementById('v-auth').style.display = 'flex';
+  ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  document.getElementById('v-onboard').style.display = 'none';
 }
 
 function hideAuthScreen() {
@@ -1253,7 +1281,8 @@ async function completeProfileSetup() {
     }
   }
   document.getElementById('v-profile-setup').style.display = 'none';
-  initApp();
+  /* Novo usuário — aguardar aprovação da mentora */
+  document.getElementById('v-pending').style.display = 'flex';
 }
 
 async function syncRitualToCloud(ritualId) {
