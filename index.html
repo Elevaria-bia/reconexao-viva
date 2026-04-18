@@ -213,33 +213,40 @@
     .cam-instr-icon { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-weight: 600; }
     .cam-instr-text { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px; }
 
-    /* JORNADA PATH */
-    .path-journey { position: relative; padding: 8px 0 20px; }
-    .path-row { display: flex; margin-bottom: 0; }
-    .path-row.p-left  { justify-content: flex-start; padding-left: 14px; }
-    .path-row.p-right { justify-content: flex-end; padding-right: 14px; }
-    .path-node { display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 152px; -webkit-tap-highlight-color: transparent; }
-    .path-node.locked { cursor: default; }
-    .path-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.15s; flex-shrink: 0; }
-    .path-circle:active { transform: scale(0.93); }
-    .path-circle.completed { background: var(--green); color: white; box-shadow: 0 6px 18px rgba(61,90,58,0.45); }
-    .path-circle.current  { background: var(--accent); color: white; box-shadow: 0 6px 18px rgba(232,123,106,0.4); animation: path-pulse 2.2s ease-in-out infinite; }
-    .path-circle.locked   { background: var(--card2); border: 2px solid var(--border); color: var(--muted); }
-    .path-gold-dot { position: absolute; top: 1px; right: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); border: 2.5px solid var(--bg); }
-    .path-lock-dot { position: absolute; bottom: 1px; right: 1px; width: 18px; height: 18px; border-radius: 50%; background: var(--card2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; }
-    @keyframes path-pulse { 0%,100%{box-shadow:0 6px 18px rgba(232,123,106,0.4),0 0 0 0 rgba(232,123,106,0.3)} 50%{box-shadow:0 6px 18px rgba(232,123,106,0.4),0 0 0 14px rgba(232,123,106,0)} }
-    .path-node-name   { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-top: 10px; text-align: center; line-height: 1.25; }
-    .path-node-period { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; text-align: center; }
-    .path-exercise-chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 8px; }
-    .path-ex-chip { font-size: 10px; padding: 3px 9px; border-radius: 100px; border: 1px solid var(--border); background: var(--faint); color: rgba(255,255,255,0.55); letter-spacing: 0.03em; line-height: 1.4; }
-    .path-ex-chip.done { border-color: rgba(61,90,58,0.35); color: rgba(255,255,255,0.7); }
-    .path-node-badge  { display: inline-block; margin-top: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; padding: 3px 10px; border-radius: 100px; }
-    .path-node-badge.completed { background: var(--green-lt); color: var(--green); }
-    .path-node-badge.current   { background: var(--acc-lt);  color: var(--accent); }
-    .path-node-badge.locked    { background: var(--faint);   color: var(--muted);  }
-    .path-conn { height: 52px; position: relative; overflow: visible; }
-    .path-conn svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; }
-    .path-timeline { display: none; }
+    /* JORNADA — FLOR */
+    .flower-wrap { display: flex; justify-content: center; padding: 12px 0 4px; }
+    .flower-svg { width: 100%; max-width: 290px; height: auto; -webkit-tap-highlight-color: transparent; }
+    .flower-petal { cursor: pointer; transition: opacity 0.2s; }
+    .flower-petal:active { opacity: 0.75; }
+    @keyframes petal-glow {
+      0%,100% { filter: drop-shadow(0 0 5px rgba(232,123,106,0.45)); }
+      50%      { filter: drop-shadow(0 0 14px rgba(232,123,106,0.8)); }
+    }
+    @keyframes center-breathe {
+      0%,100% { r: 34px; }
+      50%      { r: 37px; }
+    }
+    /* Cards de fase abaixo da flor */
+    .phase-card-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+    .pcard { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color 0.2s; }
+    .pcard.current  { border-color: rgba(232,123,106,0.35); }
+    .pcard.completed{ border-color: rgba(61,90,58,0.35); }
+    .pcard:active   { opacity: 0.8; }
+    .pcard-dot { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: white; }
+    .pcard-dot.completed { background: var(--green); box-shadow: 0 4px 12px rgba(61,90,58,0.4); }
+    .pcard-dot.current   { background: var(--accent); box-shadow: 0 4px 12px rgba(232,123,106,0.35); }
+    .pcard-dot.locked    { background: var(--card2); color: var(--muted); border: 1.5px solid var(--border); }
+    .pcard-body  { flex: 1; min-width: 0; }
+    .pcard-name  { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.2; }
+    .pcard-name.locked { color: var(--muted); }
+    .pcard-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .pcard-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+    .pcard-chip  { font-size: 10px; padding: 2px 8px; border-radius: 100px; border: 1px solid var(--border); color: rgba(255,255,255,0.5); }
+    .pcard-arrow { color: var(--muted); font-size: 20px; flex-shrink: 0; }
+    .pcard-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; padding: 2px 8px; border-radius: 100px; flex-shrink: 0; }
+    .pcard-badge.completed { background: var(--green-lt); color: var(--green); }
+    .pcard-badge.current   { background: var(--acc-lt);  color: var(--accent); }
+    .pcard-badge.locked    { background: var(--faint);   color: var(--muted);  }
 
     .gauge-outer { display: flex; align-items: center; justify-content: center; }
     .gauge-rel { position: relative; }
@@ -564,7 +571,8 @@
 
     <!-- Seção: Trilha -->
     <div id="jorn-sec-trilha">
-      <div id="jornada-path"></div>
+      <div class="flower-wrap" id="jornada-path"></div>
+      <div class="phase-card-list" id="phase-card-list"></div>
     </div>
 
     <!-- Seção: Fotos -->
@@ -2525,63 +2533,81 @@ function getCurrentPhaseNum() {
   return 1;
 }
 
-function renderJornadaPath() {
-  const positions = ['p-left','p-right','p-left','p-right','p-left','p-right'];
-  const CIRCLE_ICONS = {
-    completed: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
-    current:   '<div style="width:10px;height:10px;border-radius:50%;background:white;opacity:0.9"></div>',
-    locked:    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
-  };
+function renderFlowerSVG() {
+  const NUMS = ['I','II','III','IV','V','VI'];
+  const ANGLES = [0, 60, 120, 180, 240, 300];
+  const PETAL = 'M 0,2 C -24,-28 -20,-72 0,-90 C 20,-72 24,-28 0,2';
+  const doneCount = LEVELS.filter(function(_,i){ return getPhaseStatus(i)==='completed'; }).length;
+  const currentIdx = LEVELS.findIndex(function(_,i){ return getPhaseStatus(i)==='current'; });
+  const currentName = currentIdx >= 0 ? LEVELS[currentIdx].name : 'Presença';
 
-  let html = '<div class="path-journey">';
-
+  let petalsHTML = '';
   LEVELS.forEach(function(lv, idx) {
-    const status    = getPhaseStatus(idx);
-    const pos       = positions[idx];
-    const isLast    = idx === LEVELS.length - 1;
-    const handler   = status === 'locked' ? 'showLockedMsg(' + idx + ')' : 'openPhaseDetail(' + idx + ')';
-    const badgeTxt  = status === 'completed' ? 'Concluida'
-                    : status === 'current'   ? 'Em progresso'
-                    : 'Dia ' + PHASE_UNLOCK_DAYS[idx];
+    const status  = getPhaseStatus(idx);
+    const angle   = ANGLES[idx];
+    const rad     = angle * Math.PI / 180;
+    const tx      = 150 + Math.sin(rad) * 54;
+    const ty      = 150 - Math.cos(rad) * 54 + 5;
+    const handler = status === 'locked' ? 'showLockedMsg('+idx+')' : 'openPhaseDetail('+idx+')';
 
-    const goldDot = status === 'completed'
-      ? '<div class="path-gold-dot"></div>' : '';
+    const fill   = status === 'completed' ? 'url(#pgrad-done)'
+                 : status === 'current'   ? 'url(#pgrad-cur)'
+                 : 'rgba(255,255,255,0.04)';
+    const stroke = status === 'completed' ? 'rgba(61,90,58,0.5)'
+                 : status === 'current'   ? 'rgba(232,123,106,0.55)'
+                 : 'rgba(255,255,255,0.09)';
+    const textFill = status === 'locked' ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.92)';
+    const glowStyle= status === 'current' ? 'animation:petal-glow 2.4s ease-in-out infinite;' : '';
 
-    const icon = CIRCLE_ICONS[status] || '';
-
-    // Exercise chips from lv.focus
-    const chipsDone = (status !== 'locked');
-    const chipsHtml = (lv.focus || []).map(function(ex) {
-      return '<span class="path-ex-chip' + (chipsDone ? ' done' : '') + '">' + ex + '</span>';
-    }).join('');
-
-    html += '<div class="path-row ' + pos + '">'
-          + '<div class="path-node ' + status + '" onclick="' + handler + '">'
-          + '<div class="path-circle ' + status + '">' + icon + goldDot + '</div>'
-          + '<div class="path-node-name">' + lv.name + '</div>'
-          + '<div class="path-node-period">' + lv.period + '</div>'
-          + '<div class="path-exercise-chips">' + chipsHtml + '</div>'
-          + '<span class="path-node-badge ' + status + '">' + badgeTxt + '</span>'
-          + '</div></div>';
-
-    if (!isLast) {
-      const nxStatus = getPhaseStatus(idx + 1);
-      const done     = (nxStatus === 'completed' || nxStatus === 'current');
-      const stroke   = done ? 'rgba(61,90,58,0.65)' : 'rgba(255,255,255,0.08)';
-      const dash     = done ? '' : 'stroke-dasharray="6 5"';
-      const fromLeft = (pos === 'p-left');
-      const x1 = fromLeft ? 22 : 78;
-      const x2 = fromLeft ? 78 : 22;
-      const pathD = 'M ' + x1 + ',0 C ' + x1 + ',26 ' + x2 + ',26 ' + x2 + ',52';
-      html += '<div class="path-conn">'
-            + '<svg viewBox="0 0 100 52" preserveAspectRatio="none">'
-            + '<path d="' + pathD + '" stroke="' + stroke + '" stroke-width="2.5" ' + dash + ' fill="none" stroke-linecap="round"/>'
-            + '</svg></div>';
-    }
+    petalsHTML +=
+      '<g class="flower-petal" onclick="' + handler + '" transform="rotate(' + angle + ',150,150)" style="' + glowStyle + '">'
+    + '<path d="' + PETAL + '" transform="translate(150,150)" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.2"/>'
+    + '</g>'
+    + '<text x="' + tx + '" y="' + ty + '" text-anchor="middle" fill="' + textFill + '" font-size="13" font-weight="700" font-family="\'Playfair Display\',serif" pointer-events="none" style="user-select:none">' + NUMS[idx] + '</text>';
   });
 
-  html += '</div>';
-  return html;
+  return '<svg viewBox="0 0 300 300" class="flower-svg" xmlns="http://www.w3.org/2000/svg">'
+    + '<defs>'
+    + '<radialGradient id="pgrad-done" cx="50%" cy="75%" r="80%">'
+    + '<stop offset="0%" stop-color="#5c8f56"/><stop offset="100%" stop-color="#2a4228"/>'
+    + '</radialGradient>'
+    + '<radialGradient id="pgrad-cur" cx="50%" cy="75%" r="80%">'
+    + '<stop offset="0%" stop-color="#f0a898"/><stop offset="100%" stop-color="#c04e3c"/>'
+    + '</radialGradient>'
+    + '</defs>'
+    + '<circle cx="150" cy="150" r="130" fill="none" stroke="rgba(196,168,122,0.07)" stroke-width="1.5"/>'
+    + '<circle cx="150" cy="150" r="100" fill="none" stroke="rgba(196,168,122,0.04)" stroke-width="1"/>'
+    + petalsHTML
+    + '<circle cx="150" cy="150" r="36" fill="#0e0e0e" stroke="rgba(196,168,122,0.22)" stroke-width="1.5"/>'
+    + '<text x="150" y="145" text-anchor="middle" fill="rgba(196,168,122,0.95)" font-size="20" font-weight="700" font-family="\'Playfair Display\',serif">' + doneCount + '</text>'
+    + '<text x="150" y="161" text-anchor="middle" fill="rgba(255,255,255,0.28)" font-size="8.5" letter-spacing="0.12em" font-family="sans-serif">FASES</text>'
+    + '</svg>';
+}
+
+function renderPhaseCards() {
+  const badgeTxt = { completed:'Concluída', current:'Em progresso', locked:'' };
+  return LEVELS.map(function(lv, idx) {
+    const status  = getPhaseStatus(idx);
+    const handler = status === 'locked' ? 'showLockedMsg('+idx+')' : 'openPhaseDetail('+idx+')';
+    const chips   = status !== 'locked'
+      ? '<div class="pcard-chips">' + (lv.focus||[]).map(function(f){ return '<span class="pcard-chip">'+f+'</span>'; }).join('') + '</div>'
+      : '';
+    const sub     = status === 'locked' ? 'Disponível no Dia ' + PHASE_UNLOCK_DAYS[idx] : lv.period;
+    const badge   = status !== 'locked'
+      ? '<span class="pcard-badge ' + status + '">' + badgeTxt[status] + '</span>'
+      : '<span class="pcard-badge locked">Bloqueada</span>';
+
+    return '<div class="pcard ' + status + '" onclick="' + handler + '">'
+      + '<div class="pcard-dot ' + status + '">' + lv.num + '</div>'
+      + '<div class="pcard-body">'
+      + '<div class="pcard-name' + (status==='locked'?' locked':'') + '">' + lv.name + '</div>'
+      + '<div class="pcard-sub">' + sub + '</div>'
+      + chips
+      + '</div>'
+      + badge
+      + (status!=='locked'?'<div class="pcard-arrow">›</div>':'')
+      + '</div>';
+  }).join('');
 }
 
 let activeJornadaTab = 'trilha';
@@ -2597,8 +2623,10 @@ function switchJornadaTab(tab) {
 }
 
 function renderEvolucao() {
-  // render Duolingo-style path
-  document.getElementById('jornada-path').innerHTML = renderJornadaPath();
+  // Flor mandala
+  document.getElementById('jornada-path').innerHTML = renderFlowerSVG();
+  // Cards de fase
+  document.getElementById('phase-card-list').innerHTML = renderPhaseCards();
   // Garantir que sub-aba correta está visível
   switchJornadaTab(activeJornadaTab);
 
