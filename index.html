@@ -158,9 +158,13 @@
 
     /* JORNADA (Evolução) */
     #v-evolucao { padding: calc(var(--safe-t) + 48px) 24px 100px; }
-    .evol-h { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 24px; }
+    .evol-h { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 16px; }
     .e-card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); padding: 22px; margin-bottom: 14px; }
     .e-card-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 18px; }
+    /* Sub-abas da Jornada */
+    .jorn-tabs { display: flex; gap: 8px; margin-bottom: 20px; background: var(--card); border-radius: 14px; padding: 5px; border: 1px solid var(--border); }
+    .jorn-tab { flex: 1; padding: 10px; border: none; border-radius: 10px; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .jorn-tab.active { background: var(--green); color: white; font-weight: 600; }
 
     /* COMPARAÇÃO FOTOGRÁFICA */
     .photo-type-selector { display: flex; gap: 8px; margin-bottom: 20px; }
@@ -552,25 +556,34 @@
   <div id="v-evolucao" class="view">
     <h2 class="evol-h">Sua Jornada</h2>
 
-    <div class="e-card" style="padding:16px 0 8px">
-      <div class="e-card-lbl" style="padding:0 22px">Caminho das Fases</div>
+    <!-- Sub-abas da Jornada -->
+    <div class="jorn-tabs">
+      <button id="jt-trilha" class="jorn-tab active" onclick="switchJornadaTab('trilha')">Trilha</button>
+      <button id="jt-fotos"  class="jorn-tab"        onclick="switchJornadaTab('fotos')">Fotos</button>
+    </div>
+
+    <!-- Seção: Trilha -->
+    <div id="jorn-sec-trilha">
       <div id="jornada-path"></div>
     </div>
 
-    <div class="e-card">
-      <div class="e-card-lbl">Comparação Fotográfica</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Selecione um tipo de foto para visualizar sua evolução da Fase I até agora.</div>
-      <div class="photo-type-selector" id="photo-type-selector"></div>
-      <div class="photo-comparison" id="photo-comparison"></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:14px;text-align:center;padding:10px 0;border-top:1px solid var(--border)">
-        Quer adicionar fotos? <a href="#" onclick="openPhaseForPhotos(event)" style="color:var(--green);text-decoration:none;font-weight:600">Abra uma Fase</a>
+    <!-- Seção: Fotos -->
+    <div id="jorn-sec-fotos" style="display:none">
+      <div class="e-card">
+        <div class="e-card-lbl">Comparação — Fase I vs Agora</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Selecione o ângulo para comparar sua evolução.</div>
+        <div class="photo-type-selector" id="photo-type-selector"></div>
+        <div class="photo-comparison" id="photo-comparison"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:14px;text-align:center;padding:10px 0;border-top:1px solid var(--border)">
+          Quer adicionar fotos? <a href="#" onclick="openPhaseForPhotos(event)" style="color:var(--green);text-decoration:none;font-weight:600">Abra uma Fase</a>
+        </div>
       </div>
-    </div>
 
-    <div class="e-card">
-      <div class="e-card-lbl">Galeria de Fases</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Toque em uma miniatura para selecioná-la. Clique no tipo de foto para expandir a vista.</div>
-      <div class="timeline-phases" id="timeline-phases"></div>
+      <div class="e-card">
+        <div class="e-card-lbl">Galeria por Fase</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Toque em uma miniatura para selecioná-la.</div>
+        <div class="timeline-phases" id="timeline-phases"></div>
+      </div>
     </div>
   </div>
 
@@ -2571,9 +2584,23 @@ function renderJornadaPath() {
   return html;
 }
 
+let activeJornadaTab = 'trilha';
+
+function switchJornadaTab(tab) {
+  activeJornadaTab = tab;
+  ['trilha','fotos'].forEach(t => {
+    const btn = document.getElementById('jt-' + t);
+    const sec = document.getElementById('jorn-sec-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+    if (sec) sec.style.display = t === tab ? '' : 'none';
+  });
+}
+
 function renderEvolucao() {
   // render Duolingo-style path
   document.getElementById('jornada-path').innerHTML = renderJornadaPath();
+  // Garantir que sub-aba correta está visível
+  switchJornadaTab(activeJornadaTab);
 
   const firstPhaseWithPhoto = getFirstPhaseWithPhoto();
   const currentPhaseNum = getCurrentPhaseNum();
