@@ -833,6 +833,184 @@ const RITUALS = [
   }
 ];
 
+/* ─── STEPS REUTILIZÁVEIS ───────────────────────────────────────────────── */
+const S = {
+  verificacao: {
+    name: 'Verificação Corporal',
+    body: `<p>Antes de se levantar, <strong>mantenha os olhos fechados</strong> por um momento.</p>
+<div class="instr">Percorra mentalmente o corpo de cima a baixo. Onde há tensão? Mandíbula, nuca, ombros — apenas observe, sem julgamento.</div>
+<p class="tip">60 segundos de varredura corporal matinal reduzem o cortisol nas primeiras horas do dia.</p>`
+  },
+  lingua: {
+    name: 'Língua no Palato', timer: 60,
+    body: `<p>Com a boca fechada, <strong>posicione a língua completamente no palato</strong>. Respire pelo nariz.</p>
+<div class="instr">Ponta da língua logo atrás dos incisivos superiores. O corpo inteiro da língua toca o palato suavemente.</div>
+<p>Perceba como os músculos ao redor dos olhos, bochechas e têmporas relaxam em cadeia.</p>
+<p class="tip">A língua no palato sustenta a arcada superior e previne o afundamento facial. É o alicerce de tudo.</p>`
+  },
+  respiraDiafragmatica: {
+    name: 'Respiração Diafragmática',
+    body: `<p>Uma mão no peito, outra no abdômen. <strong>Somente o abdômen se move.</strong></p>
+<div class="instr">Inspire: 4 tempos — abdômen expande.<br/>Segure: 2 tempos.<br/>Expire: 6 tempos — abdômen retorna.<br/>Repita 5 ciclos.</div>
+<p class="tip">A respiração diafragmática é a bomba linfática do corpo. Cada ciclo reduz inchaço facial.</p>`
+  },
+  respiraCoerente: { name: 'Respiração Coerente', breathStep: true, body: '' },
+  occipital: {
+    name: 'Liberação Occipital', timer: 45,
+    body: `<p>Entrelaçe os dedos e apoie-os na <strong>base do crânio</strong> — onde o osso termina.</p>
+<div class="instr">Sem pressionar, apenas apoie o peso natural da cabeça.<br/>Queixo levemente em direção ao peito.<br/>3 respirações profundas, sentindo o espaço se criando na nuca.</div>
+<p class="tip">Os suboccipitais conectam-se à fáscia que se estende até o músculo frontal. Liberar aqui é um lifting não cirúrgico.</p>`
+  },
+  postura: {
+    name: 'Alinhamento Cervical',
+    body: `<p>Calibre sua postura cervical antes de começar o dia.</p>
+<div class="instr">Deslize a cabeça para trás — como fazer uma leve "papada".<br/>Imagine um fio puxando o topo da cabeça ao teto.<br/>Mantenha por 20 segundos, respirando fundo.</div>
+<p class="tip">Cada centímetro de avanço da cabeça adiciona 5kg de carga na coluna e traciona as estruturas faciais para baixo.</p>`
+  },
+  yintang: {
+    name: 'Ponto Yintang',
+    body: `<p>Com o dedo médio, localize o <strong>Yintang</strong> — entre as sobrancelhas, levemente acima da linha.</p>
+<div class="instr">Pressão circular suave por 60 segundos, respirando fundo.<br/>Sinta a dissolução de tensão na testa e ao redor dos olhos.</div>
+<p>Este ponto calma o sistema nervoso e relaxa o músculo glabela — responsável pelas rugas verticais entre as sobrancelhas.</p>`
+  },
+  du20: {
+    name: 'Du 20 — Baihui',
+    body: `<p>Localize o <strong>Du 20</strong>: topo exato do crânio, na intersecção da linha entre orelhas com a linha mediana.</p>
+<div class="instr">Pressione com o dedo médio por 60 segundos.<br/>Ao pressionar, visualize o ponto sendo "levantado" em direção ao teto.</div>
+<p>Du 20 é o ponto de maior yang do corpo — ativa e "levanta" a estrutura facial.</p>`
+  },
+  visualizacao: {
+    name: 'Visualização de Reconexão',
+    body: `<p>Olhos fechados, respire naturalmente.</p>
+<div class="instr">Visualize uma luz suave do centro do peito expandindo para o rosto — suavizando, aquecendo.<br/>Imagine seu rosto na expressão de paz profunda.<br/>Segure por 2 minutos.</div>
+<p class="tip">A visualização ativa os mesmos circuitos neurais do movimento real. É treinamento de presença.</p>`
+  },
+  intencao: {
+    name: 'Intenção do Dia',
+    body: `<p>Com o corpo ativado, defina <strong>uma palavra</strong> para guiar seu dia.</p>
+<div class="instr">Presença, gentileza, fluidez, força, calma, abertura.<br/>Repita mentalmente três vezes tocando suavemente as têmporas com os dedos médios.</div>
+<p>A conexão mente-corpo começa na intenção. O que você cultiva de manhã, você irradia durante o dia inteiro.</p>`
+  },
+  dissolucao: {
+    name: 'Dissolução do Dia',
+    body: `<p>Perceba como o rosto chegou até aqui.</p>
+<div class="instr">Língua no palato, dentes separados, lábios fechados.<br/>Três respirações profundas — na expiração, solte a tensão da mandíbula, testa e olhos.</div>
+<p>Este é o sinal ao sistema nervoso: o dia acabou. É hora de regenerar.</p>`
+  },
+  masseter: {
+    name: 'Relaxamento do Masseter', timer: 90,
+    body: `<p>Localize os <strong>masseteres</strong> na lateral da mandíbula.</p>
+<div class="instr">Três dedos juntos, pressão circular lenta por 30 segundos.<br/>Abra levemente a boca e mova a mandíbula lado a lado, 5 vezes.<br/>Língua no palato, mandíbula caindo pela gravidade.</div>
+<p class="tip">O masseter é o músculo mais poderoso do corpo. Bruxismo crônico aqui envelhece a face visivelmente.</p>`
+  },
+  fascia: {
+    name: 'Liberação da Fáscia Facial', timer: 60,
+    body: `<p>Com os dedos médios, encontre os <strong>pontos de tensão nas bochechas</strong> — abaixo dos zigomáticos.</p>
+<div class="instr">Pressão suave e sustentada — não deslize, apenas segure o ponto.<br/>Aguarde o tecido "ceder".<br/>Mova para a testa: três dedos no centro, afaste em direção às têmporas.</div>
+<p class="tip">A fáscia guarda a história do corpo. Liberar adesões permite que os músculos retornem à posição anatômica natural.</p>`
+  },
+  couro: {
+    name: 'Liberação do Couro Cabeludo', timer: 90,
+    body: `<p>Todas as pontas dos dedos no couro cabeludo — <strong>mova o couro cabeludo, não os dedos.</strong></p>
+<div class="instr">Sinta o tecido se deslocando sobre o crânio.<br/>Três zonas: frontal, temporal, occipital.<br/>Se não houver mobilidade, há tensão acumulada.</div>
+<p class="tip">O músculo frontal — que cria rugas na testa — começa no couro cabeludo. Liberar aqui suaviza as linhas de expressão.</p>`
+  },
+  pontoDia: { name: 'Ponto do Dia', tcmStep: true, body: '' },
+  tensaoEmocional: {
+    name: 'Varredura de Tensão Emocional',
+    body: `<p>Feche os olhos. Três respirações.</p>
+<div class="instr">Qual emoção está presente agora? Apenas observe.<br/>Localize onde ela se manifesta no rosto: testa? queixo? olhos?<br/>Na expiração, solte conscientemente a tensão nessa região.</div>
+<p>Cada emoção ativa padrões musculares específicos no rosto. Nomear e soltar é técnica de rejuvenescimento.</p>`
+  },
+  diario1: {
+    name: 'Diário de Reconexão',
+    body: `<p>Uma pergunta. Resposta curta. <strong>Sem julgamento.</strong></p>
+<div class="instr">O que meu rosto tentou me dizer hoje?</div>
+<p>Esta observação simples treina sua atenção para a linguagem do corpo.</p>`
+  },
+  diario2: {
+    name: 'Diário de Reconexão',
+    body: `<p>Duas perguntas. Resposta curta cada. <strong>Sem julgamento.</strong></p>
+<div class="instr">1. O que meu rosto tentou me dizer hoje?<br/>2. Em qual momento perdi a consciência da tensão?</div>
+<p>Você está começando a identificar padrões. Isso é inteligência corporal em desenvolvimento.</p>`
+  },
+  diario3: {
+    name: 'Diário de Reconexão',
+    body: `<p>Três perguntas. Resposta curta cada. <strong>Sem julgamento.</strong></p>
+<div class="instr">1. O que meu corpo tentou me dizer hoje?<br/>2. Em qual momento perdi a consciência — da postura, da tensão, da respiração?<br/>3. Uma coisa que posso levar para amanhã.</div>
+<p>A tensão facial é frequentemente a linguagem não falada das emoções que não foram processadas.</p>
+<p class="tip">5 minutos de escrita reflexiva antes de dormir melhoram a qualidade do sono e a autoconsciência corporal.</p>`
+  },
+  diario4: {
+    name: 'Diário Expandido',
+    body: `<p>Quatro perguntas. Resposta curta cada. <strong>Com presença.</strong></p>
+<div class="instr">1. O que meu corpo tentou me dizer hoje?<br/>2. Em qual momento perdi a consciência?<br/>3. Uma coisa que posso levar para amanhã.<br/>4. Como eu estava antes da Fase I? E como estou agora?</div>
+<p>Esta quarta pergunta é um testemunho. O que você escreve hoje pode iluminar o caminho de outra mulher.</p>`
+  },
+  intencaoAmanha: {
+    name: 'Intenção de Amanhã', intentionStep: true,
+    body: `<p>Escolha <strong>um foco</strong> para levar para o dia de amanhã.</p>
+<p>Esta escolha ativa sua atenção antecipada — quando você nomeia o que vai observar, seu sistema nervoso treina para isso durante o sono.</p>`
+  },
+  rostoRepouso: {
+    name: 'Rosto de Repouso Consciente',
+    body: `<p>Observe sua expressão de repouso — geralmente cheia de microexpressões.</p>
+<div class="instr">Libere a testa: pele suavemente para cima e para fora.<br/>Libere os olhos: sorriso interno suave, sem contrair os músculos oculares.<br/>Libere a região perioral: lábios levemente separados, mandíbula caindo pela gravidade.<br/>Mantenha por 3 minutos.</div>
+<p class="tip">Com consistência, reestrutura as expressões habituais — a face em repouso se torna a face que você escolhe.</p>`
+  }
+};
+
+/* ─── PROGRESSÃO DOS RITUAIS POR FASE ──────────────────────────────────── */
+const RITUAL_STEPS_BY_PHASE = {
+  manha: [
+    /* Fase I — Presença */
+    [S.verificacao, S.lingua, S.respiraDiafragmatica, S.intencao],
+    /* Fase II — Reconexão */
+    [S.verificacao, S.lingua, S.respiraDiafragmatica, S.occipital, S.postura, S.intencao],
+    /* Fase III — Integração */
+    [S.verificacao, S.lingua, S.respiraCoerente, S.occipital, S.postura, S.intencao],
+    /* Fase IV — Transformação */
+    [S.verificacao, S.lingua, S.respiraCoerente, S.occipital, S.yintang, S.postura, S.intencao],
+    /* Fase V — Maestria */
+    [S.verificacao, S.lingua, S.respiraCoerente, S.occipital, S.yintang, S.du20, S.postura, S.visualizacao, S.intencao],
+    /* Fase VI — Presença Plena */
+    [S.verificacao, S.lingua, S.respiraCoerente, S.occipital, S.yintang, S.du20, S.postura, S.visualizacao, S.rostoRepouso, S.intencao]
+  ],
+  tarde: [
+    /* Fase I */
+    [S.respiraDiafragmatica, S.pontoDia],
+    /* Fase II */
+    [S.respiraCoerente, S.pontoDia],
+    /* Fase III */
+    [S.respiraCoerente, S.pontoDia],
+    /* Fase IV */
+    [S.respiraCoerente, S.yintang, S.pontoDia],
+    /* Fase V */
+    [S.tensaoEmocional, S.respiraCoerente, S.yintang, S.pontoDia],
+    /* Fase VI */
+    [S.tensaoEmocional, S.respiraCoerente, S.yintang, S.du20, S.pontoDia]
+  ],
+  noite: [
+    /* Fase I */
+    [S.dissolucao, S.diario1, S.intencaoAmanha],
+    /* Fase II */
+    [S.dissolucao, S.masseter, S.fascia, S.diario2, S.intencaoAmanha],
+    /* Fase III */
+    [S.dissolucao, S.masseter, S.fascia, S.couro, S.diario3, S.intencaoAmanha],
+    /* Fase IV */
+    [S.dissolucao, S.masseter, S.fascia, S.couro, S.pontoDia, S.diario3, S.intencaoAmanha],
+    /* Fase V */
+    [S.dissolucao, S.masseter, S.fascia, S.couro, S.tensaoEmocional, S.diario4, S.intencaoAmanha],
+    /* Fase VI */
+    [S.dissolucao, S.masseter, S.fascia, S.couro, S.rostoRepouso, S.tensaoEmocional, S.diario4, S.intencaoAmanha]
+  ]
+};
+
+function getActiveRitualSteps(ritual) {
+  const phaseIdx = Math.min(getCurrentPhaseNum() - 1, 5);
+  return (RITUAL_STEPS_BY_PHASE[ritual.id] || [])[phaseIdx] || ritual.steps;
+}
+
 const MICRO = [
   { id: 'm1', pillar: 'Língua', pillarId: 'lingua', name: 'Check da Língua', time: '10 seg', instr: 'Onde está sua língua agora? Se não está no palato, leve-a gentilmente para lá. Sinta como os músculos ao redor dos olhos e bochechas relaxam imediatamente em resposta.' },
   { id: 'm2', pillar: 'Postura', pillarId: 'postura', name: 'Alinhamento Cervical', time: '20 seg', instr: 'Imagine um fio puxando o topo da cabeça em direção ao teto. Traga o queixo levemente para trás — não para baixo. Sinta o espaço se criando na nuca. O tech neck envelhece a face; esta posição reverte.' },
@@ -1746,7 +1924,7 @@ function closeRitual() {
 
 function renderStep() {
   stopStepTimer();
-  const steps = curRitual.steps;
+  const steps = getActiveRitualSteps(curRitual);
   const step  = steps[curStep];
   const total = steps.length;
 
@@ -1798,7 +1976,7 @@ function renderStep() {
 
 function nextStep() {
   stopBreath(); stopStepTimer();
-  if (curStep < curRitual.steps.length - 1) {
+  if (curStep < getActiveRitualSteps(curRitual).length - 1) {
     curStep++;
     renderStep();
   } else {
