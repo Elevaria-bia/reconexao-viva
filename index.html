@@ -1413,8 +1413,8 @@ async function syncWaterToCloud(cups) {
 }
 
 loadState();
-/* Detecta evento de recuperação de senha do Supabase v2 */
-supa.auth.onAuthStateChange((event, session) => {
+/* Detecta eventos de autenticação do Supabase v2 */
+supa.auth.onAuthStateChange(async (event, session) => {
   if (event === 'PASSWORD_RECOVERY') {
     document.getElementById('v-auth').style.display = 'flex';
     ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
@@ -1425,6 +1425,10 @@ supa.auth.onAuthStateChange((event, session) => {
     document.getElementById('auth-recovery').style.display = 'none';
     document.getElementById('auth-new-password').style.display = 'flex';
   }
+  /* Confirmação de email: sessão nova criada via link — verificar aprovação */
+  if (event === 'SIGNED_IN' && session && !currentUser) {
+    await onAuthSuccess(session.user);
+  }
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -1432,11 +1436,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await supa.auth.getSession();
   if (session) {
     await onAuthSuccess(session.user);
-  } else if (state.name) {
-    /* Legacy: local state without account — go to app but prompt to create account later */
-    initApp();
   } else {
-    /* Show auth screen */
+    /* Sem sessão válida — sempre mostrar tela de login */
     document.getElementById('v-auth').style.display = 'flex';
     ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     document.getElementById('v-onboard').style.display = 'none';
