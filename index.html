@@ -450,7 +450,7 @@
 </div>
 
   <!-- Tela de aguardando aprovação -->
-  <div id="v-pending" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.18) 0%,transparent 70%)">
+  <div id="v-pending" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;text-align:center;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.18) 0%,transparent 70%)" onshow="startPendingCheck()">
     <div style="width:72px;height:72px;border-radius:50%;background:rgba(61,90,58,0.15);border:1.5px solid rgba(61,90,58,0.4);display:flex;align-items:center;justify-content:center;margin-bottom:28px">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
@@ -460,6 +460,7 @@
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(61,90,58,0.8);margin-bottom:6px">Próximo passo</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6">Quando aprovada, você receberá acesso completo ao método. Volte aqui e faça login.</div>
     </div>
+    <button onclick="checkApprovalNow()" id="btn-check-approval" style="background:var(--green);border:none;border-radius:14px;padding:14px 32px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:white;cursor:pointer;margin-bottom:12px;width:100%;max-width:280px">Verificar acesso</button>
     <button onclick="doPendingLogout()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 28px;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer">Sair</button>
   </div>
 
@@ -1294,6 +1295,7 @@ async function onAuthSuccess(user, profileData) {
     if (!isMentor && profile.approved === false) {
       hideAuthScreen();
       document.getElementById('v-pending').style.display = 'flex';
+      startPendingAutoCheck();
       return;
     }
   } else if (profileData) {
@@ -1317,11 +1319,33 @@ async function onAuthSuccess(user, profileData) {
 }
 
 async function doPendingLogout() {
+  if (window._pendingCheckInterval) { clearInterval(window._pendingCheckInterval); window._pendingCheckInterval = null; }
   await supa.auth.signOut();
   document.getElementById('v-pending').style.display = 'none';
   document.getElementById('v-auth').style.display = 'flex';
   ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('v-onboard').style.display = 'none';
+}
+
+async function checkApprovalNow() {
+  if (!currentUser) return;
+  const btn = document.getElementById('btn-check-approval');
+  if (btn) { btn.textContent = 'Verificando...'; btn.disabled = true; }
+  try {
+    const { data: profile } = await supa.from('profiles').select('approved,is_mentor').eq('id', currentUser.id).single();
+    if (profile && (profile.approved === true || profile.is_mentor === true)) {
+      if (window._pendingCheckInterval) { clearInterval(window._pendingCheckInterval); window._pendingCheckInterval = null; }
+      document.getElementById('v-pending').style.display = 'none';
+      await onAuthSuccess(currentUser);
+      return;
+    }
+  } catch(e) {}
+  if (btn) { btn.textContent = 'Verificar acesso'; btn.disabled = false; }
+}
+
+function startPendingAutoCheck() {
+  if (window._pendingCheckInterval) clearInterval(window._pendingCheckInterval);
+  window._pendingCheckInterval = setInterval(checkApprovalNow, 30000);
 }
 
 function hideAuthScreen() {
