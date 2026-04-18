@@ -1285,21 +1285,27 @@ async function doSignup() {
 async function onAuthSuccess(user, profileData) {
   currentUser = user;
   /* Load profile from Supabase into local state */
-  const { data: profile } = await supa.from('profiles').select('*').eq('id', user.id).single();
-  if (profile) {
-    state.name = profile.name;
-    state.startDate = profile.start_date || new Date().toISOString();
-    if (profile.weight) state.weight = profile.weight;
-    isMentor = profile.is_mentor === true;
-    /* Verificar aprovação — mentora bypassa */
-    if (!isMentor && profile.approved !== true) {
-      hideAuthScreen();
-      document.getElementById('v-pending').style.display = 'flex';
-      startPendingAutoCheck();
-      return;
-    }
-  } else if (profileData) {
-    state.name = profileData.name;
+  const { data: profile, error: profileErr } = await supa.from('profiles').select('*').eq('id', user.id).single();
+
+  /* FAIL-SECURE: se não conseguiu ler o perfil, bloqueia */
+  if (!profile) {
+    hideAuthScreen();
+    document.getElementById('v-pending').style.display = 'flex';
+    startPendingAutoCheck();
+    return;
+  }
+
+  state.name = profile.name;
+  state.startDate = profile.start_date || new Date().toISOString();
+  if (profile.weight) state.weight = profile.weight;
+  isMentor = profile.is_mentor === true;
+
+  /* Verificar aprovação — mentora bypassa, qualquer outra sem approved=true bloqueia */
+  if (!isMentor && profile.approved !== true) {
+    hideAuthScreen();
+    document.getElementById('v-pending').style.display = 'flex';
+    startPendingAutoCheck();
+    return;
   }
   /* Load today's ritual completions */
   const today = todayKey();
