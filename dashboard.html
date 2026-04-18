@@ -1555,11 +1555,12 @@
         if (studentsError) throw studentsError;
         allStudents = students || [];
 
-        // 1b. Load pending users (approved = false)
+        // 1b. Load pending users (approved = false OR null)
         const { data: pending } = await db
           .from('profiles')
           .select('*')
-          .eq('approved', false)
+          .or('approved.eq.false,approved.is.null')
+          .or('is_mentor.eq.false,is_mentor.is.null')
           .order('created_at', { ascending: false });
         allPending = pending || [];
         document.getElementById('stat-pending').textContent = allPending.length;

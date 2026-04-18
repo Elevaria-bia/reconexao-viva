@@ -1272,7 +1272,7 @@ async function doSignup() {
   if (error) { err.textContent = error.message; err.style.display = 'block'; btn.textContent = 'Criar minha conta'; btn.disabled = false; return; }
   /* Update profile with age and menopausa */
   if (data.user) {
-    await supa.from('profiles').upsert({ id: data.user.id, name, age, is_menopausa: meno, start_date: new Date().toISOString() });
+    await supa.from('profiles').upsert({ id: data.user.id, name, age, is_menopausa: meno, start_date: new Date().toISOString(), approved: false });
     currentUser = data.user;
     state.name = name;
     state.startDate = new Date().toISOString();
@@ -1292,7 +1292,7 @@ async function onAuthSuccess(user, profileData) {
     if (profile.weight) state.weight = profile.weight;
     isMentor = profile.is_mentor === true;
     /* Verificar aprovação — mentora bypassa */
-    if (!isMentor && profile.approved === false) {
+    if (!isMentor && profile.approved !== true) {
       hideAuthScreen();
       document.getElementById('v-pending').style.display = 'flex';
       startPendingAutoCheck();
@@ -1384,6 +1384,7 @@ async function completeProfileSetup() {
   document.getElementById('v-profile-setup').style.display = 'none';
   /* Novo usuário — aguardar aprovação da mentora */
   document.getElementById('v-pending').style.display = 'flex';
+  startPendingAutoCheck();
 }
 
 async function syncRitualToCloud(ritualId) {
