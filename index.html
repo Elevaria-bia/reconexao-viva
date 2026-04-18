@@ -2489,6 +2489,18 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
       const swReg = await navigator.serviceWorker.register('/sw.js');
+      // Forçar atualização imediata se houver nova versão
+      swReg.addEventListener('updatefound', () => {
+        const newWorker = swReg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        }
+      });
+      await swReg.update();
       await setupPushNotifications(swReg);
     } catch (e) {
       console.warn('SW register error:', e);
