@@ -257,7 +257,7 @@
     /* ── STATS BAR ── */
     .stats-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 16px;
       margin-bottom: 32px;
     }
@@ -799,7 +799,7 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
       .stats-bar {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
       }
       .main {
         padding: 20px;
@@ -829,6 +829,106 @@
     .muted { color: var(--muted); }
     .text-sm { font-size: 12px; }
     .hidden { display: none !important; }
+
+    /* ── TABS ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--green);
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 7px;
+      margin-left: 8px;
+      min-width: 20px;
+    }
+
+    .tab-btn.active .tab-badge {
+      background: rgba(61, 90, 58, 0.4);
+      color: #6aad65;
+    }
+
+    /* ── LEAD PROFILE BADGES ── */
+    .badge-tensao {
+      background: rgba(232, 123, 106, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(232, 123, 106, 0.3);
+    }
+
+    .badge-desconexao {
+      background: rgba(196, 168, 122, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(196, 168, 122, 0.3);
+    }
+
+    .badge-pronta {
+      background: rgba(61, 90, 58, 0.3);
+      color: #6aad65;
+      border: 1px solid rgba(61, 90, 58, 0.4);
+    }
+
+    /* ── LEADS TABLE ── */
+    .whatsapp-link {
+      color: #6aad65;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .whatsapp-link:hover {
+      text-decoration: underline;
+    }
+
+    .score-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-bar {
+      width: 60px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--green);
+      transition: width 0.3s;
+    }
   </style>
 </head>
 <body>
@@ -940,56 +1040,111 @@
           <div class="stat-label">Fase Media</div>
           <div class="stat-value" id="stat-fase">—</div>
         </div>
-      </div>
-
-      <!-- TABLE SECTION -->
-      <div class="section-header">
-        <div class="section-title">Alunas</div>
-        <input
-          type="text"
-          class="search-bar"
-          id="search-input"
-          placeholder="Buscar por nome..."
-        />
-      </div>
-
-      <div class="filter-bar" id="filter-bar">
-        <button class="filter-btn active" data-filter="todas">Todas</button>
-        <button class="filter-btn" data-filter="ativa">Ativas</button>
-        <button class="filter-btn" data-filter="atenta">Atentas</button>
-        <button class="filter-btn" data-filter="risco">Em Risco</button>
-        <button class="filter-btn" data-filter="fase-1">Fase I</button>
-        <button class="filter-btn" data-filter="fase-2">Fase II</button>
-        <button class="filter-btn" data-filter="fase-3">Fase III</button>
-        <button class="filter-btn" data-filter="fase-4">Fase IV</button>
-        <button class="filter-btn" data-filter="fase-5">Fase V</button>
-        <button class="filter-btn" data-filter="fase-6">Fase VI</button>
-      </div>
-
-      <div class="table-wrapper">
-        <div id="table-loading" class="loading-state">
-          <div class="spinner"></div>
-          <div>Carregando alunas...</div>
+        <div class="stat-card" style="border-color:rgba(61,90,58,0.4)">
+          <div class="stat-label">Leads Captados</div>
+          <div class="stat-value" id="stat-leads" style="color:#6aad65">—</div>
         </div>
-        <div id="table-empty" class="empty-state hidden">
-          <div class="empty-title">Nenhuma aluna encontrada</div>
-          <div class="empty-sub">Tente ajustar os filtros ou a busca</div>
+      </div>
+
+      <!-- TABS -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" id="tab-btn-alunas">
+          Alunas
+          <span class="tab-badge" id="tab-count-alunas">0</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-leads">
+          Leads do Diagnostico
+          <span class="tab-badge" id="tab-count-leads">0</span>
+        </button>
+      </nav>
+
+      <!-- TAB: ALUNAS -->
+      <div id="tab-alunas">
+        <div class="section-header">
+          <div class="section-title">Alunas</div>
+          <input
+            type="text"
+            class="search-bar"
+            id="search-input"
+            placeholder="Buscar por nome..."
+          />
         </div>
-        <table id="students-table" class="hidden">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Fase</th>
-              <th>Dias na Mentoria</th>
-              <th>Rituais Hoje</th>
-              <th>Ultima Atividade</th>
-              <th>Como esta</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="students-tbody"></tbody>
-        </table>
+
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-btn active" data-filter="todas">Todas</button>
+          <button class="filter-btn" data-filter="ativa">Ativas</button>
+          <button class="filter-btn" data-filter="atenta">Atentas</button>
+          <button class="filter-btn" data-filter="risco">Em Risco</button>
+          <button class="filter-btn" data-filter="fase-1">Fase I</button>
+          <button class="filter-btn" data-filter="fase-2">Fase II</button>
+          <button class="filter-btn" data-filter="fase-3">Fase III</button>
+          <button class="filter-btn" data-filter="fase-4">Fase IV</button>
+          <button class="filter-btn" data-filter="fase-5">Fase V</button>
+          <button class="filter-btn" data-filter="fase-6">Fase VI</button>
+        </div>
+
+        <div class="table-wrapper">
+          <div id="table-loading" class="loading-state">
+            <div class="spinner"></div>
+            <div>Carregando alunas...</div>
+          </div>
+          <div id="table-empty" class="empty-state hidden">
+            <div class="empty-title">Nenhuma aluna encontrada</div>
+            <div class="empty-sub">Tente ajustar os filtros ou a busca</div>
+          </div>
+          <table id="students-table" class="hidden">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Fase</th>
+                <th>Dias na Mentoria</th>
+                <th>Rituais Hoje</th>
+                <th>Ultima Atividade</th>
+                <th>Como esta</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: LEADS -->
+      <div id="tab-leads" class="hidden">
+        <div class="section-header">
+          <div class="section-title">Leads do Diagnostico</div>
+          <input
+            type="text"
+            class="search-bar"
+            id="leads-search-input"
+            placeholder="Buscar por nome ou perfil..."
+          />
+        </div>
+
+        <div class="table-wrapper">
+          <div id="leads-loading" class="loading-state hidden">
+            <div class="spinner"></div>
+            <div>Carregando leads...</div>
+          </div>
+          <div id="leads-empty" class="empty-state hidden">
+            <div class="empty-title">Nenhum lead ainda</div>
+            <div class="empty-sub">Os leads do diagnostico aparecao aqui</div>
+          </div>
+          <table id="leads-table" class="hidden">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>WhatsApp</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Pontuacao</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
       </div>
 
     </main>
@@ -1045,6 +1200,9 @@
     let currentFilter = 'todas';
     let searchQuery = '';
     let mentorName = '';
+    let allLeads = [];
+    let leadsSearchQuery = '';
+    let activeTab = 'alunas';
 
     // ── HELPERS ──────────────────────────────────────────────
     function todayStr() {
@@ -1188,6 +1346,7 @@
         document.getElementById('header-username').textContent = mentorName;
         showDashboard();
         await loadDashboardData();
+        await loadLeads();
 
       } catch (err) {
         errorEl.textContent = 'Erro ao conectar. Tente novamente.';
@@ -1379,6 +1538,9 @@
         // Update stats
         updateStats();
 
+        // Update alunas tab badge
+        document.getElementById('tab-count-alunas').textContent = allStudents.length;
+
         // Render table
         renderTable();
 
@@ -1526,6 +1688,137 @@
       tbody.querySelectorAll('.btn-profile').forEach(btn => {
         btn.addEventListener('click', () => openModal(btn.dataset.id));
       });
+    }
+
+    // ── LEADS ────────────────────────────────────────────────
+    async function loadLeads() {
+      const loadingEl = document.getElementById('leads-loading');
+      const tableEl   = document.getElementById('leads-table');
+      const emptyEl   = document.getElementById('leads-empty');
+
+      showEl(loadingEl);
+      hideEl(tableEl);
+      hideEl(emptyEl);
+
+      try {
+        const { data: leads, error } = await db
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allLeads = leads || [];
+
+        document.getElementById('stat-leads').textContent = allLeads.length;
+        document.getElementById('tab-count-leads').textContent = allLeads.length;
+
+        renderLeads();
+      } catch (err) {
+        console.error('Error loading leads:', err);
+        hideEl(loadingEl);
+        showEl(emptyEl);
+        document.getElementById('leads-empty').querySelector('.empty-title').textContent = 'Erro ao carregar leads';
+        document.getElementById('leads-empty').querySelector('.empty-sub').textContent = err.message || 'Verifique a conexao.';
+      }
+    }
+
+    function getLeadBadgeClass(perfil) {
+      if (!perfil) return '';
+      const p = perfil.toLowerCase();
+      if (p.includes('tens')) return 'badge-tensao';
+      if (p.includes('descon')) return 'badge-desconexao';
+      if (p.includes('pronta') || p.includes('aprofund')) return 'badge-pronta';
+      return 'badge-atenta';
+    }
+
+    function formatDatetime(isoStr) {
+      if (!isoStr) return '—';
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function renderLeads() {
+      const loadingEl = document.getElementById('leads-loading');
+      const tableEl   = document.getElementById('leads-table');
+      const emptyEl   = document.getElementById('leads-empty');
+      const tbody     = document.getElementById('leads-tbody');
+
+      hideEl(loadingEl);
+
+      let list = [...allLeads];
+
+      if (leadsSearchQuery) {
+        const q = leadsSearchQuery.toLowerCase();
+        list = list.filter(l =>
+          (l.nome || '').toLowerCase().includes(q) ||
+          (l.perfil || '').toLowerCase().includes(q) ||
+          (l.email || '').toLowerCase().includes(q)
+        );
+      }
+
+      if (list.length === 0) {
+        hideEl(tableEl);
+        showEl(emptyEl);
+        return;
+      }
+
+      hideEl(emptyEl);
+      showEl(tableEl);
+
+      tbody.innerHTML = '';
+
+      list.forEach(lead => {
+        const maxScore = 30; // 6 perguntas x 5 pontos max
+        const pct = Math.min(100, Math.round(((lead.pontuacao || 0) / maxScore) * 100));
+        const whatsClean = (lead.whatsapp || '').replace(/\D/g, '');
+        const whatsLink = whatsClean
+          ? `<a class="whatsapp-link" href="https://wa.me/55${whatsClean}" target="_blank" rel="noopener">${escHtml(lead.whatsapp)}</a>`
+          : '<span class="muted">—</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><div style="font-weight:500">${escHtml(lead.nome || '—')}</div></td>
+          <td>${whatsLink}</td>
+          <td><span class="muted text-sm">${escHtml(lead.email || '—')}</span></td>
+          <td>
+            ${lead.perfil
+              ? `<span class="badge ${getLeadBadgeClass(lead.perfil)}">${escHtml(lead.perfil)}</span>`
+              : '<span class="muted">—</span>'
+            }
+          </td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar">
+                <div class="score-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span class="text-sm muted">${lead.pontuacao || 0}</span>
+            </div>
+          </td>
+          <td><span class="muted text-sm">${formatDatetime(lead.created_at)}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ── TABS ─────────────────────────────────────────────────
+    function switchTab(tab) {
+      activeTab = tab;
+      const tabAlunas = document.getElementById('tab-alunas');
+      const tabLeads  = document.getElementById('tab-leads');
+      const btnAlunas = document.getElementById('tab-btn-alunas');
+      const btnLeads  = document.getElementById('tab-btn-leads');
+
+      if (tab === 'alunas') {
+        showEl(tabAlunas);
+        hideEl(tabLeads);
+        btnAlunas.classList.add('active');
+        btnLeads.classList.remove('active');
+      } else {
+        hideEl(tabAlunas);
+        showEl(tabLeads);
+        btnLeads.classList.add('active');
+        btnAlunas.classList.remove('active');
+      }
     }
 
     // ── MODAL ─────────────────────────────────────────────────
@@ -1753,12 +2046,23 @@
 
     document.getElementById('btn-logout').addEventListener('click', logout);
 
-    document.getElementById('btn-refresh').addEventListener('click', loadDashboardData);
+    document.getElementById('btn-refresh').addEventListener('click', () => {
+      loadDashboardData();
+      loadLeads();
+    });
 
     document.getElementById('search-input').addEventListener('input', e => {
       searchQuery = e.target.value;
       renderTable();
     });
+
+    document.getElementById('leads-search-input').addEventListener('input', e => {
+      leadsSearchQuery = e.target.value;
+      renderLeads();
+    });
+
+    document.getElementById('tab-btn-alunas').addEventListener('click', () => switchTab('alunas'));
+    document.getElementById('tab-btn-leads').addEventListener('click', () => switchTab('leads'));
 
     document.getElementById('filter-bar').addEventListener('click', e => {
       const btn = e.target.closest('.filter-btn');
@@ -1815,6 +2119,7 @@
         document.getElementById('header-username').textContent = mentorName;
         showDashboard();
         await loadDashboardData();
+        await loadLeads();
 
       } catch (err) {
         showLogin();
