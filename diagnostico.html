@@ -323,6 +323,35 @@
     .testimonial .t-name { font-size: 13px; font-weight: 600; }
     .testimonial .t-meta { font-size: 11px; color: rgba(255,255,255,0.35); }
 
+    /* ─── LGPD CHECKBOX ─── */
+    .lgpd-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 18px 0 6px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+    }
+    .lgpd-wrap input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .lgpd-wrap label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      cursor: pointer;
+    }
+    .lgpd-wrap label a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
     /* ─── FORMULÁRIO ─── */
     #s-form { background: var(--dark); }
     .form-wrap { width: min(520px, 100%); text-align: left; }
@@ -775,21 +804,10 @@
       </p>
     </div>
 
-    <!-- Indicador de vagas -->
-    <div class="spots-indicator">
-      <div class="spots-bar">
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot filled"></div>
-        <div class="spot"></div>
-        <div class="spot"></div>
-      </div>
-      <span>8 de 10 vagas preenchidas</span>
+    <!-- Indicador de vagas dinâmico -->
+    <div class="spots-indicator" id="spots-indicator" style="display:none;">
+      <div class="spots-bar" id="spots-bar"></div>
+      <span id="spots-text">carregando vagas…</span>
     </div>
 
     <form id="apply-form" name="aplicacao-mentoria" data-netlify="true" netlify-honeypot="bot-field" onsubmit="submitForm(event)">
@@ -811,7 +829,15 @@
         <input type="email" id="f-email" name="email" placeholder="seu@email.com" required />
       </div>
 
-      <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">
+      <div class="lgpd-wrap">
+        <input type="checkbox" id="lgpd-check" required />
+        <label for="lgpd-check">
+          Li e concordo com a <a href="privacidade.html" target="_blank">Política de Privacidade</a>.
+          Autorizo o uso dos meus dados (nome, WhatsApp, e-mail e foto) exclusivamente para contato da @biafaceyoga sobre a mentoria, conforme a <strong style="color:rgba(255,255,255,0.7);">LGPD (Lei 13.709/2018)</strong>. Meus dados não serão compartilhados com terceiros.
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:12px;">
         Enviar minha aplicação ✦
       </button>
     </form>
@@ -820,7 +846,7 @@
       Seus dados são confidenciais. Zero spam.
     </div>
     <p class="form-note">
-      Ao enviar, você confirma que é maior de 18 anos e aceita ser contatada pela equipe @biafaceyoga para avaliar sua vaga.
+      Ao enviar, você confirma que é maior de 18 anos e autoriza contato da equipe @biafaceyoga para avaliação da sua vaga.
     </p>
   </div>
 </div>
@@ -877,42 +903,73 @@
   let photoSrc = '';
   let currentScreen = 's-hero';
 
-  // Perfis baseados em pontuação
-  const PROFILES = {
-    high: {
-      badge: 'Tensão Crônica Acumulada',
-      title: 'Seu corpo está gritando por atenção',
-      lead: 'Os padrões que identifiquei mostram uma tensão que se instalou há algum tempo — maxilar, respiração, postura. A boa notícia: é reversível com a abordagem certa.',
+  // 5 Perfis poéticos baseados em pontuação (5-15)
+  const PROFILES = [
+    {
+      range: [5, 7],
+      badge: 'Raiz Firme',
+      title: 'Você já habita o seu corpo — agora é hora de ir mais fundo',
+      lead: 'Seu mapa revela uma mulher que já cuida de si com consciência. A tensão que existe é sutil — mas é exatamente nela que mora o próximo nível de vitalidade e presença.',
       cards: [
-        { title: 'Padrão identificado', body: 'Tensão miofascial e bruxismo noturno como resposta ao estresse acumulado' },
-        { title: 'Impacto no rosto', body: 'Descida de contorno, inchaço facial, expressão de cansaço mesmo descansada' },
-        { title: 'Prioridade', body: 'Trabalho de liberação do masseter, fáscia cervical e reeducação respiratória' }
+        { title: 'Seu padrão', body: 'Boa consciência corporal, com tensões pontuais que ainda passam despercebidas no dia a dia' },
+        { title: 'O que o rosto revela', body: 'Leveza geral, com pequenas marcas de expressão que podem ser suavizadas com técnica refinada' },
+        { title: 'Seu próximo passo', body: 'Aprofundamento em fáscia, liberação miofascial avançada e presença ainda mais intencional' }
       ],
-      transform: 'Com acompanhamento individual, mulheres com seu perfil relatam sentir o rosto mais leve nas primeiras 3 semanas — seguido de melhora progressiva no sono, na energia e no contorno facial nos 2-3 meses seguintes.'
+      transform: 'Mulheres com seu perfil têm uma vantagem enorme: o corpo já sabe responder. Com acompanhamento individual, os avanços são rápidos e surpreendem até quem já estava bem. Em 4 a 6 semanas, a diferença é sentida de dentro para fora.'
     },
-    mid: {
-      badge: 'Desconexão Corpo-Rosto',
-      title: 'Você se adaptou à tensão — mas ela está lá',
-      lead: 'Você funciona bem, mas tem sinais de que seu corpo aprendeu a "conviver" com padrões que drenam energia sem que você perceba. Está na hora de reconectar.',
+    {
+      range: [8, 9],
+      badge: 'Despertar',
+      title: 'Algo em você está pronto para voltar — o rosto está chamando',
+      lead: 'Seu mapa mostra uma mulher que percebe que algo mudou, mas ainda não sabe exatamente o que. A desconexão é sutil, mas real. E o corpo está pedindo atenção.',
       cards: [
-        { title: 'Padrão identificado', body: 'Tensão crônica leve no pescoço, respiração parcial e início de perda de tônus' },
-        { title: 'Impacto no rosto', body: 'Falta de definição, olhar cansado, expressão menos viva do que você se sente' },
-        { title: 'Prioridade', body: 'Ativação muscular, consciência postural e técnicas de drenagem natural' }
+        { title: 'Seu padrão', body: 'Sinais iniciais de tensão acumulada — respiração mais superficial, tônus levemente reduzido' },
+        { title: 'O que o rosto revela', body: 'Expressão um pouco mais fechada do que você se sente por dentro — uma distância entre quem você é e como aparece' },
+        { title: 'Seu próximo passo', body: 'Ativação da consciência facial, reeducação respiratória e primeiros protocolos de toque consciente' }
       ],
-      transform: 'Mulheres com seu perfil costumam ter resultados rápidos — porque o corpo ainda tem muito potencial de resposta. Em 6 a 8 semanas de prática orientada, a diferença é notável no espelho e na energia do dia a dia.'
+      transform: 'Esse é o momento mais fértil para começar — antes que os padrões se aprofundem. Mulheres no seu perfil sentem resultados nas primeiras semanas e costumam dizer que "finalmente voltaram para si mesmas".'
     },
-    low: {
-      badge: 'Pronta para Aprofundar',
-      title: 'Você já tem consciência corporal — e pode ir muito mais fundo',
-      lead: 'Seus hábitos mostram que você cuida de si. Agora é o momento de ir além da superfície e trabalhar os padrões mais sutis que definem a vitalidade a longo prazo.',
+    {
+      range: [10, 11],
+      badge: 'Nó que Pede Passagem',
+      title: 'Há tensão guardada aqui — e ela está esperando ser liberada',
+      lead: 'Seu mapa aponta padrões de tensão que já estão instalados há algum tempo. O rosto carrega o que a rotina acumula. A boa notícia: o corpo tem memória — e ela pode ser reescrita.',
       cards: [
-        { title: 'Padrão identificado', body: 'Base sólida — tensões pontuais que precisam de refinamento e precisão técnica' },
-        { title: 'Potencial', body: 'Com metodologia específica, você pode alcançar resultados que surpreendem mesmo quem já está bem' },
-        { title: 'Prioridade', body: 'Aprofundamento em fáscia, liberação miofascial avançada e integração sistêmica' }
+        { title: 'Seu padrão', body: 'Tensão moderada no maxilar, pescoço e respiração — resposta típica de anos de estresse não processado' },
+        { title: 'O que o rosto revela', body: 'Contorno com menos definição, olhar com véu de cansaço, expressão mais pesada do que você realmente está' },
+        { title: 'Seu próximo passo', body: 'Liberação miofascial, trabalho com masseter e fáscia cervical, respiração diafragmática' }
       ],
-      transform: 'Sua consciência corporal é um diferencial enorme. Com acompanhamento individual e técnicas avançadas, você pode alcançar uma qualidade de presença e vitalidade que vai além do que qualquer prática genérica oferece.'
+      transform: 'Com acompanhamento individual, mulheres com seu perfil sentem o rosto mais leve nas primeiras 2 a 3 semanas. Em 2 meses, a transformação é visível — e mais importante, sentida.'
+    },
+    {
+      range: [12, 13],
+      badge: 'Tempestade em Silêncio',
+      title: 'Seu rosto está guardando muito — mais do que você percebe',
+      lead: 'Seu mapa revela tensão acumulada em camadas — muscular, fascial e emocional. O corpo aprendeu a funcionar assim, mas esse padrão drena energia sem que você veja. É hora de mudar isso.',
+      cards: [
+        { title: 'Seu padrão', body: 'Tensão crônica no masseter, bruxismo provável, respiração alta e postura cervical comprometida' },
+        { title: 'O que o rosto revela', body: 'Descida de contorno, inchaço facial, expressão de cansaço mesmo após descanso, olhar menos vivo' },
+        { title: 'Seu próximo passo', body: 'Protocolo intensivo de liberação de masseter, fáscia e reeducação respiratória — com acompanhamento' }
+      ],
+      transform: 'Mulheres com tensão no seu nível costumam sentir alívio imediato nas primeiras sessões. Em 3 a 4 semanas, o rosto muda visivelmente. Em 3 meses, a transformação é profunda — no rosto e em como você se sente no próprio corpo.'
+    },
+    {
+      range: [14, 15],
+      badge: 'Rosto que Carrega o Mundo',
+      title: 'Você carregou demais — e o rosto está dizendo isso',
+      lead: 'Seu mapa mostra o padrão mais profundo de tensão acumulada. Anos de estresse, noites mal dormidas e pouca atenção a si mesma deixaram marcas reais — não no tempo, mas na tensão. E tensão se libera.',
+      cards: [
+        { title: 'Seu padrão', body: 'Tensão crônica profunda — masseter hipertrofiado, fáscia rígida, respiração comprometida, sistema nervoso em alerta' },
+        { title: 'O que o rosto revela', body: 'Peso facial visível, contorno alterado pela tensão muscular, expressão de esgotamento mesmo em repouso' },
+        { title: 'Seu próximo passo', body: 'Acompanhamento individual urgente — liberação miofascial profunda, reeducação completa e protocolo personalizado' }
+      ],
+      transform: 'Esse é o perfil que mais me move a ajudar — porque eu já estive aqui. Com acompanhamento individual dedicado, mulheres com seu padrão experimentam uma transformação que vai muito além do rosto. É uma reconexão com quem você é de verdade.'
     }
-  };
+  ];
+
+  function getProfile(total) {
+    return PROFILES.find(p => total >= p.range[0] && total <= p.range[1]) || PROFILES[2];
+  }
 
   function goTo(id) {
     const cur = document.getElementById(currentScreen);
@@ -922,6 +979,7 @@
     currentScreen = id;
     updateProgress(id);
     window.scrollTo(0,0);
+    if (id === 's-form') loadSpots();
   }
 
   function updateProgress(id) {
@@ -983,12 +1041,8 @@
 
   function buildResult() {
     const total = Object.values(scores).reduce((a,b) => a+b, 0);
-    let p;
-    if (total >= 12) p = PROFILES.high;
-    else if (total >= 8) p = PROFILES.mid;
-    else p = PROFILES.low;
+    const p = getProfile(total);
 
-    // Foto no resultado
     const ri = document.getElementById('result-img');
     if (photoSrc) { ri.src = photoSrc; } else { ri.parentElement.style.display = 'none'; }
 
@@ -1001,6 +1055,36 @@
     cardsEl.innerHTML = p.cards.map(c =>
       `<div class="result-card"><div class="rc-title">${c.title}</div><div class="rc-body">${c.body}</div></div>`
     ).join('');
+  }
+
+  // Contador dinâmico de vagas
+  async function loadSpots() {
+    const MAX_VAGAS = 10;
+    try {
+      const now = new Date();
+      const inicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const { count } = await supa
+        .from('leads')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', inicio);
+
+      const ocupadas = Math.min(count || 0, MAX_VAGAS);
+      const livres = MAX_VAGAS - ocupadas;
+
+      const bar = document.getElementById('spots-bar');
+      bar.innerHTML = Array.from({length: MAX_VAGAS}, (_, i) =>
+        `<div class="spot${i < ocupadas ? ' filled' : ''}"></div>`
+      ).join('');
+
+      document.getElementById('spots-text').textContent =
+        livres <= 0 ? 'Vagas esgotadas este mês' :
+        livres === 1 ? 'Última vaga disponível este mês' :
+        `${ocupadas} de ${MAX_VAGAS} vagas preenchidas`;
+
+      document.getElementById('spots-indicator').style.display = 'flex';
+    } catch(e) {
+      document.getElementById('spots-indicator').style.display = 'none';
+    }
   }
 
   async function submitForm(e) {
