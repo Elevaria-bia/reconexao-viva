@@ -525,10 +525,10 @@
 ══════════════════════════════════════ -->
 <div class="screen" id="s-foto">
   <div class="pill pill-accent">passo 1 de 2</div>
-  <h2>Envie uma foto do seu rosto</h2>
+  <h2>Tire uma foto do seu rosto</h2>
   <p class="lead">
-    Vou usar para traçar o seu mapa de reconexão personalizado.<br>
-    Foto natural, sem filtro, boa iluminação.
+    Preciso ver o seu rosto para traçar o seu mapa com precisão.<br>
+    Luz natural, frontal, sem filtro — você do jeito que é.
   </p>
 
   <div class="upload-circle" onclick="document.getElementById('file-input').click()">
@@ -541,18 +541,18 @@
         </svg>
       </div>
       <div class="upload-hint">
-        <strong>Toque para adicionar foto</strong>
-        JPG ou PNG · frontal · boa luz
+        <strong>Toque para abrir a câmera</strong>
+        Frontal · boa luz · sem filtro
       </div>
     </div>
   </div>
-  <input type="file" id="file-input" accept="image/*" onchange="handlePhoto(event)" />
+  <input type="file" id="file-input" accept="image/*" capture="user" onchange="handlePhoto(event)" />
   <p class="privacy-note">Sua foto é usada só aqui e não é salva em nenhum servidor</p>
 
   <button class="btn btn-primary" id="btn-foto" style="display:none; margin-top:24px;" onclick="goTo('s-analise'); startAnalise()">
     Analisar meu rosto →
   </button>
-  <button class="btn btn-ghost" onclick="skipPhoto()">Continuar sem foto</button>
+  <p style="font-size:12px; color:rgba(255,255,255,0.3); margin-top:14px; text-align:center;">A foto é necessária para criar o seu mapa personalizado</p>
 </div>
 
 
@@ -943,12 +943,6 @@
       document.getElementById('btn-foto').style.display = 'inline-block';
     };
     reader.readAsDataURL(file);
-  }
-
-  function skipPhoto() {
-    photoSrc = '';
-    goTo('s-analise');
-    startAnalise();
   }
 
   function startAnalise() {
