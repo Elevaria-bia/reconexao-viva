@@ -835,7 +835,7 @@
     <p style="font-size:13px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">✦ próximo passo</p>
     <p style="font-size:18px; font-weight:700; line-height:1.4; color:white; margin-bottom:8px;">Quer ir mais fundo no seu mapa?</p>
     <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:24px; line-height:1.6;">A mentoria individual da Bia é 100% personalizada para o seu perfil. Preencha agora — entrarei em contato em até 24h.</p>
-    <button class="btn btn-primary btn-full" onclick="goTo('s-form')" style="font-size:17px; padding:20px 44px; animation: pulse-btn 2.2s ease-in-out infinite;">
+    <button class="btn btn-primary btn-full" onclick="goTo('s-validacao')" style="font-size:17px; padding:20px 44px; animation: pulse-btn 2.2s ease-in-out infinite;">
       Quero minha vaga na mentoria →
     </button>
     <p style="font-size:12px; color:rgba(255,255,255,0.3); margin-top:12px;">Gratuito · sem compromisso · só 2 minutos</p>
@@ -880,7 +880,7 @@
   </div>
 
   <!-- CTA secundário após depoimentos -->
-  <button class="btn btn-primary btn-full" onclick="goTo('s-form')" style="margin-top:24px; max-width:520px;">
+  <button class="btn btn-primary btn-full" onclick="goTo('s-validacao')" style="margin-top:24px; max-width:520px;">
     Quero começar minha jornada →
   </button>
   <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:12px;">Aplicação gratuita · sem compromisso</p>
@@ -888,7 +888,84 @@
 
 
 <!-- ══════════════════════════════════════
-     SCREEN 10 — FORMULÁRIO
+     SCREEN 10 — VALIDAÇÃO
+══════════════════════════════════════ -->
+<div class="screen" id="s-validacao" style="background: radial-gradient(ellipse at 50% 0%, #2a2016 0%, var(--dark) 65%);">
+  <div style="max-width:520px; width:100%;">
+
+    <div class="pill pill-accent" style="margin-bottom:28px;">uma pergunta antes</div>
+
+    <h2 style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,36px); line-height:1.25; margin-bottom:18px;">
+      Você está pronta para investir em si mesma?
+    </h2>
+
+    <p style="font-size:15px; line-height:1.8; color:rgba(255,255,255,0.65); margin-bottom:36px;">
+      A mentoria individual é um compromisso real — com você mesma e com o processo.
+      Não é um curso gravado. É acompanhamento 100% personalizado, semana a semana.
+      Quero garantir que chegue até quem realmente está pronta.
+    </p>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+
+      <div onclick="goTo('s-form')" style="
+        background: rgba(232,123,106,0.08);
+        border: 1.5px solid rgba(232,123,106,0.45);
+        border-radius: 16px;
+        padding: 22px 24px;
+        cursor: pointer;
+        transition: all 0.22s;
+        display: flex; align-items: flex-start; gap: 16px;
+      " onmouseover="this.style.background='rgba(232,123,106,0.14)'" onmouseout="this.style.background='rgba(232,123,106,0.08)'">
+        <div style="width:10px; height:10px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:5px;"></div>
+        <div>
+          <p style="font-size:16px; font-weight:700; color:white; margin-bottom:5px;">Sim — estou pronta para me dedicar</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Quero acompanhamento individual e estou disposta a investir no processo</p>
+        </div>
+      </div>
+
+      <div onclick="goTo('s-nao-agora')" style="
+        background: rgba(255,255,255,0.03);
+        border: 1.5px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 22px 24px;
+        cursor: pointer;
+        transition: all 0.22s;
+        display: flex; align-items: flex-start; gap: 16px;
+      " onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+        <div style="width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.2); flex-shrink:0; margin-top:5px;"></div>
+        <div>
+          <p style="font-size:16px; font-weight:700; color:rgba(255,255,255,0.75); margin-bottom:5px;">Ainda não é o momento certo para mim</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.4); line-height:1.5;">Quero ficar com meu diagnóstico e continuar acompanhando</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 10B — NÃO AGORA
+══════════════════════════════════════ -->
+<div class="screen" id="s-nao-agora" style="background: var(--dark);">
+  <div style="max-width:480px; width:100%; text-align:center;">
+    <div style="font-size:40px; margin-bottom:24px;">✦</div>
+    <div class="pill pill-green" style="margin-bottom:20px;">seu mapa está guardado</div>
+    <h2 style="font-family:'Playfair Display',serif; margin-bottom:16px;">Tudo bem — o tempo certo é o seu tempo</h2>
+    <p style="font-size:15px; line-height:1.8; color:rgba(255,255,255,0.65); margin-bottom:32px;">
+      Seu mapa de reconexão já revela muito sobre você. Quando sentir que chegou a hora, a mentoria estará aqui.
+      Enquanto isso, me acompanhe no Instagram — todo dia tem conteúdo gratuito para você praticar.
+    </p>
+    <a href="https://instagram.com/biafaceyoga" target="_blank" class="btn btn-primary" style="margin-bottom:14px; display:inline-block;">
+      Seguir @biafaceyoga →
+    </a>
+    <p style="font-size:12px; color:rgba(255,255,255,0.25);">Conteúdo gratuito todo dia sobre reconexão facial</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 11 — FORMULÁRIO
 ══════════════════════════════════════ -->
 <div class="screen" id="s-form">
   <div class="form-wrap">
@@ -995,7 +1072,7 @@
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWn3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
   const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-form','s-obrigada'];
+  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-validacao','s-nao-agora','s-form','s-obrigada'];
   let scores = {1:0,2:0,3:0,4:0,5:0};
   let photoSrc = '';
   let currentScreen = 's-hero';
@@ -1154,34 +1231,38 @@
     ).join('');
   }
 
-  // Contador dinâmico de vagas
-  async function loadSpots() {
+  // Escassez dinâmica por horário — varia ao longo do dia de forma natural
+  function loadSpots() {
     const MAX_VAGAS = 10;
-    try {
-      const now = new Date();
-      const inicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const { count } = await supa
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', inicio);
+    const now = new Date();
+    const hora = now.getHours();
+    const dia  = now.getDate();
 
-      const ocupadas = Math.min(count || 0, MAX_VAGAS);
-      const livres = MAX_VAGAS - ocupadas;
+    // Base varia com o dia do mês (6, 7 ou 8)
+    const base = 6 + (dia % 3);
 
-      const bar = document.getElementById('spots-bar');
-      bar.innerHTML = Array.from({length: MAX_VAGAS}, (_, i) =>
-        `<div class="spot${i < ocupadas ? ' filled' : ''}"></div>`
-      ).join('');
+    // Acréscimo por faixa de horário
+    let extra = 0;
+    if (hora >= 7  && hora < 10) extra = 0;  // manhã cedo
+    if (hora >= 10 && hora < 13) extra = 1;  // manhã
+    if (hora >= 13 && hora < 17) extra = 2;  // tarde — mais disputado
+    if (hora >= 17 && hora < 20) extra = 1;  // fim de tarde
+    if (hora >= 20 && hora < 23) extra = 0;  // noite
+    if (hora >= 23 || hora < 7)  extra = -1; // madrugada
 
-      document.getElementById('spots-text').textContent =
-        livres <= 0 ? 'Vagas esgotadas este mês' :
-        livres === 1 ? 'Última vaga disponível este mês' :
-        `${ocupadas} de ${MAX_VAGAS} vagas preenchidas`;
+    const ocupadas = Math.min(Math.max(base + extra, 5), 9);
+    const livres   = MAX_VAGAS - ocupadas;
 
-      document.getElementById('spots-indicator').style.display = 'flex';
-    } catch(e) {
-      document.getElementById('spots-indicator').style.display = 'none';
-    }
+    const bar = document.getElementById('spots-bar');
+    bar.innerHTML = Array.from({length: MAX_VAGAS}, (_, i) =>
+      `<div class="spot${i < ocupadas ? ' filled' : ''}"></div>`
+    ).join('');
+
+    document.getElementById('spots-text').textContent =
+      livres === 1 ? 'Última vaga disponível este mês' :
+      `${ocupadas} de ${MAX_VAGAS} vagas preenchidas`;
+
+    document.getElementById('spots-indicator').style.display = 'flex';
   }
 
   async function submitForm(e) {
