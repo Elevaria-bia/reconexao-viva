@@ -1069,13 +1069,17 @@
 ══════════════════════════════════════ -->
 <script>
   const SUPA_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWn3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWh3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
   const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  // URL do Worker de análise facial — atualizar após deploy
+  const FACE_ANALYZER_URL = 'https://elevaria-face-analyzer.workers.dev';
 
   const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-validacao','s-nao-agora','s-form','s-obrigada'];
   let scores = {1:0,2:0,3:0,4:0,5:0};
   let photoSrc = '';
   let currentScreen = 's-hero';
+  let aiAnalysis = null; // resultado da análise facial por IA
 
   // 5 Perfis poéticos baseados em pontuação (5-15)
   const PROFILES = [
@@ -1167,18 +1171,47 @@
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(ev) {
-      photoSrc = ev.target.result;
-      const prev = document.getElementById('preview');
-      prev.src = photoSrc;
-      prev.style.display = 'block';
-      document.getElementById('upload-placeholder').style.display = 'none';
-      document.getElementById('btn-foto').style.display = 'inline-block';
+      // Redimensiona para max 800px antes de guardar (economiza custo de API)
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 800;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = h * MAX / w; w = MAX; }
+        else if (h > MAX) { w = w * MAX / h; h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        photoSrc = canvas.toDataURL('image/jpeg', 0.85);
+        const prev = document.getElementById('preview');
+        prev.src = photoSrc;
+        prev.style.display = 'block';
+        document.getElementById('upload-placeholder').style.display = 'none';
+        document.getElementById('btn-foto').style.display = 'inline-block';
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
   }
 
+  // Envia foto para análise por IA em background enquanto usuária responde questionário
+  async function analisarFotoIA() {
+    if (!photoSrc) return;
+    try {
+      const res = await fetch(FACE_ANALYZER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: photoSrc, scores })
+      });
+      if (res.ok) {
+        aiAnalysis = await res.json();
+      }
+    } catch(e) {
+      console.log('Análise IA indisponível, usando perfil do questionário');
+      aiAnalysis = null;
+    }
+  }
+
   function startAnalise() {
-    // Mostrar foto na tela de análise
     const img = document.getElementById('analysis-img');
     if (photoSrc) {
       img.src = photoSrc;
@@ -1187,7 +1220,11 @@
       img.parentElement.style.display = 'none';
     }
 
-    // Animar steps um a um
+    // Dispara análise IA em background — resultado estará pronto quando chegar no resultado
+    aiAnalysis = null;
+    analisarFotoIA();
+
+    // Anima steps enquanto aguarda
     const steps = [1,2,3,4,5];
     steps.forEach((n, i) => {
       setTimeout(() => {
@@ -1215,20 +1252,39 @@
 
   function buildResult() {
     const total = Object.values(scores).reduce((a,b) => a+b, 0);
-    const p = getProfile(total);
 
     const ri = document.getElementById('result-img');
     if (photoSrc) { ri.src = photoSrc; } else { ri.parentElement.style.display = 'none'; }
 
-    document.getElementById('result-badge').textContent = p.badge;
-    document.getElementById('result-title').textContent = p.title;
-    document.getElementById('result-lead').textContent = p.lead;
-    document.getElementById('transform-text').textContent = p.transform;
+    if (aiAnalysis && aiAnalysis.perfil) {
+      // Usa análise real da IA — personalizada para este rosto
+      document.getElementById('result-badge').textContent = aiAnalysis.perfil;
+      document.getElementById('result-title').textContent = aiAnalysis.titulo;
+      document.getElementById('result-lead').textContent = aiAnalysis.lead;
+      document.getElementById('transform-text').textContent = aiAnalysis.transform;
 
-    const cardsEl = document.getElementById('result-cards');
-    cardsEl.innerHTML = p.cards.map(c =>
-      `<div class="result-card"><div class="rc-title">${c.title}</div><div class="rc-body">${c.body}</div></div>`
-    ).join('');
+      const cardsEl = document.getElementById('result-cards');
+      cardsEl.innerHTML = (aiAnalysis.cards || []).map(c =>
+        `<div class="result-card"><div class="rc-title">${c.title}</div><div class="rc-body">${c.body}</div></div>`
+      ).join('');
+
+      // Indicador discreto de análise real
+      const badge = document.getElementById('result-badge');
+      badge.innerHTML = aiAnalysis.perfil + ' <span style="font-size:9px;opacity:0.6;letter-spacing:0.5px;">✦ ANÁLISE REAL</span>';
+
+    } else {
+      // Fallback: usa perfil do questionário
+      const p = getProfile(total);
+      document.getElementById('result-badge').textContent = p.badge;
+      document.getElementById('result-title').textContent = p.title;
+      document.getElementById('result-lead').textContent = p.lead;
+      document.getElementById('transform-text').textContent = p.transform;
+
+      const cardsEl = document.getElementById('result-cards');
+      cardsEl.innerHTML = p.cards.map(c =>
+        `<div class="result-card"><div class="rc-title">${c.title}</div><div class="rc-body">${c.body}</div></div>`
+      ).join('');
+    }
   }
 
   // Escassez dinâmica por horário — varia ao longo do dia de forma natural
