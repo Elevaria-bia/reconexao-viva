@@ -1198,10 +1198,12 @@
             <thead>
               <tr>
                 <th>Nome</th>
+                <th>Interesse</th>
+                <th>Idade</th>
                 <th>WhatsApp</th>
                 <th>E-mail</th>
                 <th>Perfil</th>
-                <th>Pontuacao</th>
+                <th>Pontuação</th>
                 <th>Data</th>
               </tr>
             </thead>
@@ -1852,8 +1854,16 @@
           : '<span class="muted">—</span>';
 
         const tr = document.createElement('tr');
+        const interesseBadge = lead.interesse === 'desafio'
+          ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(100,160,240,0.15);color:#7ab4f5;border:1px solid rgba(100,160,240,0.3);">🔵 Desafio 21d</span>`
+          : lead.interesse === 'mentoria'
+          ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(180,120,240,0.15);color:#c49bf5;border:1px solid rgba(180,120,240,0.3);">🟣 Mentoria</span>`
+          : '<span class="muted">—</span>';
+
         tr.innerHTML = `
           <td><div style="font-weight:500">${escHtml(lead.nome || '—')}</div></td>
+          <td>${interesseBadge}</td>
+          <td><span class="muted text-sm">${lead.idade ? lead.idade + ' anos' : '—'}</span></td>
           <td>${whatsLink}</td>
           <td><span class="muted text-sm">${escHtml(lead.email || '—')}</span></td>
           <td>

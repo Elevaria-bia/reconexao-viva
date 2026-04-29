@@ -481,6 +481,96 @@
     .ns-num { width: 28px; height: 28px; border-radius: 50%; background: rgba(232,123,106,0.2); border: 1px solid rgba(232,123,106,0.4); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
     .ns-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.6; }
 
+    /* ─── TELA DE OFERTAS ─── */
+    #s-oferta { background: radial-gradient(ellipse at 50% 0%, #2a1a2e 0%, var(--dark) 65%); }
+    .oferta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: min(620px, 100%);
+      margin: 32px auto 0;
+    }
+    @media (max-width: 560px) { .oferta-grid { grid-template-columns: 1fr; } }
+    .oferta-card {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .oferta-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.25); }
+    .oferta-card.desafio { border-color: rgba(100,160,240,0.35); }
+    .oferta-card.desafio:hover { border-color: rgba(100,160,240,0.7); box-shadow: 0 8px 32px rgba(100,160,240,0.15); }
+    .oferta-card.mentoria { border-color: rgba(180,120,240,0.35); }
+    .oferta-card.mentoria:hover { border-color: rgba(180,120,240,0.7); box-shadow: 0 8px 32px rgba(180,120,240,0.15); }
+    .oferta-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    .oferta-badge.azul { background: rgba(100,160,240,0.15); color: #7ab4f5; }
+    .oferta-badge.roxo { background: rgba(180,120,240,0.15); color: #c49bf5; }
+    .oferta-nome { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: white; line-height: 1.2; }
+    .oferta-preco { font-size: 26px; font-weight: 700; }
+    .oferta-preco.azul { color: #7ab4f5; }
+    .oferta-preco.roxo { color: #c49bf5; }
+    .oferta-data { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); }
+    .oferta-desc { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.55; }
+    .oferta-cta {
+      margin-top: auto;
+      padding: 13px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      width: 100%;
+    }
+    .oferta-cta:hover { opacity: 0.88; }
+    .oferta-cta.azul { background: linear-gradient(135deg, #4a90d9, #7ab4f5); color: white; }
+    .oferta-cta.roxo { background: linear-gradient(135deg, #8a50d0, #c49bf5); color: white; }
+    .oferta-destaque {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* badge de oferta selecionada no formulário */
+    .oferta-selecionada-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .oferta-selecionada-badge.desafio { background: rgba(100,160,240,0.1); border: 1px solid rgba(100,160,240,0.3); color: #7ab4f5; }
+    .oferta-selecionada-badge.mentoria { background: rgba(180,120,240,0.1); border: 1px solid rgba(180,120,240,0.3); color: #c49bf5; }
+
     /* ─── FOOTER ─── */
     .footer { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 24px; text-align: center; font-size: 11px; color: rgba(255,255,255,0.15); pointer-events: none; }
 
@@ -835,7 +925,7 @@
     <p style="font-size:13px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">✦ próximo passo</p>
     <p style="font-size:18px; font-weight:700; line-height:1.4; color:white; margin-bottom:8px;">Quer ir mais fundo no seu mapa?</p>
     <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-bottom:24px; line-height:1.6;">A mentoria individual da Bia é 100% personalizada para o seu perfil. Preencha agora — entrarei em contato em até 24h.</p>
-    <button class="btn btn-primary btn-full" onclick="goTo('s-validacao')" style="font-size:17px; padding:20px 44px; animation: pulse-btn 2.2s ease-in-out infinite;">
+    <button class="btn btn-primary btn-full" onclick="goTo('s-oferta')" style="font-size:17px; padding:20px 44px; animation: pulse-btn 2.2s ease-in-out infinite;">
       Quero minha vaga na mentoria →
     </button>
     <p style="font-size:12px; color:rgba(255,255,255,0.3); margin-top:12px;">Gratuito · sem compromisso · só 2 minutos</p>
@@ -880,7 +970,7 @@
   </div>
 
   <!-- CTA secundário após depoimentos -->
-  <button class="btn btn-primary btn-full" onclick="goTo('s-validacao')" style="margin-top:24px; max-width:520px;">
+  <button class="btn btn-primary btn-full" onclick="goTo('s-oferta')" style="margin-top:24px; max-width:520px;">
     Quero começar minha jornada →
   </button>
   <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:12px;">Aplicação gratuita · sem compromisso</p>
@@ -888,58 +978,49 @@
 
 
 <!-- ══════════════════════════════════════
-     SCREEN 10 — VALIDAÇÃO
+     SCREEN 10 — ESCOLHA DA OFERTA
 ══════════════════════════════════════ -->
-<div class="screen" id="s-validacao" style="background: radial-gradient(ellipse at 50% 0%, #2a2016 0%, var(--dark) 65%);">
-  <div style="max-width:520px; width:100%;">
+<div class="screen" id="s-oferta">
+  <div style="max-width:660px; width:100%; text-align:center;">
 
-    <div class="pill pill-accent" style="margin-bottom:28px;">uma pergunta antes</div>
+    <div class="pill pill-accent" style="margin-bottom:24px;">seu próximo passo</div>
 
-    <h2 style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,36px); line-height:1.25; margin-bottom:18px;">
-      Você está pronta para investir em si mesma?
+    <h2 style="font-family:'Playfair Display',serif; font-size:clamp(24px,5vw,34px); line-height:1.25; margin-bottom:12px;">
+      Como você quer avançar?
     </h2>
-
-    <p style="font-size:15px; line-height:1.8; color:rgba(255,255,255,0.65); margin-bottom:36px;">
-      A mentoria individual é um compromisso real — com você mesma e com o processo.
-      Não é um curso gravado. É acompanhamento 100% personalizado, semana a semana.
-      Quero garantir que chegue até quem realmente está pronta.
+    <p style="font-size:15px; color:rgba(255,255,255,0.55); margin-bottom:4px; line-height:1.6;">
+      Escolha o caminho que está mais alinhado com você agora.
     </p>
 
-    <div style="display:flex; flex-direction:column; gap:14px;">
+    <div class="oferta-grid">
 
-      <div onclick="goTo('s-form')" style="
-        background: rgba(232,123,106,0.08);
-        border: 1.5px solid rgba(232,123,106,0.45);
-        border-radius: 16px;
-        padding: 22px 24px;
-        cursor: pointer;
-        transition: all 0.22s;
-        display: flex; align-items: flex-start; gap: 16px;
-      " onmouseover="this.style.background='rgba(232,123,106,0.14)'" onmouseout="this.style.background='rgba(232,123,106,0.08)'">
-        <div style="width:10px; height:10px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:5px;"></div>
-        <div>
-          <p style="font-size:16px; font-weight:700; color:white; margin-bottom:5px;">Sim — estou pronta para me dedicar</p>
-          <p style="font-size:13px; color:rgba(255,255,255,0.5); line-height:1.5;">Quero acompanhamento individual e estou disposta a investir no processo</p>
-        </div>
+      <!-- DESAFIO 21 DIAS -->
+      <div class="oferta-card desafio" onclick="selectOffer('desafio')">
+        <div class="oferta-destaque">mais acessível</div>
+        <div class="oferta-badge azul">Grupo</div>
+        <div class="oferta-nome">Desafio<br>21 Dias</div>
+        <div class="oferta-preco azul">R$ 97,90</div>
+        <div class="oferta-data">Inicia 10 de maio</div>
+        <div class="oferta-desc">Protocolo estruturado em grupo. 21 dias para criar o hábito da reconexão facial — com suporte e comunidade.</div>
+        <button class="oferta-cta azul">Quero garantir minha vaga →</button>
       </div>
 
-      <div onclick="goTo('s-nao-agora')" style="
-        background: rgba(255,255,255,0.03);
-        border: 1.5px solid rgba(255,255,255,0.08);
-        border-radius: 16px;
-        padding: 22px 24px;
-        cursor: pointer;
-        transition: all 0.22s;
-        display: flex; align-items: flex-start; gap: 16px;
-      " onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-        <div style="width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.2); flex-shrink:0; margin-top:5px;"></div>
-        <div>
-          <p style="font-size:16px; font-weight:700; color:rgba(255,255,255,0.75); margin-bottom:5px;">Ainda não é o momento certo para mim</p>
-          <p style="font-size:13px; color:rgba(255,255,255,0.4); line-height:1.5;">Quero ficar com meu diagnóstico e continuar acompanhando</p>
-        </div>
+      <!-- MENTORIA INDIVIDUAL -->
+      <div class="oferta-card mentoria" onclick="selectOffer('mentoria')">
+        <div class="oferta-badge roxo">1:1 com a Bia</div>
+        <div class="oferta-nome">Mentoria<br>Individual</div>
+        <div class="oferta-preco roxo" style="font-size:18px; padding-top:4px;">Personalizada</div>
+        <div class="oferta-data">Vagas limitadas</div>
+        <div class="oferta-desc">Acompanhamento individual e exclusivo. Seu mapa, seu ritmo, seu protocolo — com a Bia do seu lado.</div>
+        <button class="oferta-cta roxo">Quero aplicar para a mentoria →</button>
       </div>
 
     </div>
+
+    <p style="margin-top:28px; font-size:13px; color:rgba(255,255,255,0.25); cursor:pointer;" onclick="goTo('s-nao-agora')">
+      ainda não estou pronta
+    </p>
+
   </div>
 </div>
 
@@ -971,10 +1052,9 @@
   <div class="form-wrap">
     <div class="form-header">
       <div class="pill pill-accent" style="margin-bottom:16px;">última etapa</div>
-      <h2>Sua vaga na mentoria</h2>
-      <p class="lead" style="font-size:15px; margin-bottom:16px;">
-        A mentoria é <strong>100% individual</strong> — seu mapa, seu ritmo, seus resultados.
-        Preencha abaixo e entrarei em contato em até 24h.
+      <h2 id="form-titulo">Garantir minha vaga</h2>
+      <p class="lead" style="font-size:15px; margin-bottom:16px;" id="form-subtitulo">
+        Preencha abaixo — entrarei em contato em até <strong>24h</strong>.
       </p>
     </div>
 
@@ -984,15 +1064,26 @@
       <span id="spots-text">carregando vagas…</span>
     </div>
 
+    <!-- Badge da oferta selecionada -->
+    <div id="oferta-selecionada-badge" class="oferta-selecionada-badge desafio" style="display:none;">
+      <span id="oferta-badge-icon">🔵</span>
+      <span id="oferta-badge-texto">Desafio 21 Dias — 10 de maio</span>
+    </div>
+
     <form id="apply-form" name="aplicacao-mentoria" data-netlify="true" netlify-honeypot="bot-field" onsubmit="submitForm(event)">
       <input type="hidden" name="form-name" value="aplicacao-mentoria" />
       <input type="hidden" name="perfil" id="f-perfil" value="" />
       <input type="hidden" name="pontuacao" id="f-pontuacao" value="" />
+      <input type="hidden" name="interesse" id="f-interesse" value="" />
       <p style="display:none;"><label>Não preencha: <input name="bot-field" /></label></p>
 
       <div class="form-group">
         <label>Seu nome completo</label>
         <input type="text" id="f-nome" name="nome" placeholder="Como posso te chamar?" required />
+      </div>
+      <div class="form-group">
+        <label>Sua idade</label>
+        <input type="number" id="f-idade" name="idade" placeholder="Ex: 43" min="18" max="99" required />
       </div>
       <div class="form-group">
         <label>WhatsApp com DDD</label>
@@ -1011,8 +1102,8 @@
         </label>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-full" style="margin-top:12px;">
-        Enviar minha aplicação ✦
+      <button type="submit" id="form-submit-btn" class="btn btn-primary btn-full" style="margin-top:12px;">
+        Confirmar meu interesse ✦
       </button>
     </form>
 
@@ -1031,25 +1122,27 @@
 ══════════════════════════════════════ -->
 <div class="screen" id="s-obrigada">
   <div class="check-icon">✦</div>
-  <div class="pill pill-green">aplicação recebida</div>
-  <h2>Sua aplicação chegou!</h2>
-  <p class="lead">
-    Tracei seu mapa — e vou entrar em contato pelo WhatsApp em até <strong>24 horas</strong>.
-    Fique de olho.
+  <div class="pill pill-green">recebido com carinho</div>
+  <h2>Que bom, <span id="obrigada-nome">querida</span>!</h2>
+  <p class="lead" style="margin-bottom:12px;">
+    Seu interesse foi registrado.
+  </p>
+  <p style="font-size:15px; color:rgba(255,255,255,0.65); max-width:420px; line-height:1.7; margin-bottom:28px;" id="obrigada-oferta">
+    Entrarei em contato em breve pelo WhatsApp.
   </p>
 
   <div class="next-steps">
     <div class="next-step">
       <div class="ns-num">1</div>
-      <div class="ns-text">Verifique seu WhatsApp e e-mail — vou confirmar o recebimento da sua aplicação.</div>
+      <div class="ns-text">Verifique seu WhatsApp e e-mail — vou confirmar o recebimento em breve.</div>
     </div>
     <div class="next-step">
       <div class="ns-num">2</div>
-      <div class="ns-text">Farei uma análise cuidadosa do seu perfil antes de entrar em contato.</div>
+      <div class="ns-text">Farei uma análise cuidadosa do seu mapa e perfil antes de entrar em contato.</div>
     </div>
     <div class="next-step">
       <div class="ns-num">3</div>
-      <div class="ns-text">Se houver compatibilidade, agendaremos uma conversa para entender seus objetivos.</div>
+      <div class="ns-text">Me acompanhe no Instagram enquanto isso — todo dia tem conteúdo gratuito.</div>
     </div>
   </div>
 
@@ -1075,11 +1168,12 @@
   // URL do Worker de análise facial — atualizar após deploy
   const FACE_ANALYZER_URL = 'https://elevaria-face-analyzer.biafaceyoga.workers.dev';
 
-  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-validacao','s-nao-agora','s-form','s-obrigada'];
+  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-oferta','s-nao-agora','s-form','s-obrigada'];
   let scores = {1:0,2:0,3:0,4:0,5:0};
   let photoSrc = '';
   let currentScreen = 's-hero';
   let aiAnalysis = null; // resultado da análise facial por IA
+  let selectedOffer = 'mentoria'; // 'desafio' | 'mentoria'
 
   // 5 Perfis poéticos baseados em pontuação (5-15)
   const PROFILES = [
@@ -1321,9 +1415,42 @@
     document.getElementById('spots-indicator').style.display = 'flex';
   }
 
+  function selectOffer(offer) {
+    selectedOffer = offer;
+    document.getElementById('f-interesse').value = offer;
+
+    const badge = document.getElementById('oferta-selecionada-badge');
+    const icon  = document.getElementById('oferta-badge-icon');
+    const texto = document.getElementById('oferta-badge-texto');
+    const titulo = document.getElementById('form-titulo');
+    const subtitulo = document.getElementById('form-subtitulo');
+    const btn = document.getElementById('form-submit-btn');
+
+    badge.style.display = 'flex';
+
+    if (offer === 'desafio') {
+      badge.className = 'oferta-selecionada-badge desafio';
+      icon.textContent = '🔵';
+      texto.textContent = 'Desafio 21 Dias — inicia 10 de maio';
+      titulo.textContent = 'Garantir minha vaga no Desafio';
+      subtitulo.innerHTML = 'Inicia <strong>10 de maio</strong>. Preencha abaixo e garanta sua vaga por <strong>R$ 97,90</strong>.';
+      btn.textContent = 'Garantir minha vaga no Desafio ✦';
+    } else {
+      badge.className = 'oferta-selecionada-badge mentoria';
+      icon.textContent = '🟣';
+      texto.textContent = 'Mentoria Individual — 1:1 com a Bia';
+      titulo.textContent = 'Aplicar para a Mentoria Individual';
+      subtitulo.innerHTML = 'Acompanhamento <strong>100% personalizado</strong>. Preencha abaixo e entrarei em contato em até <strong>24h</strong>.';
+      btn.textContent = 'Enviar minha aplicação ✦';
+    }
+
+    goTo('s-form');
+  }
+
   async function submitForm(e) {
     e.preventDefault();
     const nome  = document.getElementById('f-nome').value.trim();
+    const idade = document.getElementById('f-idade').value.trim();
     const whats = document.getElementById('f-whats').value.trim();
     const email = document.getElementById('f-email').value.trim();
     const total = Object.values(scores).reduce((a,b) => a+b, 0);
@@ -1332,6 +1459,7 @@
 
     document.getElementById('f-perfil').value = perfil;
     document.getElementById('f-pontuacao').value = pontuacao;
+    document.getElementById('f-interesse').value = selectedOffer;
 
     const btn = e.target.querySelector('button[type="submit"]');
     btn.disabled = true;
@@ -1340,13 +1468,23 @@
     // Salva no Supabase
     const { error: sbErr } = await supa.from('leads').insert({
       nome,
+      idade: idade ? parseInt(idade) : null,
       whatsapp: whats,
       email,
       perfil,
       pontuacao,
-      respostas: scores
+      respostas: scores,
+      interesse: selectedOffer
     });
     if (sbErr) console.error('Supabase error:', sbErr.message, sbErr);
+
+    // Personaliza tela de obrigada
+    const nomeEl = document.getElementById('obrigada-nome');
+    if (nomeEl) nomeEl.textContent = nome.split(' ')[0];
+    const ofertaEl = document.getElementById('obrigada-oferta');
+    if (ofertaEl) ofertaEl.textContent = selectedOffer === 'desafio'
+      ? 'Desafio 21 Dias — você receberá o link de pagamento em breve.'
+      : 'Mentoria Individual — entrarei em contato em até 24h para conversarmos.';
 
     // Envia para Netlify Forms
     const formData = new FormData(e.target);
