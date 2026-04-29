@@ -1,0 +1,27 @@
+name: Deploy Face Analyzer Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'face-analyzer/**'
+  workflow_dispatch:   # permite disparar manualmente pelo GitHub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy elevaria-face-analyzer
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Worker via Wrangler
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: df9d1ffd363fde39636510158f460aa3
+          workingDirectory: face-analyzer
+          secrets: |
+            ANTHROPIC_API_KEY
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
