@@ -503,6 +503,20 @@
         </div>
       </div>
 
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.08em">Minha modalidade</label>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button onclick="selectModalidade('desafio')" id="ps-desafio" class="ps-opt" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;color:var(--fg);font-size:14px;text-align:left;cursor:pointer;transition:border-color 0.2s">
+            <div style="font-weight:600;margin-bottom:2px">🔵 Desafio 21 Dias</div>
+            <div style="font-size:12px;color:var(--muted)">Inicia 10 de maio · 1 prática por dia</div>
+          </button>
+          <button onclick="selectModalidade('mentoria')" id="ps-mentoria" class="ps-opt" style="background:var(--card);border:1px solid rgba(180,120,240,0.5);border-radius:14px;padding:16px 20px;color:var(--fg);font-size:14px;text-align:left;cursor:pointer;transition:border-color 0.2s">
+            <div style="font-weight:600;margin-bottom:2px">🟣 Mentoria Individual</div>
+            <div style="font-size:12px;color:var(--muted)">Jornada de 6 fases com a Bia</div>
+          </button>
+        </div>
+      </div>
+
       <button onclick="completeProfileSetup()" style="background:var(--green);color:white;border:none;border-radius:14px;padding:18px;font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:8px">
         Comecar minha jornada
       </button>
@@ -561,7 +575,10 @@
   </div>
 
   <div id="v-evolucao" class="view">
-    <h2 class="evol-h">Sua Jornada</h2>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px;margin-bottom:4px;">
+      <h2 class="evol-h" style="margin:0">Sua Jornada</h2>
+      <div id="modalidade-badge" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;"></div>
+    </div>
 
     <!-- Sub-abas da Jornada -->
     <div class="jorn-tabs">
@@ -1167,6 +1184,42 @@ const LEVELS = [
 
 const PHASE_UNLOCK_DAYS = [0, 14, 28, 49, 77, 112];
 
+// ─── DESAFIO 21 DIAS ────────────────────────────────────────────────────────
+const DESAFIO_LEVELS = [
+  // SEMANA 1 — PRESENÇA
+  { num:'1',  name:'Onde está meu rosto?',       desc:'Mapeamento inicial de tensão', period:'Semana 1 · Presença', focus:['Consciência'] },
+  { num:'2',  name:'A língua como âncora',       desc:'Posição de repouso que tudo muda', period:'Semana 1 · Presença', focus:['Postura'] },
+  { num:'3',  name:'Respiração como chave',      desc:'O sistema nervoso começa aqui', period:'Semana 1 · Presença', focus:['Respiração'] },
+  { num:'4',  name:'Os olhos que carregam',      desc:'Tensão orbital e pálpebras pesadas', period:'Semana 1 · Presença', focus:['Consciência'] },
+  { num:'5',  name:'A mandíbula que guarda',     desc:'Primeiro contato com o masseter', period:'Semana 1 · Presença', focus:['Liberação'] },
+  { num:'6',  name:'A cervical esquecida',       desc:'Tech neck e o impacto no rosto', period:'Semana 1 · Presença', focus:['Postura'] },
+  { num:'7',  name:'Ritual da Semana 1',         desc:'Integrar os 6 dias em 10 minutos', period:'Semana 1 · Presença', focus:['Integração'] },
+  // SEMANA 2 — RECONEXÃO
+  { num:'8',  name:'Liberação profunda do masseter', desc:'Pressão e soltura — o que não foi dito', period:'Semana 2 · Reconexão', focus:['Liberação'] },
+  { num:'9',  name:'Respiração 4-7-8',           desc:'Regulação vagal em 3 minutos', period:'Semana 2 · Reconexão', focus:['Respiração'] },
+  { num:'10', name:'O couro cabeludo acorda',    desc:'O músculo frontal começa no hairline', period:'Semana 2 · Reconexão', focus:['Liberação'] },
+  { num:'11', name:'Drenagem linfática',         desc:'Primeiros movimentos de drenagem', period:'Semana 2 · Reconexão', focus:['Toque'] },
+  { num:'12', name:'A fáscia que conecta tudo',  desc:'A rede que sustenta ou afunda a face', period:'Semana 2 · Reconexão', focus:['Liberação'] },
+  { num:'13', name:'Pontos de acupressão',       desc:'Os 5 pontos que regulam tudo', period:'Semana 2 · Reconexão', focus:['Toque'] },
+  { num:'14', name:'Ritual da Semana 2',         desc:'Dois semanas — o rosto já responde', period:'Semana 2 · Reconexão', focus:['Integração'] },
+  // SEMANA 3 — INTEGRAÇÃO
+  { num:'15', name:'Liberação occipital',        desc:'A conexão nuca-rosto que poucos conhecem', period:'Semana 3 · Integração', focus:['Liberação'] },
+  { num:'16', name:'Automassagem modeladora',    desc:'Técnica completa de levantamento natural', period:'Semana 3 · Integração', focus:['Toque'] },
+  { num:'17', name:'Simetria e presença',        desc:'Lendo os padrões emocionais no rosto', period:'Semana 3 · Integração', focus:['Consciência'] },
+  { num:'18', name:'O protocolo noturno',        desc:'Ritual de desfazer o dia no rosto', period:'Semana 3 · Integração', focus:['Toque'] },
+  { num:'19', name:'Rosto e voz',                desc:'A conexão laringe-rosto-respiração', period:'Semana 3 · Integração', focus:['Respiração'] },
+  { num:'20', name:'O ritual dos 10 minutos',   desc:'Todos os quatro pilares integrados', period:'Semana 3 · Integração', focus:['Integração'] },
+  { num:'21', name:'Reconexão Plena',            desc:'21 dias. O que mudou no seu rosto?', period:'Semana 3 · Integração', focus:['Celebração'] }
+];
+const DESAFIO_UNLOCK_DAYS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+
+function getActiveLevels() {
+  return state.modalidade === 'desafio' ? DESAFIO_LEVELS : LEVELS;
+}
+function getActiveUnlockDays() {
+  return state.modalidade === 'desafio' ? DESAFIO_UNLOCK_DAYS : PHASE_UNLOCK_DAYS;
+}
+
 /* Foco específico de cada fase para cada ritual */
 const PHASE_RITUAL_FOCUS = {
   I: {
@@ -1286,6 +1339,7 @@ const ML_PER_KG  = 35;
 let state = {
   name: '',
   startDate: null,
+  modalidade: 'mentoria', // 'mentoria' | 'desafio'
   ritualsDone: {},
   microsDone:  {},
   tomorrowFocus: null,
@@ -1344,6 +1398,7 @@ function loadState() {
     if (!state.photos) state.photos = [];
     if (!state.waterLog) state.waterLog = {};
     if (state.waterReminder === undefined) state.waterReminder = false;
+    if (!state.modalidade) state.modalidade = 'mentoria';
   } catch(e) {}
 }
 
@@ -1566,6 +1621,22 @@ function selectMomento(val) {
     if (!btn) return;
     btn.style.borderColor = id === val ? 'var(--green)' : 'var(--border)';
     btn.style.background  = id === val ? 'rgba(61,90,58,0.12)' : 'var(--card)';
+  });
+}
+
+function selectModalidade(val) {
+  state.modalidade = val;
+  saveState();
+  const colors = {
+    desafio: { border:'rgba(100,160,240,0.7)', bg:'rgba(100,160,240,0.1)' },
+    mentoria: { border:'rgba(180,120,240,0.7)', bg:'rgba(180,120,240,0.1)' }
+  };
+  ['desafio','mentoria'].forEach(id => {
+    const btn = document.getElementById('ps-' + id);
+    if (!btn) return;
+    const active = id === val;
+    btn.style.borderColor = active ? colors[id].border : 'var(--border)';
+    btn.style.background  = active ? colors[id].bg : 'var(--card)';
   });
 }
 
@@ -2211,7 +2282,7 @@ function closePillar() {
 
 function getPhaseStatus(idx) {
   if (!isPhaseUnlocked(idx)) return 'locked';
-  if (idx < LEVELS.length - 1 && isPhaseUnlocked(idx + 1)) return 'completed';
+  if (idx < getActiveLevels().length - 1 && isPhaseUnlocked(idx + 1)) return 'completed';
   return 'current';
 }
 
@@ -2331,16 +2402,16 @@ function getDaysSinceStart() {
 
 function isPhaseUnlocked(idx) {
   if (isMentor) return true;
-  return getDaysSinceStart() >= PHASE_UNLOCK_DAYS[idx];
+  return getDaysSinceStart() >= getActiveUnlockDays()[idx];
 }
 
 function daysToUnlock(idx) {
-  return Math.max(0, PHASE_UNLOCK_DAYS[idx] - getDaysSinceStart());
+  return Math.max(0, getActiveUnlockDays()[idx] - getDaysSinceStart());
 }
 
 function showLockedMsg(idx) {
   const days = daysToUnlock(idx);
-  const lv = LEVELS[idx];
+  const lv = getActiveLevels()[idx];
   document.getElementById('lu-r').textContent = lv.num;
   document.getElementById('lu-n').textContent = lv.name + ' — Bloqueada';
   document.getElementById('lu-d').textContent = `Esta fase desbloqueia em ${days} dia${days !== 1 ? 's' : ''}. Continue praticando — o tempo na fase atual é parte da transformação.`;
@@ -2350,10 +2421,11 @@ function showLockedMsg(idx) {
 function openPhaseDetail(idx) {
   if (!isPhaseUnlocked(idx)) { showLockedMsg(idx); return; }
   curPhaseIdx = idx;
-  const lv = LEVELS[idx];
-  document.getElementById('phd-num').textContent = 'Fase ' + lv.num;
+  const lv = getActiveLevels()[idx];
+  const prefix = state.modalidade === 'desafio' ? 'Dia ' : 'Fase ';
+  document.getElementById('phd-num').textContent = prefix + lv.num;
   document.getElementById('phd-name').textContent = lv.name;
-  document.getElementById('phd-period').textContent = lv.period;
+  document.getElementById('phd-period').textContent = lv.period || lv.desc || '';
   renderPhaseDetailBody();
   const m = document.getElementById('modal-phase');
   m.style.display = 'flex';
@@ -2367,7 +2439,7 @@ function closePhaseDetail() {
 }
 
 function renderPhaseDetailBody() {
-  const lv = LEVELS[curPhaseIdx];
+  const lv = getActiveLevels()[curPhaseIdx];
   const phaseNum = curPhaseIdx + 1;
   const photos = (state.photos || []).filter(p => p.phaseNum === phaseNum);
   const types = ['frontal','perfil-d','perfil-e'];
@@ -2707,6 +2779,10 @@ function getFirstPhaseWithPhoto() {
 }
 
 function getCurrentPhaseNum() {
+  if (state.modalidade === 'desafio') {
+    const days = getDaysSinceStart();
+    return Math.min(21, Math.max(1, days + 1));
+  }
   const total = Object.values(state.ritualsDone).reduce((a, arr) => a + arr.length, 0);
   for (let i = LEVELS.length - 1; i >= 0; i--) {
     if (total >= LEVELS[i].checks) return i + 1;
@@ -2715,6 +2791,32 @@ function getCurrentPhaseNum() {
 }
 
 function renderFlowerSVG() {
+  // Para o Desafio, renderiza um progresso circular em vez da flor
+  if (state.modalidade === 'desafio') {
+    const days = getDaysSinceStart();
+    const done = Math.min(21, days);
+    const pct  = Math.round((done / 21) * 100);
+    const r = 110, cx = 150, cy = 150;
+    const circ = 2 * Math.PI * r;
+    const dash = (pct / 100) * circ;
+    const curDay = Math.min(21, done + 1);
+    const curName = DESAFIO_LEVELS[curDay - 1]?.name || 'Reconexão Plena';
+    return `<svg viewBox="0 0 300 300" class="flower-svg" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="url(#dgrad)" stroke-width="14"
+        stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${circ/4}" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="dgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#4a90d9"/>
+          <stop offset="100%" stop-color="#c49bf5"/>
+        </linearGradient>
+      </defs>
+      <text x="150" y="138" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-size="38" font-weight="700" font-family="'DM Sans',sans-serif">Dia ${curDay}</text>
+      <text x="150" y="162" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-size="11" font-family="'DM Sans',sans-serif">de 21</text>
+      <text x="150" y="185" text-anchor="middle" fill="rgba(196,168,122,0.7)" font-size="10" font-family="'Playfair Display',serif" font-style="italic">${curName}</text>
+    </svg>`;
+  }
+
   const NUMS = ['I','II','III','IV','V','VI'];
   const ANGLES = [0, 60, 120, 180, 240, 300];
   const PETAL = 'M 0,2 C -24,-28 -20,-72 0,-90 C 20,-72 24,-28 0,2';
@@ -2767,13 +2869,13 @@ function renderFlowerSVG() {
 
 function renderPhaseCards() {
   const badgeTxt = { completed:'Concluída', current:'Em progresso', locked:'' };
-  return LEVELS.map(function(lv, idx) {
+  return getActiveLevels().map(function(lv, idx) {
     const status  = getPhaseStatus(idx);
     const handler = status === 'locked' ? 'showLockedMsg('+idx+')' : 'openPhaseDetail('+idx+')';
     const chips   = status !== 'locked'
       ? '<div class="pcard-chips">' + (lv.focus||[]).map(function(f){ return '<span class="pcard-chip">'+f+'</span>'; }).join('') + '</div>'
       : '';
-    const sub     = status === 'locked' ? 'Disponível no Dia ' + PHASE_UNLOCK_DAYS[idx] : lv.period;
+    const sub     = status === 'locked' ? 'Disponível no Dia ' + getActiveUnlockDays()[idx] : lv.period;
     const badge   = status !== 'locked'
       ? '<span class="pcard-badge ' + status + '">' + badgeTxt[status] + '</span>'
       : '<span class="pcard-badge locked">Bloqueada</span>';
@@ -2804,9 +2906,24 @@ function switchJornadaTab(tab) {
 }
 
 function renderEvolucao() {
-  // Flor mandala
+  // Badge de modalidade
+  const badge = document.getElementById('modalidade-badge');
+  if (badge) {
+    if (state.modalidade === 'desafio') {
+      badge.textContent = '🔵 Desafio 21 Dias';
+      badge.style.background = 'rgba(100,160,240,0.15)';
+      badge.style.color = '#7ab4f5';
+      badge.style.border = '1px solid rgba(100,160,240,0.3)';
+    } else {
+      badge.textContent = '🟣 Mentoria';
+      badge.style.background = 'rgba(180,120,240,0.15)';
+      badge.style.color = '#c49bf5';
+      badge.style.border = '1px solid rgba(180,120,240,0.3)';
+    }
+  }
+  // Flor mandala / progresso circular
   document.getElementById('jornada-path').innerHTML = renderFlowerSVG();
-  // Cards de fase
+  // Cards de fase / dias
   document.getElementById('phase-card-list').innerHTML = renderPhaseCards();
   // Garantir que sub-aba correta está visível
   switchJornadaTab(activeJornadaTab);
