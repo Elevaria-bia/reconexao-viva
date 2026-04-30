@@ -588,6 +588,7 @@
 
     <!-- Seção: Trilha -->
     <div id="jorn-sec-trilha">
+      <div id="jornada-prelaunch"></div>
       <div class="flower-wrap" id="jornada-path"></div>
       <div class="phase-card-list" id="phase-card-list"></div>
     </div>
@@ -1212,6 +1213,22 @@ const DESAFIO_LEVELS = [
   { num:'21', name:'Reconexão Plena',            desc:'21 dias. O que mudou no seu rosto?', period:'Semana 3 · Integração', focus:['Celebração'] }
 ];
 const DESAFIO_UNLOCK_DAYS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+
+/* Data de início do coorte — todos os desafio começam juntos */
+const DESAFIO_START_DATE = '2026-05-10';
+
+function isDesafioPreLaunch() {
+  if (state.modalidade !== 'desafio') return false;
+  const start = new Date(DESAFIO_START_DATE + 'T00:00:00');
+  const now   = new Date(); now.setHours(0,0,0,0);
+  return now < start;
+}
+
+function diasParaDesafio() {
+  const start = new Date(DESAFIO_START_DATE + 'T00:00:00');
+  const now   = new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((start - now) / (1000 * 60 * 60 * 24));
+}
 
 function getActiveLevels() {
   return state.modalidade === 'desafio' ? DESAFIO_LEVELS : LEVELS;
@@ -1929,6 +1946,39 @@ ${wellnessPills}
   <div style="font-size:12px;color:var(--muted);font-style:italic">${waterMsg}</div>
 </div>`;
 
+  const diasRestantes = diasParaDesafio();
+  const prelaunchBanner = isDesafioPreLaunch() ? `
+<div style="margin:0 24px 0;background:linear-gradient(135deg,rgba(100,160,240,0.12),rgba(100,160,240,0.05));border:1px solid rgba(100,160,240,0.3);border-radius:20px;padding:24px 20px;text-align:center">
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(122,180,245,0.8);margin-bottom:10px">🔵 Desafio 21 Dias</div>
+  <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#7ab4f5;margin-bottom:4px" id="countdown-days">${diasRestantes}</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px">dia${diasRestantes !== 1 ? 's' : ''} para o início</div>
+  <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:6px">Começa dia 10 de maio de 2026</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.65">Seu acesso está ativo — em breve você receberá<br>a prática do Dia 1 aqui mesmo no app.</div>
+  <div id="countdown-hms" style="margin-top:16px;display:flex;justify-content:center;gap:16px"></div>
+</div>
+<script>
+(function startCountdown(){
+  function tick(){
+    const target = new Date('${DESAFIO_START_DATE}T00:00:00');
+    const diff = target - new Date();
+    if (diff <= 0) { document.getElementById('countdown-hms') && (document.getElementById('countdown-hms').innerHTML = ''); return; }
+    const h = Math.floor(diff/3600000)%24;
+    const m = Math.floor(diff/60000)%60;
+    const s = Math.floor(diff/1000)%60;
+    const el = document.getElementById('countdown-hms');
+    if (el) el.innerHTML = [['h',h<10?'0'+h:h],['min',m<10?'0'+m:m],['seg',s<10?'0'+s:s]].map(([l,v])=>
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:22px;font-weight:700;color:#7ab4f5;font-variant-numeric:tabular-nums">'+v+'</span><span style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">'+l+'</span></div>'
+    ).join('');
+  }
+  tick();
+  const iv = setInterval(tick, 1000);
+  /* Para o timer quando a view muda */
+  const obs = new MutationObserver(()=>{ if(!document.getElementById('countdown-hms')){ clearInterval(iv); obs.disconnect(); }});
+  obs.observe(document.getElementById('v-hoje'), {childList:true});
+})();
+<\/script>
+` : '';
+
   document.getElementById('v-hoje').innerHTML = `
 <div class="hoje-hd">
   <div class="hoje-greet">${getGreeting()}</div>
@@ -1936,6 +1986,7 @@ ${wellnessPills}
   <div class="hoje-dt">${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}</div>
 </div>
 ${reminderHTML}
+${prelaunchBanner}
 ${waterHTML}
 <div class="int-strip">
   <div class="int-lbl">Intenção do Dia</div>
@@ -1958,6 +2009,7 @@ ${wellnessHTML}
     <div class="score-streak">${streakTxt}</div>
   </div>
 </div>
+${isDesafioPreLaunch() ? '' : `
 <div class="timeline-wrap">
   <div class="section-lbl">Rituais do Dia</div>
   ${rituaisHTML}
@@ -1965,7 +2017,8 @@ ${wellnessHTML}
 <div class="micro-wrap">
   <div class="section-lbl" style="margin-top:8px">Micro-Consciências</div>
   <div class="micro-scr">${microHTML}</div>
-</div>`;
+</div>`}
+`;
 }
 
 function setWellness(choice) {
@@ -2397,6 +2450,14 @@ function getRitualWindowStatus(ritualId) {
 }
 
 function getDaysSinceStart() {
+  /* Desafio 21 Dias: todas as alunas usam a data do coorte como referência */
+  if (state.modalidade === 'desafio') {
+    const start = new Date(DESAFIO_START_DATE + 'T00:00:00');
+    start.setHours(0,0,0,0);
+    const now = new Date(); now.setHours(0,0,0,0);
+    return Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    /* negativo antes de 10/05 → todos os dias ficam bloqueados */
+  }
   if (!state.startDate) return 0;
   const start = new Date(state.startDate);
   const now = new Date();
@@ -2413,11 +2474,16 @@ function daysToUnlock(idx) {
 }
 
 function showLockedMsg(idx) {
-  const days = daysToUnlock(idx);
   const lv = getActiveLevels()[idx];
   document.getElementById('lu-r').textContent = lv.num;
   document.getElementById('lu-n').textContent = lv.name + ' — Bloqueada';
-  document.getElementById('lu-d').textContent = `Esta fase desbloqueia em ${days} dia${days !== 1 ? 's' : ''}. Continue praticando — o tempo na fase atual é parte da transformação.`;
+  if (isDesafioPreLaunch()) {
+    const dr = diasParaDesafio();
+    document.getElementById('lu-d').textContent = `O Desafio 21 Dias inicia em ${dr} dia${dr !== 1 ? 's' : ''}, no dia 10 de maio. Seu acesso está garantido — aguarde o início do coorte.`;
+  } else {
+    const days = daysToUnlock(idx);
+    document.getElementById('lu-d').textContent = `Esta fase desbloqueia em ${days} dia${days !== 1 ? 's' : ''}. Continue praticando — o tempo na fase atual é parte da transformação.`;
+  }
   document.getElementById('modal-lu').classList.add('open');
 }
 
@@ -2907,7 +2973,11 @@ function renderPhaseCards() {
     const chips   = status !== 'locked'
       ? '<div class="pcard-chips">' + (lv.focus||[]).map(function(f){ return '<span class="pcard-chip">'+f+'</span>'; }).join('') + '</div>'
       : '';
-    const sub     = status === 'locked' ? 'Disponível no Dia ' + getActiveUnlockDays()[idx] : lv.period;
+    const sub     = status === 'locked'
+      ? (isDesafioPreLaunch() && idx === 0 ? 'Inicia 10 de maio de 2026'
+        : isDesafioPreLaunch() ? 'Disponível após o Dia ' + getActiveUnlockDays()[idx]
+        : 'Disponível no Dia ' + getActiveUnlockDays()[idx])
+      : lv.period;
     const badge   = status !== 'locked'
       ? '<span class="pcard-badge ' + status + '">' + badgeTxt[status] + '</span>'
       : '<span class="pcard-badge locked">Bloqueada</span>';
@@ -2951,6 +3021,21 @@ function renderEvolucao() {
       badge.style.background = 'rgba(180,120,240,0.15)';
       badge.style.color = '#c49bf5';
       badge.style.border = '1px solid rgba(180,120,240,0.3)';
+    }
+  }
+  // Banner pré-lançamento para desafio
+  const prelaunchJornada = document.getElementById('jornada-prelaunch');
+  if (prelaunchJornada) {
+    if (isDesafioPreLaunch()) {
+      const dr = diasParaDesafio();
+      prelaunchJornada.style.display = 'block';
+      prelaunchJornada.innerHTML = `
+        <div style="background:linear-gradient(135deg,rgba(100,160,240,0.12),rgba(100,160,240,0.05));border:1px solid rgba(100,160,240,0.3);border-radius:16px;padding:16px 18px;margin:0 0 16px;text-align:center">
+          <div style="font-size:12px;color:#7ab4f5;font-weight:600;margin-bottom:4px">🔵 Desafio começa em ${dr} dia${dr!==1?'s':''}</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6">Explore a trilha — os 21 dias abrem a partir de 10/05/2026</div>
+        </div>`;
+    } else {
+      prelaunchJornada.style.display = 'none';
     }
   }
   // Flor mandala / progresso circular
