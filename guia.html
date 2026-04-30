@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guia Completo — Reconexão Viva</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:     #0A0A0A;
+      --surf:   #111111;
+      --card:   #181818;
+      --card2:  #1E1E1E;
+      --border: rgba(255,255,255,0.07);
+      --green:  #3D5A3A;
+      --green2: rgba(61,90,58,0.18);
+      --accent: #E87B6A;
+      --gold:   #C4A87A;
+      --blue:   #7ab4f5;
+      --muted:  rgba(255,255,255,0.42);
+      --white:  #FFFFFF;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--white); line-height: 1.6; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,10,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: 0.04em; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--white); }
+    @media(max-width:520px) { .nav-links { display: none; } }
+
+    /* HERO */
+    .hero {
+      padding: 80px 24px 64px; text-align: center;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(61,90,58,0.28) 0%, transparent 70%);
+    }
+    .hero-tag {
+      display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--accent); border: 1px solid rgba(232,123,106,0.3); border-radius: 20px;
+      padding: 6px 16px; margin-bottom: 24px;
+    }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(32px,8vw,52px); line-height: 1.1; margin-bottom: 16px; }
+    .hero h1 em { font-style: italic; color: var(--accent); }
+    .hero p { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 40px; }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--green); color: white; border: none; border-radius: 14px;
+      padding: 16px 32px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+      text-decoration: none; cursor: pointer; transition: opacity 0.2s;
+    }
+    .hero-cta:hover { opacity: 0.85; }
+
+    /* ÍNDICE */
+    .index-wrap { max-width: 640px; margin: 0 auto; padding: 40px 24px 0; }
+    .index-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 16px; }
+    .index-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .index-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px 16px; text-decoration: none; color: var(--white); transition: border-color 0.2s;
+    }
+    .index-item:hover { border-color: rgba(61,90,58,0.5); }
+    .index-num {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--green2);
+      border: 1px solid rgba(61,90,58,0.4); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--green); flex-shrink: 0;
+    }
+    .index-lbl { font-size: 13px; line-height: 1.3; }
+    @media(max-width:400px) { .index-grid { grid-template-columns: 1fr; } }
+
+    /* SEÇÕES */
+    .section { max-width: 640px; margin: 0 auto; padding: 72px 24px 0; }
+    .sec-tag {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+    }
+    .sec-tag::before { content:''; display:block; width:20px; height:1px; background:var(--border); }
+    .sec-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--green2); border: 1px solid rgba(61,90,58,0.4);
+      font-size: 12px; font-weight: 700; color: var(--green); margin-bottom: 16px;
+    }
+    .sec-h { font-family: 'Playfair Display', serif; font-size: clamp(24px,6vw,34px); line-height: 1.15; margin-bottom: 14px; }
+    .sec-p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+
+    /* CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 22px 20px; margin-bottom: 12px; }
+    .card-blue { border-color: rgba(122,180,245,0.25); }
+
+    /* PILARES */
+    .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .pillar { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .pillar-num { font-size: 10px; color: var(--green); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .pillar-name { font-family: 'Playfair Display', serif; font-size: 15px; margin-bottom: 4px; }
+    .pillar-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* STEPS */
+    .steps { display: flex; flex-direction: column; }
+    .step { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .step-n {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green); color: white;
+      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+    }
+    .step-body { flex: 1; }
+    .step-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .step-note {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; margin-top: 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .step-note-ico {
+      width: 32px; height: 32px; border-radius: 8px; background: var(--green2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-note-ico svg { width: 16px; height: 16px; }
+    .step-note-txt { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* OS TABS */
+    .os-tabs { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .os-tab {
+      flex: 1; padding: 11px; text-align: center; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; color: var(--muted); background: transparent;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .os-tab.active { background: var(--green); color: white; }
+    .os-content { display: none; }
+    .os-content.active { display: block; }
+
+    /* PHONE MOCKUP */
+    .phone-wrap { display: flex; justify-content: center; margin: 32px 0; }
+    .phone {
+      width: 240px; border-radius: 40px; border: 2px solid rgba(255,255,255,0.12);
+      background: #0A0A0A;
+      box-shadow: 0 0 60px rgba(61,90,58,0.18), 0 30px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .phone-notch { width: 80px; height: 22px; border-radius: 0 0 16px 16px; background: #111; margin: 0 auto; }
+    .phone-screen { padding: 10px 12px 16px; min-height: 360px; }
+    .phone-nav {
+      display: flex; justify-content: space-around; padding: 10px 0 6px;
+      border-top: 1px solid rgba(255,255,255,0.07); background: #111;
+    }
+    .phone-nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 7px; color: rgba(255,255,255,0.35); }
+    .phone-nav-item.active { color: #3D5A3A; }
+    .phone-nav-dot { width: 18px; height: 2px; border-radius: 1px; background: currentColor; }
+
+    /* Mockup elementos */
+    .mock-hd { padding: 6px 0 10px; }
+    .mock-greet { font-size: 9px; color: rgba(255,255,255,0.4); }
+    .mock-name { font-family: 'Playfair Display', serif; font-size: 17px; margin: 1px 0; }
+    .mock-date { font-size: 8px; color: rgba(255,255,255,0.28); }
+    .mock-banner { background: rgba(100,160,240,0.1); border: 1px solid rgba(100,160,240,0.22); border-radius: 10px; padding: 10px; margin-bottom: 8px; text-align: center; }
+    .mock-banner-tag { font-size: 7px; color: #7ab4f5; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .mock-banner-lbl { font-size: 8px; color: rgba(255,255,255,0.45); }
+    .mock-card { background: #181818; border-radius: 9px; padding: 9px 11px; margin-bottom: 7px; }
+    .mock-lbl { font-size: 7px; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.28); margin-bottom: 4px; }
+    .mock-val { font-size: 10px; color: rgba(255,255,255,0.75); }
+    .mock-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+    .mock-pill { font-size: 8px; padding: 3px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+    .mock-pill.sel { background: rgba(61,90,58,0.3); border-color: rgba(61,90,58,0.5); color: white; }
+    .mock-trail { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 0; }
+    .mock-node { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+    .mock-node.unlocked { background: var(--green); color: white; }
+    .mock-node.locked { background: #1E1E1E; border: 2px solid #2a2a2a; color: #3a3a3a; }
+    .mock-connector { width: 2px; height: 18px; background: #1e1e1e; }
+    .mock-node-lbl { font-size: 7px; color: rgba(255,255,255,0.35); margin-top: 2px; text-align: center; }
+    .mock-cam-wrap { background: #111; height: 200px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .mock-cam-oval { width: 70px; height: 90px; border-radius: 50%; border: 1.5px dashed rgba(61,90,58,0.55); }
+    .mock-cam-line { position: absolute; background: rgba(255,255,255,0.06); }
+    .mock-cam-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.92); margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+    .mock-cam-inner { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.2); }
+
+    /* TAB DESC */
+    .tab-desc { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+    .tab-icon-wrap {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--green2);
+      border: 1px solid rgba(61,90,58,0.35); display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px; flex-shrink: 0;
+    }
+    .tab-icon-wrap svg { width: 20px; height: 20px; }
+    .tab-name { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .tab-info { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .tab-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--green2); border: 1px solid rgba(61,90,58,0.3); color: rgba(255,255,255,0.65); }
+
+    /* DICAS */
+    .dica-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+    .dica { background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .dica-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+    .dica-ico svg { width: 18px; height: 18px; }
+    .dica.bom .dica-ico { background: rgba(61,90,58,0.2); }
+    .dica.nao .dica-ico { background: rgba(232,123,106,0.12); }
+    .dica-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .dica-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .dica.bom { border-color: rgba(61,90,58,0.28); }
+    .dica.nao { border-color: rgba(232,123,106,0.18); }
+
+    /* ALERT */
+    .alert {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(61,90,58,0.1); border: 1px solid rgba(61,90,58,0.28);
+      border-radius: 14px; padding: 16px; margin-bottom: 24px;
+    }
+    .alert-ico { width: 36px; height: 36px; border-radius: 10px; background: rgba(61,90,58,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .alert-ico svg { width: 18px; height: 18px; }
+    .alert-txt { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.65; padding-top: 2px; }
+    .alert-txt strong { color: var(--white); }
+
+    /* FAQ */
+    .faq-item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 8px; overflow: hidden; }
+    .faq-q {
+      padding: 16px 18px; font-size: 14px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .faq-arrow { width: 20px; height: 20px; border-radius: 50%; background: var(--green2); border: 1px solid rgba(61,90,58,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s; }
+    .faq-arrow svg { width: 10px; height: 10px; }
+    .faq-q.open .faq-arrow { transform: rotate(180deg); background: var(--green2); }
+    .faq-a { display: none; padding: 0 18px 16px; font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .faq-a.open { display: block; }
+
+    /* FOOTER */
+    .footer { max-width: 640px; margin: 80px auto 0; padding: 40px 24px 48px; text-align: center; border-top: 1px solid var(--border); }
+    .footer-r { width: 56px; height: 56px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-family: 'Playfair Display', serif; font-size: 26px; color: var(--accent); }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px; }
+    .footer-p { font-size: 13px; color: var(--muted); }
+    .footer-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; background: var(--green); color: white; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-size: 14px; font-weight: 600; }
+
+    /* DIVIDER */
+    .divider { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+    .divider hr { border: none; border-top: 1px solid var(--border); margin-top: 64px; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Reconexão Viva</a>
+  <div class="nav-links">
+    <a href="#desafio">O Desafio</a>
+    <a href="#instalar">Instalar</a>
+    <a href="#tour">O App</a>
+    <a href="#fotos">Fotos</a>
+    <a href="#faq">Duvidas</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Guia Completo do App</div>
+  <h1>Tudo que voce precisa<br/>para começar sua <em>jornada</em></h1>
+  <p>Passo a passo para instalar, entender e aproveitar ao maximo o Reconexão Viva no seu celular.</p>
+  <a class="hero-cta" href="https://app.biafaceyoga.workers.dev" target="_blank">
+    Abrir o App
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  </a>
+</div>
+
+<!-- ÍNDICE -->
+<div class="index-wrap">
+  <div class="index-title">Neste guia</div>
+  <div class="index-grid">
+    <a class="index-item" href="#desafio">
+      <div class="index-num">1</div>
+      <div class="index-lbl">O Desafio 21 Dias</div>
+    </a>
+    <a class="index-item" href="#instalar">
+      <div class="index-num">2</div>
+      <div class="index-lbl">Instalar na tela inicial</div>
+    </a>
+    <a class="index-item" href="#tour">
+      <div class="index-num">3</div>
+      <div class="index-lbl">Tour pelo app</div>
+    </a>
+    <a class="index-item" href="#fotos">
+      <div class="index-num">4</div>
+      <div class="index-lbl">Como tirar as fotos</div>
+    </a>
+  </div>
+</div>
+
+<!-- ── SEÇÃO 1: DESAFIO ── -->
+<div class="section" id="desafio">
+  <div class="sec-tag">Seção 1</div>
+  <div class="sec-num">1</div>
+  <h2 class="sec-h">O que é o<br/>Desafio 21 Dias</h2>
+  <p class="sec-p">Uma jornada coletiva de reconexão com o proprio rosto — 21 dias de pratica guiada, com inicio no mesmo dia para todas as participantes.</p>
+
+  <div class="card card-blue" style="margin-bottom:24px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7ab4f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:#7ab4f5">Data de Inicio</span>
+    </div>
+    <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#7ab4f5;margin-bottom:4px">10 de maio de 2026</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5)">Todas as alunas começam juntas no mesmo dia</div>
+  </div>
+
+  <p class="sec-p">O app fica disponivel assim que voce cria sua conta e recebe aprovação. Antes do dia 10 voce ve a contagem regressiva. No dia 10, o Dia 1 abre automaticamente para todas.</p>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-num">Pilar 1</div>
+      <div class="pillar-name">Consciência</div>
+      <div class="pillar-desc">Perceba as tensões do rosto que voce carrega sem saber</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">Pilar 2</div>
+      <div class="pillar-name">Respiração</div>
+      <div class="pillar-desc">Regule o sistema nervoso antes de qualquer toque</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">Pilar 3</div>
+      <div class="pillar-name">Fascia</div>
+      <div class="pillar-desc">Libere a rigidez acumulada nos tecidos faciais</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">Pilar 4</div>
+      <div class="pillar-name">Toque</div>
+      <div class="pillar-desc">Automassagem e drenagem para circulação e relaxamento</div>
+    </div>
+  </div>
+
+  <div class="alert">
+    <div class="alert-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#3D5A3A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="alert-txt"><strong>10 a 20 minutos por dia.</strong> Suas maos. Sua presença. Sem equipamentos, sem procedimentos. So voce e seu rosto.</div>
+  </div>
+</div>
+
+<div class="divider"><hr/></div>
+
+<!-- ── SEÇÃO 2: INSTALAR ── -->
+<div class="section" id="instalar">
+  <div class="sec-tag">Seção 2</div>
+  <div class="sec-num">2</div>
+  <h2 class="sec-h">Instalar na<br/>tela inicial</h2>
+  <p class="sec-p">O Reconexão Viva funciona direto no navegador — sem baixar da App Store. Salve como icone na tela inicial para abrir como um app normal.</p>
+
+  <div class="os-tabs">
+    <button class="os-tab active" onclick="switchOS('iphone', this)">iPhone (Safari)</button>
+    <button class="os-tab" onclick="switchOS('android', this)">Android (Chrome)</button>
+  </div>
+
+  <!-- IPHONE -->
+  <div class="os-content active" id="os-iphone">
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-body">
+          <div class="step-title">Abra o Safari</div>
+          <div class="step-desc">Acesse <strong>app.biafaceyoga.workers.dev</strong> no Safari. Use o Safari — o Chrome no iPhone nao permite instalação na tela inicial.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </div>
+            <div class="step-note-txt">Copie o link e cole na barra de endereços do Safari</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-body">
+          <div class="step-title">Toque em Compartilhar</div>
+          <div class="step-desc">Na barra inferior do Safari, toque no icone de compartilhar — o quadrado com a seta apontando para cima.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </div>
+            <div class="step-note-txt">Icone de compartilhar na barra de navegação inferior do Safari</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-body">
+          <div class="step-title">Adicionar à Tela de Início</div>
+          <div class="step-desc">Role o menu e toque em <strong>"Adicionar à Tela de Início"</strong>. Se nao aparecer de imediato, role um pouco mais para baixo na lista de opcoes.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="3"/></svg>
+            </div>
+            <div class="step-note-txt">Role o menu ate encontrar "Adicionar à Tela de Início"</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">4</div>
+        <div class="step-body">
+          <div class="step-title">Confirmar</div>
+          <div class="step-desc">O iPhone mostra um preview do icone. Toque em <strong>"Adicionar"</strong> no canto superior direito. O icone aparece na tela inicial.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="step-note-txt">Pronto — abre em tela cheia como qualquer app nativo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert" style="margin-top:20px">
+      <div class="alert-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="alert-txt"><strong>Da proxima vez</strong>, toque no icone na tela inicial. Abre em tela cheia, sem barra do navegador.</div>
+    </div>
+  </div>
+
+  <!-- ANDROID -->
+  <div class="os-content" id="os-android">
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-body">
+          <div class="step-title">Abra o Chrome</div>
+          <div class="step-desc">Acesse <strong>app.biafaceyoga.workers.dev</strong> no Google Chrome. No Android, o Chrome permite instalação diretamente.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            </div>
+            <div class="step-note-txt">Digite o link na barra de endereços do Chrome</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-body">
+          <div class="step-title">Toque nos três pontos</div>
+          <div class="step-desc">No canto superior direito do Chrome, toque nos tres pontos verticais para abrir o menu de opcoes.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1" fill="rgba(61,90,58,0.9)"/><circle cx="12" cy="12" r="1" fill="rgba(61,90,58,0.9)"/><circle cx="12" cy="19" r="1" fill="rgba(61,90,58,0.9)"/></svg>
+            </div>
+            <div class="step-note-txt">Tres pontos verticais no canto superior direito do Chrome</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-body">
+          <div class="step-title">Adicionar à tela inicial</div>
+          <div class="step-desc">Toque em <strong>"Adicionar à tela inicial"</strong> ou <strong>"Instalar app"</strong>. Alguns Android tambem mostram um banner automatico na parte inferior da tela.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="step-note-txt">Opcao "Adicionar à tela inicial" no menu do Chrome</div>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">4</div>
+        <div class="step-body">
+          <div class="step-title">Confirmar instalação</div>
+          <div class="step-desc">Confirme tocando em <strong>"Instalar"</strong> ou <strong>"Adicionar"</strong>. O icone aparece na tela inicial ou gaveta de apps.</div>
+          <div class="step-note">
+            <div class="step-note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="step-note-txt">Pronto — o app e instalado como qualquer outro</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert" style="margin-top:20px">
+      <div class="alert-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="alert-txt"><strong>Funciona offline!</strong> Depois de instalado, o app carrega mesmo sem conexão com a internet.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr/></div>
+
+<!-- ── SEÇÃO 3: TOUR ── -->
+<div class="section" id="tour">
+  <div class="sec-tag">Seção 3</div>
+  <div class="sec-num">3</div>
+  <h2 class="sec-h">Tour pelo app</h2>
+  <p class="sec-p">O app tem quatro abas na parte inferior. Cada uma tem uma funcão especifica na sua jornada.</p>
+
+  <!-- ABA HOJE -->
+  <div class="tab-desc">
+    <div class="tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="tab-name">Hoje</div>
+    <div class="tab-info">A tela principal do seu dia. Mostra a saudação, a intenção do dia, seu nivel de hidratação, como voce está se sentindo e — a partir do Dia 1 — os rituais para praticar.</div>
+    <div class="tab-chips">
+      <span class="chip">Countdown ate dia 10</span>
+      <span class="chip">Hidratação</span>
+      <span class="chip">Bem-estar do dia</span>
+      <span class="chip">Rituais diarios</span>
+    </div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="mock-hd">
+          <div class="mock-greet">Bom dia</div>
+          <div class="mock-name">Maria</div>
+          <div class="mock-date">sabado, 10 de maio</div>
+        </div>
+        <div class="mock-banner">
+          <div class="mock-banner-tag">Desafio 21 Dias</div>
+          <div style="font-size:11px;color:#7ab4f5;font-weight:600;margin-bottom:2px">Dia 1 desbloqueado!</div>
+          <div class="mock-banner-lbl">Sua pratica esta esperando</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-lbl">Intencao do Dia</div>
+          <div class="mock-val" style="font-style:italic;font-size:10px;color:rgba(255,255,255,0.65)">"A mandibula relaxada e o rosto que rejuvenesce."</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-lbl">Como voce esta hoje?</div>
+          <div class="mock-pills">
+            <div class="mock-pill sel">Leve</div>
+            <div class="mock-pill">Presente</div>
+            <div class="mock-pill">Cansada</div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <div class="phone-nav-item active"><div class="phone-nav-dot"></div>HOJE</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>GUIAS</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>JORNADA</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>PERFIL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA GUIAS -->
+  <div class="tab-desc" style="margin-top:8px">
+    <div class="tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    </div>
+    <div class="tab-name">Guias</div>
+    <div class="tab-info">Biblioteca com os guias completos de cada pilar do metodo. Acesse a qualquer momento para aprofundar a pratica ou tirar duvidas sobre as tecnicas.</div>
+    <div class="tab-chips">
+      <span class="chip">4 pilares</span>
+      <span class="chip">Tecnicas detalhadas</span>
+      <span class="chip">Anatomia facial</span>
+    </div>
+  </div>
+
+  <!-- ABA JORNADA -->
+  <div class="tab-desc" style="margin-top:8px">
+    <div class="tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <div class="tab-name">Jornada</div>
+    <div class="tab-info">Sua trilha dos 21 dias visualizada como um mapa. Cada dia e um no que abre conforme voce avança. Aqui tambem fica o registro de fotos de evolução.</div>
+    <div class="tab-chips">
+      <span class="chip">Trilha 21 dias</span>
+      <span class="chip">Dias bloqueados</span>
+      <span class="chip">Fotos de evolucao</span>
+    </div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div style="font-size:11px;font-weight:600;margin-bottom:10px;padding-top:4px">Sua Jornada</div>
+        <div class="mock-trail">
+          <div style="text-align:center">
+            <div class="mock-node unlocked">1</div>
+            <div class="mock-node-lbl">Presença</div>
+          </div>
+          <div class="mock-connector"></div>
+          <div style="text-align:center">
+            <div class="mock-node unlocked">2</div>
+            <div class="mock-node-lbl">Respiração</div>
+          </div>
+          <div class="mock-connector"></div>
+          <div style="text-align:center">
+            <div class="mock-node locked">3</div>
+            <div class="mock-node-lbl">Abre amanha</div>
+          </div>
+          <div class="mock-connector"></div>
+          <div style="text-align:center">
+            <div class="mock-node locked">4</div>
+            <div class="mock-node-lbl">Bloqueado</div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>HOJE</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>GUIAS</div>
+        <div class="phone-nav-item active"><div class="phone-nav-dot"></div>JORNADA</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>PERFIL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA PERFIL -->
+  <div class="tab-desc" style="margin-top:8px">
+    <div class="tab-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div class="tab-name">Perfil</div>
+    <div class="tab-info">Suas estatisticas da jornada — dias de sequencia, rituais feitos, nivel de vitalidade. Tambem onde voce ajusta notificacoes e preferencias.</div>
+    <div class="tab-chips">
+      <span class="chip">Sequencia de dias</span>
+      <span class="chip">Vitalidade</span>
+      <span class="chip">Configuracoes</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr/></div>
+
+<!-- ── SEÇÃO 4: FOTOS ── -->
+<div class="section" id="fotos">
+  <div class="sec-tag">Seção 4</div>
+  <div class="sec-num">4</div>
+  <h2 class="sec-h">Como tirar as<br/>fotos de evolução</h2>
+  <p class="sec-p">As fotos de evolução sao um registro pessoal da sua jornada. So voce as ve — nao sao compartilhadas. O app tem camera com grade de alinhamento para garantir fotos comparaveis ao longo dos 21 dias.</p>
+
+  <div class="alert" style="margin-bottom:28px">
+    <div class="alert-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <div class="alert-txt">As fotos ficam salvas <strong>so no seu celular</strong>, dentro do app. Nao vao para nenhum servidor. Sao para voce se reconhecer na propria evolucao.</div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen" style="padding:0">
+        <div class="mock-cam-wrap" style="height:290px;border-radius:0">
+          <div class="mock-cam-line" style="left:33%;top:0;bottom:0;width:1px"></div>
+          <div class="mock-cam-line" style="left:66%;top:0;bottom:0;width:1px"></div>
+          <div class="mock-cam-line" style="top:33%;left:0;right:0;height:1px"></div>
+          <div class="mock-cam-line" style="top:66%;left:0;right:0;height:1px"></div>
+          <div class="mock-cam-oval"></div>
+          <div style="position:absolute;top:10px;left:0;right:0;text-align:center;font-size:8px;color:rgba(255,255,255,0.45)">Frontal · Centralize o rosto no oval</div>
+        </div>
+        <div style="padding:12px;display:flex;justify-content:center">
+          <div class="mock-cam-btn"><div class="mock-cam-inner"></div></div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>HOJE</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>GUIAS</div>
+        <div class="phone-nav-item active"><div class="phone-nav-dot"></div>JORNADA</div>
+        <div class="phone-nav-item"><div class="phone-nav-dot"></div>PERFIL</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-p" style="margin-top:8px">O app pede 3 angulos: frontal, perfil direito e perfil esquerdo. Siga as dicas abaixo para ter fotos uteis para comparar depois.</p>
+
+  <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px">Dicas para boas fotos</div>
+  <div class="dica-grid">
+    <div class="dica bom">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </div>
+      <div class="dica-title">Luz natural</div>
+      <div class="dica-desc">Perto de janela com luz do dia, sem sol direto no rosto</div>
+    </div>
+    <div class="dica bom">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <div class="dica-title">Camera na altura dos olhos</div>
+      <div class="dica-desc">Celular na frente do rosto, nao apontado de baixo para cima</div>
+    </div>
+    <div class="dica bom">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0112 0v2"/></svg>
+      </div>
+      <div class="dica-title">Expressao neutra</div>
+      <div class="dica-desc">Rosto relaxado, nem sorrindo nem franzindo a testa</div>
+    </div>
+    <div class="dica bom">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="dica-title">Mesmo horario</div>
+      <div class="dica-desc">Se possivel, tire sempre no mesmo momento do dia</div>
+    </div>
+    <div class="dica nao">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(232,123,106,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      </div>
+      <div class="dica-title">Sem maquiagem</div>
+      <div class="dica-desc">Para ver a evolucao real da pele, prefira sem maquiagem</div>
+    </div>
+    <div class="dica nao">
+      <div class="dica-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(232,123,106,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      </div>
+      <div class="dica-title">Sem filtros</div>
+      <div class="dica-desc">O app nao usa filtros — a foto e fiel ao seu rosto real</div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="step-title">Va em Jornada → aba Fotos</div>
+        <div class="step-desc">Na aba Jornada, toque em "Fotos" (sub-aba no topo) e depois em "Registrar fotos de hoje".</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="step-title">Permita acesso à camera</div>
+        <div class="step-desc">Na primeira vez, o celular pede permissao para usar a camera. Toque em "Permitir" para continuar.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="step-title">Centralize o rosto no oval</div>
+        <div class="step-desc">A camera mostra uma grade e um oval no centro. Posicione o rosto dentro do oval, com os ombros paralelos ao chao.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="step-title">Tire os 3 angulos</div>
+        <div class="step-desc">O app guia: frontal, perfil direito, perfil esquerdo. Toque no botao branco para capturar cada angulo.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><hr/></div>
+
+<!-- FAQ -->
+<div class="section" id="faq">
+  <div class="sec-tag">Duvidas frequentes</div>
+  <div class="sec-num" style="font-size:14px">?</div>
+  <h2 class="sec-h">Perguntas<br/>frequentes</h2>
+
+  <div style="margin-bottom:8px">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Ja comprei — quando recebo o acesso?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Apos a compra, a Bia libera seu acesso manualmente. Quando aprovada, voce pode entrar no app normalmente. Voce tambem pode tocar em "Verificar acesso" na tela de espera a qualquer momento.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        O app funciona no iPhone e no Android?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Sim! Funciona em qualquer celular com navegador atualizado. No iPhone use o Safari para instalar na tela inicial. No Android use o Chrome.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Preciso de internet para usar?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Para o primeiro acesso e para sincronizar o progresso sim. Mas depois de instalado, o app carrega mesmo sem conexao. Seu progresso e salvo automaticamente.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Quando o Dia 1 vai aparecer?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">No dia 10 de maio de 2026, o Dia 1 abre automaticamente para todas. Antes disso, voce ve a contagem regressiva. Nao precisa fazer nada — o app atualiza sozinho.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Posso ver meu historico de fotos?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Sim. Na aba Jornada → Fotos, voce ve todas as fotos registradas organizadas por semana. As fotos ficam salvas no seu celular, dentro do app.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Esqueci minha senha. O que faco?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Na tela de login, toque em "Esqueceu a senha?". Digite seu e-mail e voce recebe um link para criar uma nova senha. Verifique a caixa de spam se nao chegar em alguns minutos.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Posso usar em mais de um celular?
+        <div class="faq-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="rgba(61,90,58,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="faq-a">Sim. Seu progresso fica salvo na sua conta. Faca login com o mesmo e-mail e senha em qualquer dispositivo e seu historico aparece.</div>
+    </div>
+  </div>
+</div>
+
+<!-- RODAPÉ -->
+<div class="footer">
+  <div class="footer-r">R</div>
+  <div class="footer-logo">Reconexão Viva</div>
+  <div class="footer-p">Metodo Reconexão Facial · @biafaceyoga</div>
+  <a class="footer-link" href="https://app.biafaceyoga.workers.dev" target="_blank">
+    Abrir o App
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+  </a>
+</div>
+
+<script>
+  function switchOS(os, btn) {
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.os-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('os-' + os).classList.add('active');
+  }
+  function toggleFaq(el) {
+    const answer = el.nextElementSibling;
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    if (!isOpen) { el.classList.add('open'); answer.classList.add('open'); }
+  }
+</script>
+</body>
+</html>
