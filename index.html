@@ -2022,76 +2022,75 @@ ${wellnessPills}
   const diasRestantes = diasParaDesafio();
   const prelaunchBanner = isDesafioPreLaunch() ? `
 <div style="margin:0 24px 0;background:linear-gradient(135deg,rgba(100,160,240,0.12),rgba(100,160,240,0.05));border:1px solid rgba(100,160,240,0.3);border-radius:20px;padding:24px 20px;text-align:center">
-  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(122,180,245,0.8);margin-bottom:10px">🔵 Desafio 21 Dias</div>
-  <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#7ab4f5;margin-bottom:4px" id="countdown-days">${diasRestantes}</div>
-  <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px">dia${diasRestantes !== 1 ? 's' : ''} para o início</div>
-  <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:6px">Começa dia 10 de maio de 2026</div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.65">Seu acesso está ativo — em breve você receberá<br>a prática do Dia 1 aqui mesmo no app.</div>
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.14em;color:rgba(122,180,245,0.8);margin-bottom:10px">Desafio 21 Dias</div>
+  <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#7ab4f5;margin-bottom:4px">${diasRestantes}</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px">dia${diasRestantes !== 1 ? 's' : ''} para o inicio</div>
+  <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:6px">Comeca dia 10 de maio de 2026</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.65">Seu acesso esta ativo — a pratica do Dia 1 chega aqui no app.</div>
   <div id="countdown-hms" style="margin-top:16px;display:flex;justify-content:center;gap:16px"></div>
 </div>
-<script>
-(function startCountdown(){
-  function tick(){
-    const target = new Date('${DESAFIO_START_DATE}T00:00:00');
-    const diff = target - new Date();
-    if (diff <= 0) { document.getElementById('countdown-hms') && (document.getElementById('countdown-hms').innerHTML = ''); return; }
-    const h = Math.floor(diff/3600000)%24;
-    const m = Math.floor(diff/60000)%60;
-    const s = Math.floor(diff/1000)%60;
-    const el = document.getElementById('countdown-hms');
-    if (el) el.innerHTML = [['h',h<10?'0'+h:h],['min',m<10?'0'+m:m],['seg',s<10?'0'+s:s]].map(([l,v])=>
-      '<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:22px;font-weight:700;color:#7ab4f5;font-variant-numeric:tabular-nums">'+v+'</span><span style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">'+l+'</span></div>'
-    ).join('');
-  }
-  tick();
-  const iv = setInterval(tick, 1000);
-  /* Para o timer quando a view muda */
-  const obs = new MutationObserver(()=>{ if(!document.getElementById('countdown-hms')){ clearInterval(iv); obs.disconnect(); }});
-  obs.observe(document.getElementById('v-hoje'), {childList:true});
-})();
-<\/script>
 ` : '';
 
-  document.getElementById('v-hoje').innerHTML = `
-<div class="hoje-hd">
-  <div class="hoje-greet">${getGreeting()}</div>
-  <div class="hoje-name">${state.name}</div>
-  <div class="hoje-dt">${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]}</div>
-</div>
-${reminderHTML}
-${prelaunchBanner}
-${waterHTML}
-<div class="int-strip">
-  <div class="int-lbl">Intenção do Dia</div>
-  <div class="int-txt">${getTodayIntention()}</div>
-</div>
-${wellnessHTML}
-<div class="score-strip" style="margin-top:14px">
-  <div class="arc-wrap">
-    <svg width="64" height="64" viewBox="0 0 64 64">
-      <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#3D5A3A" stroke-width="5"
-        stroke-linecap="round" stroke-dasharray="${circum}" stroke-dashoffset="${offset}"
-        transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 1s"/>
-    </svg>
-    <div class="arc-pct">${vit}</div>
-  </div>
-  <div class="score-txt">
-    <div class="score-lbl">Vitalidade</div>
-    <div class="score-val">${vit} pts</div>
-    <div class="score-streak">${streakTxt}</div>
-  </div>
-</div>
-${isDesafioPreLaunch() ? '' : `
-<div class="timeline-wrap">
-  <div class="section-lbl">Rituais do Dia</div>
-  ${rituaisHTML}
-</div>
-<div class="micro-wrap">
-  <div class="section-lbl" style="margin-top:8px">Micro-Consciências</div>
-  <div class="micro-scr">${microHTML}</div>
-</div>`}
-`;
+  const prelaunch = isDesafioPreLaunch();
+  const rituaisSection = prelaunch ? '' :
+    '<div class="timeline-wrap"><div class="section-lbl">Rituais do Dia</div>' + rituaisHTML + '</div>' +
+    '<div class="micro-wrap"><div class="section-lbl" style="margin-top:8px">Micro-Consciencias</div><div class="micro-scr">' + microHTML + '</div></div>';
+
+  document.getElementById('v-hoje').innerHTML =
+    '<div class="hoje-hd">' +
+      '<div class="hoje-greet">' + getGreeting() + '</div>' +
+      '<div class="hoje-name">' + state.name + '</div>' +
+      '<div class="hoje-dt">' + dias[now.getDay()] + ', ' + now.getDate() + ' de ' + meses[now.getMonth()] + '</div>' +
+    '</div>' +
+    reminderHTML +
+    prelaunchBanner +
+    waterHTML +
+    '<div class="int-strip"><div class="int-lbl">Intencao do Dia</div><div class="int-txt">' + getTodayIntention() + '</div></div>' +
+    wellnessHTML +
+    '<div class="score-strip" style="margin-top:14px">' +
+      '<div class="arc-wrap">' +
+        '<svg width="64" height="64" viewBox="0 0 64 64">' +
+          '<circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>' +
+          '<circle cx="32" cy="32" r="26" fill="none" stroke="#3D5A3A" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + circum + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset 1s"/>' +
+        '</svg>' +
+        '<div class="arc-pct">' + vit + '</div>' +
+      '</div>' +
+      '<div class="score-txt">' +
+        '<div class="score-lbl">Vitalidade</div>' +
+        '<div class="score-val">' + vit + ' pts</div>' +
+        '<div class="score-streak">' + streakTxt + '</div>' +
+      '</div>' +
+    '</div>' +
+    rituaisSection;
+
+  /* Inicia countdown ao vivo se for pré-lançamento do desafio */
+  if (prelaunch) startDesafioCountdown();
+}
+
+function startDesafioCountdown() {
+  if (window._countdownIv) clearInterval(window._countdownIv);
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function tick() {
+    var el = document.getElementById('countdown-hms');
+    if (!el) { clearInterval(window._countdownIv); return; }
+    var diff = new Date(DESAFIO_START_DATE + 'T00:00:00') - new Date();
+    if (diff <= 0) { el.innerHTML = ''; clearInterval(window._countdownIv); return; }
+    var h = Math.floor(diff / 3600000) % 24;
+    var m = Math.floor(diff / 60000) % 60;
+    var s = Math.floor(diff / 1000) % 60;
+    el.innerHTML =
+      unit(pad(h), 'h') +
+      unit(pad(m), 'min') +
+      unit(pad(s), 'seg');
+  }
+  function unit(v, l) {
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px">' +
+      '<span style="font-size:22px;font-weight:700;color:#7ab4f5;font-variant-numeric:tabular-nums">' + v + '</span>' +
+      '<span style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">' + l + '</span>' +
+      '</div>';
+  }
+  tick();
+  window._countdownIv = setInterval(tick, 1000);
 }
 
 function setWellness(choice) {
