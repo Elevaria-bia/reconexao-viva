@@ -1604,48 +1604,53 @@ async function doSignup() {
 }
 
 async function onAuthSuccess(user, profileData) {
-  currentUser = user;
-  /* Load profile from Supabase into local state */
-  const { data: profile, error: profileErr } = await supa.from('profiles').select('*').eq('id', user.id).single();
+  try {
+    currentUser = user;
+    /* Load profile from Supabase into local state */
+    const { data: profile } = await supa.from('profiles').select('*').eq('id', user.id).single();
 
-  /* FAIL-SECURE: se não conseguiu ler o perfil, bloqueia */
-  if (!profile) {
+    /* FAIL-SECURE: se não conseguiu ler o perfil, mostra pendente */
+    if (!profile) {
+      hideAuthScreen();
+      hideSplash();
+      document.getElementById('v-pending').style.display = 'flex';
+      startPendingAutoCheck();
+      return;
+    }
+
+    state.name = profile.name;
+    state.startDate = profile.start_date || new Date().toISOString();
+    if (profile.weight) state.weight = profile.weight;
+    if (profile.modalidade) state.modalidade = profile.modalidade;
+    isMentor = profile.is_mentor === true;
+
+    /* Verificar aprovação */
+    if (!isMentor && profile.approved !== true) {
+      hideAuthScreen();
+      hideSplash();
+      document.getElementById('v-pending').style.display = 'flex';
+      startPendingAutoCheck();
+      return;
+    }
+
+    /* Load today's data */
+    const today = todayKey();
+    const { data: rituals } = await supa.from('ritual_completions').select('ritual_id').eq('user_id', user.id).eq('date', today);
+    if (rituals && rituals.length > 0) state.ritualsDone[today] = rituals.map(r => r.ritual_id);
+    const { data: wellness } = await supa.from('wellness_logs').select('choice').eq('user_id', user.id).eq('date', today).single();
+    if (wellness) state.wellnessLog[today] = wellness.choice;
+    const { data: water } = await supa.from('water_logs').select('cups').eq('user_id', user.id).eq('date', today).single();
+    if (water) state.waterLog[today] = water.cups;
+
+    saveState();
     hideAuthScreen();
+    initApp();
+  } catch(err) {
+    console.error('Erro em onAuthSuccess:', err);
     hideSplash();
-    document.getElementById('v-pending').style.display = 'flex';
-    startPendingAutoCheck();
-    return;
+    /* Fallback: mostrar login em caso de erro inesperado */
+    document.getElementById('v-auth').style.display = 'flex';
   }
-
-  state.name = profile.name;
-  state.startDate = profile.start_date || new Date().toISOString();
-  if (profile.weight) state.weight = profile.weight;
-  if (profile.modalidade) state.modalidade = profile.modalidade;
-  isMentor = profile.is_mentor === true;
-
-  /* Verificar aprovação — mentora bypassa, qualquer outra sem approved=true bloqueia */
-  if (!isMentor && profile.approved !== true) {
-    hideAuthScreen();
-    hideSplash();
-    document.getElementById('v-pending').style.display = 'flex';
-    startPendingAutoCheck();
-    return;
-  }
-  /* Load today's ritual completions */
-  const today = todayKey();
-  const { data: rituals } = await supa.from('ritual_completions').select('ritual_id').eq('user_id', user.id).eq('date', today);
-  if (rituals && rituals.length > 0) {
-    state.ritualsDone[today] = rituals.map(r => r.ritual_id);
-  }
-  /* Load today's wellness */
-  const { data: wellness } = await supa.from('wellness_logs').select('choice').eq('user_id', user.id).eq('date', today).single();
-  if (wellness) state.wellnessLog[today] = wellness.choice;
-  /* Load today's water */
-  const { data: water } = await supa.from('water_logs').select('cups').eq('user_id', user.id).eq('date', today).single();
-  if (water) state.waterLog[today] = water.cups;
-  saveState();
-  hideAuthScreen();
-  initApp();
 }
 
 async function doPendingLogout() {
@@ -1685,10 +1690,13 @@ function hideAuthScreen() {
 
 function hideSplash() {
   const splash = document.getElementById('v-splash');
-  if (!splash) return;
+  if (!splash || splash._hiding) return;
+  splash._hiding = true;
   splash.classList.add('hiding');
-  setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
+  setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 650);
 }
+/* Segurança: se algo der errado e hideSplash não for chamado, some em 5s */
+setTimeout(hideSplash, 5000);
 
 let selectedMomento = 'inicio';
 function selectMomento(val) {
@@ -1781,16 +1789,20 @@ supa.auth.onAuthStateChange(async (event, session) => {
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
-  /* Check if user already has a Supabase session */
-  const { data: { session } } = await supa.auth.getSession();
-  if (session) {
-    await onAuthSuccess(session.user);
-  } else {
-    /* Sem sessão válida — mostrar tela de login com fade do splash */
+  try {
+    const { data: { session } } = await supa.auth.getSession();
+    if (session) {
+      await onAuthSuccess(session.user);
+    } else {
+      hideSplash();
+      document.getElementById('v-auth').style.display = 'flex';
+      ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      document.getElementById('v-onboard').style.display = 'none';
+    }
+  } catch(e) {
+    console.error('Erro ao verificar sessão:', e);
     hideSplash();
     document.getElementById('v-auth').style.display = 'flex';
-    ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
-    document.getElementById('v-onboard').style.display = 'none';
   }
   const inp = document.getElementById('ob-name');
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') startApp(); });
