@@ -38,6 +38,35 @@
     .view { display: none; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
     .view.active { display: block; }
 
+    /* SPLASH SCREEN */
+    #v-splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0A0A0A;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      transition: opacity 0.55s ease;
+    }
+    #v-splash.hiding { opacity: 0; pointer-events: none; }
+    .splash-ring {
+      position: absolute; border-radius: 50%; border: 1px solid rgba(61,90,58,0.25);
+      animation: splash-ring-pulse 2.8s ease-in-out infinite;
+    }
+    @keyframes splash-ring-pulse {
+      0%,100% { transform: scale(1); opacity: 0.6; }
+      50%      { transform: scale(1.18); opacity: 0; }
+    }
+    @keyframes splash-logo-breathe {
+      0%,100% { transform: scale(1);    box-shadow: 0 0 40px rgba(61,90,58,0.35); }
+      50%      { transform: scale(1.06); box-shadow: 0 0 80px rgba(61,90,58,0.6); }
+    }
+    @keyframes splash-text-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes splash-dot {
+      0%,80%,100% { transform: scale(0); opacity: 0; }
+      40%          { transform: scale(1); opacity: 1; }
+    }
+
     /* ONBOARDING */
     #v-onboard {
       min-height: 100dvh; display: none; flex-direction: column;
@@ -404,6 +433,27 @@
   </style>
 </head>
 <body>
+
+<!-- SPLASH — aparece imediatamente, some após verificação de sessão -->
+<div id="v-splash">
+  <div style="position:relative;display:flex;align-items:center;justify-content:center">
+    <div class="splash-ring" style="width:120px;height:120px;animation-delay:0s"></div>
+    <div class="splash-ring" style="width:160px;height:160px;animation-delay:0.5s"></div>
+    <div style="width:76px;height:76px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;animation:splash-logo-breathe 3s ease-in-out infinite;position:relative;z-index:1">
+      <span style="font-family:'Playfair Display',serif;font-size:36px;color:var(--accent);line-height:1">R</span>
+    </div>
+  </div>
+  <div style="text-align:center;animation:splash-text-in 0.8s ease 0.4s both">
+    <div style="font-family:'Playfair Display',serif;font-size:22px;color:rgba(255,255,255,0.9);margin-bottom:8px;letter-spacing:0.02em">Reconexão Viva</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.28);letter-spacing:0.18em;text-transform:uppercase">Método Reconexão Facial</div>
+  </div>
+  <div style="display:flex;gap:7px;animation:splash-text-in 0.8s ease 0.8s both">
+    <div style="width:5px;height:5px;border-radius:50%;background:rgba(61,90,58,0.7);animation:splash-dot 1.4s 0.0s infinite ease-in-out"></div>
+    <div style="width:5px;height:5px;border-radius:50%;background:rgba(61,90,58,0.7);animation:splash-dot 1.4s 0.2s infinite ease-in-out"></div>
+    <div style="width:5px;height:5px;border-radius:50%;background:rgba(61,90,58,0.7);animation:splash-dot 1.4s 0.4s infinite ease-in-out"></div>
+  </div>
+</div>
+
 <div id="app">
 
   <div id="v-auth" style="display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%)">
@@ -558,7 +608,7 @@
     <button class="btn-primary" onclick="goOb(4)">Começar minha jornada</button>
   </div>
 
-  <div id="v-onboard" class="view active">
+  <div id="v-onboard" class="view">
     <div class="ob-mark"><span class="ob-mark-r">R</span></div>
     <h1 class="ob-h">Método<br/>Reconexão Viva</h1>
     <p class="ob-p">Sua companheira diária para o rejuvenescimento natural — guiada pelos 9 pilares.</p>
@@ -1561,6 +1611,7 @@ async function onAuthSuccess(user, profileData) {
   /* FAIL-SECURE: se não conseguiu ler o perfil, bloqueia */
   if (!profile) {
     hideAuthScreen();
+    hideSplash();
     document.getElementById('v-pending').style.display = 'flex';
     startPendingAutoCheck();
     return;
@@ -1575,6 +1626,7 @@ async function onAuthSuccess(user, profileData) {
   /* Verificar aprovação — mentora bypassa, qualquer outra sem approved=true bloqueia */
   if (!isMentor && profile.approved !== true) {
     hideAuthScreen();
+    hideSplash();
     document.getElementById('v-pending').style.display = 'flex';
     startPendingAutoCheck();
     return;
@@ -1629,6 +1681,13 @@ function startPendingAutoCheck() {
 function hideAuthScreen() {
   const auth = document.getElementById('v-auth');
   if (auth) auth.style.display = 'none';
+}
+
+function hideSplash() {
+  const splash = document.getElementById('v-splash');
+  if (!splash) return;
+  splash.classList.add('hiding');
+  setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 600);
 }
 
 let selectedMomento = 'inicio';
@@ -1727,7 +1786,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (session) {
     await onAuthSuccess(session.user);
   } else {
-    /* Sem sessão válida — sempre mostrar tela de login */
+    /* Sem sessão válida — mostrar tela de login com fade do splash */
+    hideSplash();
     document.getElementById('v-auth').style.display = 'flex';
     ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
     document.getElementById('v-onboard').style.display = 'none';
@@ -1757,6 +1817,7 @@ function initApp() {
   ob.classList.remove('active');
   ob.style.display = 'none';
   document.getElementById('nav').classList.add('visible');
+  hideSplash();
   switchTab('hoje');
 }
 
