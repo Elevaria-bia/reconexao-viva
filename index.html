@@ -1604,8 +1604,9 @@ async function doSignup() {
 }
 
 async function onAuthSuccess(user) {
-  /* Guard contra chamadas duplas (INITIAL_SESSION + DOMContentLoaded) */
-  if (currentUser) return;
+  /* Evita execução duplicada se já estiver em andamento */
+  if (window._authRunning) return;
+  window._authRunning = true;
   currentUser = user;
   try {
     /* Load profile + dados do dia em paralelo para máxima velocidade */
@@ -1621,6 +1622,7 @@ async function onAuthSuccess(user) {
 
     /* FAIL-SECURE: se não conseguiu ler o perfil, mostra pendente */
     if (!profile) {
+      window._authRunning = false;
       currentUser = null;
       hideAuthScreen();
       hideSplash();
@@ -1637,6 +1639,7 @@ async function onAuthSuccess(user) {
 
     /* Verificar aprovação */
     if (!isMentor && profile.approved !== true) {
+      window._authRunning = false;
       currentUser = null;
       hideAuthScreen();
       hideSplash();
@@ -1652,9 +1655,11 @@ async function onAuthSuccess(user) {
 
     saveState();
     hideAuthScreen();
+    window._authRunning = false;
     initApp();
   } catch(err) {
     console.error('Erro em onAuthSuccess:', err);
+    window._authRunning = false;
     currentUser = null;
     hideSplash();
     /* Fallback: mostrar login em caso de erro inesperado */
@@ -1787,8 +1792,8 @@ async function syncWaterToCloud(cups) {
 
 loadState();
 /* Detecta eventos de autenticação do Supabase v2.
-   INITIAL_SESSION = usuária já logada (sessão restaurada do localStorage) — acontece IMEDIATAMENTE
-   SIGNED_IN = login novo ou confirmação de email */
+   INITIAL_SESSION = acontece ao carregar a página (com ou sem sessão armazenada)
+   Usamos para fast-track usuárias já logadas sem esperar DOMContentLoaded */
 supa.auth.onAuthStateChange(async (event, session) => {
   if (event === 'PASSWORD_RECOVERY') {
     document.getElementById('v-auth').style.display = 'flex';
@@ -1801,33 +1806,27 @@ supa.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('auth-new-password').style.display = 'flex';
     return;
   }
-  /* INITIAL_SESSION: usuária de retorno — sessão restaurada do storage local (instantâneo) */
+  /* INITIAL_SESSION com sessão = usuária já logada → carrega app imediatamente */
   if (event === 'INITIAL_SESSION' && session) {
     await onAuthSuccess(session.user);
     return;
   }
-  /* INITIAL_SESSION sem sessão = usuária não logada → mostrar login */
+  /* INITIAL_SESSION sem sessão = ninguém logado → mostra login */
   if (event === 'INITIAL_SESSION' && !session) {
     hideSplash();
     document.getElementById('v-auth').style.display = 'flex';
     return;
   }
-  /* SIGNED_IN: login manual ou confirmação de e-mail */
-  if (event === 'SIGNED_IN' && session) {
-    await onAuthSuccess(session.user);
-    return;
-  }
+  /* Não tratamos SIGNED_IN aqui — doLogin() e doSignup() chamam onAuthSuccess diretamente */
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
-  /* DOMContentLoaded é backup — onAuthStateChange INITIAL_SESSION já deve ter iniciado o fluxo.
-     Só age se onAuthSuccess ainda não foi chamado (currentUser === null). */
-  if (currentUser) return; // já em andamento via INITIAL_SESSION
+  /* Backup: se INITIAL_SESSION não disparou ou já foi tratado, garante estado correto */
   try {
     const { data: { session } } = await supa.auth.getSession();
-    if (session) {
+    if (session && !window._authRunning && !currentUser) {
       await onAuthSuccess(session.user);
-    } else {
+    } else if (!session && !currentUser) {
       hideSplash();
       document.getElementById('v-auth').style.display = 'flex';
       ['ob1','ob2','ob3'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
