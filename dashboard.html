@@ -1164,7 +1164,7 @@
                 <th>Nome</th>
                 <th>Cadastro</th>
                 <th>Idade</th>
-                <th>Menopausa</th>
+                <th>Modalidade</th>
                 <th></th>
               </tr>
             </thead>
@@ -1920,11 +1920,17 @@
       allPending.forEach(p => {
         const tr = document.createElement('tr');
         const cadDate = p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—';
+        const prefModal = p.modalidade_pref || 'desafio';
         tr.innerHTML = `
           <td><div style="font-weight:500">${escHtml(p.name || '—')}</div></td>
           <td><span class="muted text-sm">${cadDate}</span></td>
           <td><span class="muted text-sm">${p.age || '—'}</span></td>
-          <td>${p.is_menopausa ? '<span class="badge badge-atenta">Sim</span>' : '<span class="muted text-sm">Não</span>'}</td>
+          <td>
+            <select class="modal-select" data-id="${escAttr(p.id)}" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--fg);font-size:12px;cursor:pointer">
+              <option value="desafio" ${prefModal==='desafio'?'selected':''}>🔵 Desafio 21d</option>
+              <option value="mentoria" ${prefModal==='mentoria'?'selected':''}>🟣 Mentoria</option>
+            </select>
+          </td>
           <td>
             <button class="btn-approve" data-id="${escAttr(p.id)}">Aprovar</button>
           </td>
@@ -1933,16 +1939,21 @@
       });
 
       tbody.querySelectorAll('.btn-approve').forEach(btn => {
-        btn.addEventListener('click', () => approveUser(btn.dataset.id, btn));
+        btn.addEventListener('click', () => {
+          const row = btn.closest('tr');
+          const sel = row ? row.querySelector('.modal-select') : null;
+          const modalidade = sel ? sel.value : 'desafio';
+          approveUser(btn.dataset.id, btn, modalidade);
+        });
       });
     }
 
-    async function approveUser(userId, btn) {
+    async function approveUser(userId, btn, modalidade) {
       if (btn) { btn.textContent = 'Aprovando...'; btn.disabled = true; }
       try {
         const { error } = await db
           .from('profiles')
-          .update({ approved: true })
+          .update({ approved: true, modalidade: modalidade || 'desafio' })
           .eq('id', userId);
         if (error) throw error;
         // Remove from pending list and refresh

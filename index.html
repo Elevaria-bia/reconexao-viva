@@ -40,7 +40,7 @@
 
     /* ONBOARDING */
     #v-onboard {
-      min-height: 100dvh; display: flex; flex-direction: column;
+      min-height: 100dvh; display: none; flex-direction: column;
       align-items: center; justify-content: center; padding: 48px 32px;
       background: radial-gradient(ellipse 80% 55% at 50% 0%, rgba(61,90,58,0.28) 0%, transparent 70%);
     }
@@ -523,7 +523,7 @@
     </div>
   </div>
 
-  <div id="ob1" style="min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
+  <div id="ob1" style="min-height:100dvh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:48px 32px;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(61,90,58,0.28) 0%,transparent 70%);">
     <div class="ob-mark"><span class="ob-mark-r">R</span></div>
     <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
     <h1 class="ob-h">Você não precisa parecer mais jovem.</h1>
@@ -1552,6 +1552,7 @@ async function onAuthSuccess(user, profileData) {
   state.name = profile.name;
   state.startDate = profile.start_date || new Date().toISOString();
   if (profile.weight) state.weight = profile.weight;
+  if (profile.modalidade) state.modalidade = profile.modalidade;
   isMentor = profile.is_mentor === true;
 
   /* Verificar aprovação — mentora bypassa, qualquer outra sem approved=true bloqueia */
@@ -1650,12 +1651,14 @@ function showProfileSetup(userName) {
 
 async function completeProfileSetup() {
   const weightVal = parseFloat(document.getElementById('ps-weight').value) || null;
+  const updateData = { modalidade_pref: state.modalidade || 'desafio' };
   if (weightVal) {
     state.weight = weightVal;
     saveState();
-    if (currentUser) {
-      await supa.from('profiles').update({ weight: weightVal }).eq('id', currentUser.id);
-    }
+    updateData.weight = weightVal;
+  }
+  if (currentUser) {
+    await supa.from('profiles').update(updateData).eq('id', currentUser.id);
   }
   document.getElementById('v-profile-setup').style.display = 'none';
   /* Novo usuário — aguardar aprovação da mentora */
@@ -2452,38 +2455,67 @@ function renderPhaseDetailBody() {
     </div>`;
   }).join('');
 
-  document.getElementById('phd-body').innerHTML = `
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">O que esperar</div>
-    <p style="font-size:14px;line-height:1.75;color:rgba(255,255,255,0.8);margin-bottom:20px">${lv.expect}</p>
+  const focusColors = { 'Consciência':'var(--gold)', 'Respiração':'#7ab4f5', 'Liberação':'var(--green)', 'Toque':'#c49bf5', 'Postura':'#f5a67a', 'Integração':'var(--accent)', 'Celebração':'#f5d67a' };
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
-      <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:8px">Corpo</div>
-        <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.bodyChanges}</div>
+  if (state.modalidade === 'desafio') {
+    const focusBadges = (lv.focus || []).map(f =>
+      `<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;background:rgba(255,255,255,0.06);color:${focusColors[f]||'var(--muted)'};border:1px solid ${focusColors[f]||'var(--border)'}">${f}</span>`
+    ).join(' ');
+
+    document.getElementById('phd-body').innerHTML = `
+      <div style="margin-bottom:16px">${focusBadges}</div>
+
+      <div style="background:var(--card2);border-radius:14px;padding:18px;border:1px solid var(--border);margin-bottom:20px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:10px">Prática de hoje</div>
+        <p style="font-size:15px;line-height:1.75;color:rgba(255,255,255,0.88);margin:0">${lv.desc}</p>
       </div>
-      <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:8px">Mente</div>
-        <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.mindChanges}</div>
+
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Fotos desta fase</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Registre sua evolução — toque para adicionar ou atualizar.</div>
+      <div style="display:flex;gap:10px;margin-bottom:24px">${photoSlots}</div>
+
+      <div onclick="closePhaseDetail();switchTab('guias')" style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid rgba(61,90,58,0.3);border-radius:14px;padding:16px 18px;cursor:pointer;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9)">Técnicas e exercícios</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Ver os 9 Pilares completos no Guia</div>
+        </div>
+        <div style="color:var(--green);font-size:22px;font-weight:300">›</div>
       </div>
-    </div>
+    `;
+  } else {
+    document.getElementById('phd-body').innerHTML = `
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">O que esperar</div>
+      <p style="font-size:14px;line-height:1.75;color:rgba(255,255,255,0.8);margin-bottom:20px">${lv.expect}</p>
 
-    <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border);margin-bottom:20px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:10px">Marco desta fase</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic">${lv.milestone}</div>
-    </div>
-
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Fotos desta fase</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Registre sua evolução — toque para adicionar ou atualizar.</div>
-    <div style="display:flex;gap:10px;margin-bottom:24px">${photoSlots}</div>
-
-    <div onclick="closePhaseDetail();switchTab('guias')" style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid rgba(61,90,58,0.3);border-radius:14px;padding:16px 18px;cursor:pointer;margin-bottom:8px">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9)">Técnicas e exercícios</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:2px">Ver os 9 Pilares completos no Guia</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+        <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--green);margin-bottom:8px">Corpo</div>
+          <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.bodyChanges}</div>
+        </div>
+        <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:8px">Mente</div>
+          <div style="font-size:13px;line-height:1.65;color:rgba(255,255,255,0.75)">${lv.mindChanges}</div>
+        </div>
       </div>
-      <div style="color:var(--green);font-size:22px;font-weight:300">›</div>
-    </div>
-  `;
+
+      <div style="background:var(--card2);border-radius:14px;padding:14px;border:1px solid var(--border);margin-bottom:20px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:10px">Marco desta fase</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic">${lv.milestone}</div>
+      </div>
+
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:12px">Fotos desta fase</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Registre sua evolução — toque para adicionar ou atualizar.</div>
+      <div style="display:flex;gap:10px;margin-bottom:24px">${photoSlots}</div>
+
+      <div onclick="closePhaseDetail();switchTab('guias')" style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);border:1px solid rgba(61,90,58,0.3);border-radius:14px;padding:16px 18px;cursor:pointer;margin-bottom:8px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9)">Técnicas e exercícios</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Ver os 9 Pilares completos no Guia</div>
+        </div>
+        <div style="color:var(--green);font-size:22px;font-weight:300">›</div>
+      </div>
+    `;
+  }
 }
 
 function renderPhaseExercises(phaseNum) {
