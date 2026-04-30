@@ -2869,7 +2869,8 @@ function switchPhotoType(type) {
 }
 
 function getFirstPhaseWithPhoto() {
-  for (let i = 1; i <= 6; i++) {
+  const maxPhase = state.modalidade === 'desafio' ? 21 : 6;
+  for (let i = 1; i <= maxPhase; i++) {
     const phasePhotos = (state.photos || []).filter(p => p.phaseNum === i);
     if (phasePhotos.length > 0) return i;
   }
@@ -3053,52 +3054,92 @@ function renderEvolucao() {
     `<button class="photo-type-btn ${selectedPhotoType === type ? 'active' : ''}" onclick="switchPhotoType('${type}')">${typeLabels[type]}</button>`
   ).join('');
 
+  const isDesafio = state.modalidade === 'desafio';
+
+  /* ── Comparação início × atual ── */
   let comparisonHtml = '';
   if (firstPhaseWithPhoto) {
-    const firstPhotoData = (state.photos || []).find(p => p.phaseNum === firstPhaseWithPhoto && p.type === selectedPhotoType);
+    const firstPhotoData  = (state.photos || []).find(p => p.phaseNum === firstPhaseWithPhoto && p.type === selectedPhotoType);
     const currentPhotoData = (state.photos || []).find(p => p.phaseNum === currentPhaseNum && p.type === selectedPhotoType);
+    const labelFirst  = isDesafio ? 'Início' : 'Fase I';
+    const labelCurrent = isDesafio ? 'Hoje'   : 'Fase Atual';
 
     comparisonHtml = `
       <div class="photo-slot" style="position:relative">
         ${firstPhotoData ? `<img src="${firstPhotoData.dataUrl}"/>` : '<div class="empty">Sem registro ainda</div>'}
-        <div class="photo-slot-label">Fase I</div>
+        <div class="photo-slot-label">${labelFirst}</div>
       </div>
       <div class="photo-slot" style="position:relative">
         ${currentPhotoData ? `<img src="${currentPhotoData.dataUrl}"/>` : '<div class="empty">Sem registro ainda</div>'}
-        <div class="photo-slot-label">Fase Atual</div>
+        <div class="photo-slot-label">${labelCurrent}</div>
       </div>
     `;
   } else {
+    const emptyMsg = isDesafio
+      ? 'Abra um dia da trilha e registre sua primeira foto'
+      : 'Abra uma fase e tire uma foto para começar';
     comparisonHtml = `
-      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">Abra uma fase e tire uma foto para começar</span></div></div>
-      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">Abra uma fase e tire uma foto para começar</span></div></div>
+      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">${emptyMsg}</span></div></div>
+      <div class="photo-slot"><div class="empty">Nenhuma foto registrada<br/><span style="font-size:10px;margin-top:8px">${emptyMsg}</span></div></div>
     `;
   }
 
   document.getElementById('photo-comparison').innerHTML = comparisonHtml;
 
+  /* ── Timeline de fotos ── */
   let timelineHtml = '';
-  for (let phaseNum = 1; phaseNum <= 6; phaseNum++) {
-    const lv = LEVELS[phaseNum - 1];
-    const phasePhotos = (state.photos || []).filter(p => p.phaseNum === phaseNum);
-    const isCurrent = phaseNum === currentPhaseNum;
-    const isCompleted = phaseNum < currentPhaseNum;
-    const groupClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
 
-    let photosHtml = PHOTO_TYPES.map(type => {
-      const photo = phasePhotos.find(p => p.type === type);
-      const thumbClass = selectedPhotoType === type ? 'current' : '';
-      return `<div class="photo-thumb ${thumbClass}" onclick="switchPhotoTypeAndScroll('${type}')">
-        ${photo ? `<img src="${photo.dataUrl}"/>` : ''}
-      </div>`;
-    }).join('');
+  if (isDesafio) {
+    /* Desafio: agrupa por semana (3 grupos) */
+    const semanas = [
+      { label: 'Semana 1 · Presença',   start: 1,  end: 7  },
+      { label: 'Semana 2 · Reconexão',  start: 8,  end: 14 },
+      { label: 'Semana 3 · Integração', start: 15, end: 21 }
+    ];
+    semanas.forEach(sem => {
+      const semPhotos  = (state.photos || []).filter(p => p.phaseNum >= sem.start && p.phaseNum <= sem.end);
+      const isCurrent  = currentPhaseNum >= sem.start && currentPhaseNum <= sem.end;
+      const isCompleted = currentPhaseNum > sem.end;
+      const groupClass = isCompleted ? 'completed' : isCurrent ? 'current' : '';
 
-    timelineHtml += `
-      <div class="phase-photo-group ${groupClass}">
-        <div class="phase-num">Fase ${phaseNum}</div>
-        <div class="phase-photo-row">${photosHtml}</div>
-      </div>
-    `;
+      const photosHtml = PHOTO_TYPES.map(type => {
+        const photo = semPhotos.find(p => p.type === type);
+        const thumbClass = selectedPhotoType === type ? 'current' : '';
+        return `<div class="photo-thumb ${thumbClass}" onclick="switchPhotoTypeAndScroll('${type}')">
+          ${photo ? `<img src="${photo.dataUrl}"/>` : ''}
+        </div>`;
+      }).join('');
+
+      timelineHtml += `
+        <div class="phase-photo-group ${groupClass}">
+          <div class="phase-num">${sem.label}</div>
+          <div class="phase-photo-row">${photosHtml}</div>
+        </div>
+      `;
+    });
+  } else {
+    /* Mentoria: 6 fases */
+    for (let phaseNum = 1; phaseNum <= 6; phaseNum++) {
+      const phasePhotos = (state.photos || []).filter(p => p.phaseNum === phaseNum);
+      const isCurrent   = phaseNum === currentPhaseNum;
+      const isCompleted = phaseNum < currentPhaseNum;
+      const groupClass  = isCompleted ? 'completed' : isCurrent ? 'current' : '';
+
+      const photosHtml = PHOTO_TYPES.map(type => {
+        const photo = phasePhotos.find(p => p.type === type);
+        const thumbClass = selectedPhotoType === type ? 'current' : '';
+        return `<div class="photo-thumb ${thumbClass}" onclick="switchPhotoTypeAndScroll('${type}')">
+          ${photo ? `<img src="${photo.dataUrl}"/>` : ''}
+        </div>`;
+      }).join('');
+
+      timelineHtml += `
+        <div class="phase-photo-group ${groupClass}">
+          <div class="phase-num">Fase ${phaseNum}</div>
+          <div class="phase-photo-row">${photosHtml}</div>
+        </div>
+      `;
+    }
   }
 
   document.getElementById('timeline-phases').innerHTML = timelineHtml;
