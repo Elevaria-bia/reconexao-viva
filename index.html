@@ -1603,14 +1603,25 @@ async function doSignup() {
   btn.textContent = 'Criar minha conta'; btn.disabled = false;
 }
 
-async function onAuthSuccess(user, profileData) {
+async function onAuthSuccess(user) {
+  /* Guard contra chamadas duplas (INITIAL_SESSION + DOMContentLoaded) */
+  if (currentUser) return;
+  currentUser = user;
   try {
-    currentUser = user;
-    /* Load profile from Supabase into local state */
-    const { data: profile } = await supa.from('profiles').select('*').eq('id', user.id).single();
+    /* Load profile + dados do dia em paralelo para máxima velocidade */
+    const today = todayKey();
+    const [profileRes, ritualsRes, wellnessRes, waterRes] = await Promise.all([
+      supa.from('profiles').select('*').eq('id', user.id).single(),
+      supa.from('ritual_completions').select('ritual_id').eq('user_id', user.id).eq('date', today),
+      supa.from('wellness_logs').select('choice').eq('user_id', user.id).eq('date', today).single(),
+      supa.from('water_logs').select('cups').eq('user_id', user.id).eq('date', today).single()
+    ]);
+
+    const profile = profileRes.data;
 
     /* FAIL-SECURE: se não conseguiu ler o perfil, mostra pendente */
     if (!profile) {
+      currentUser = null;
       hideAuthScreen();
       hideSplash();
       document.getElementById('v-pending').style.display = 'flex';
@@ -1626,6 +1637,7 @@ async function onAuthSuccess(user, profileData) {
 
     /* Verificar aprovação */
     if (!isMentor && profile.approved !== true) {
+      currentUser = null;
       hideAuthScreen();
       hideSplash();
       document.getElementById('v-pending').style.display = 'flex';
@@ -1633,20 +1645,17 @@ async function onAuthSuccess(user, profileData) {
       return;
     }
 
-    /* Load today's data */
-    const today = todayKey();
-    const { data: rituals } = await supa.from('ritual_completions').select('ritual_id').eq('user_id', user.id).eq('date', today);
-    if (rituals && rituals.length > 0) state.ritualsDone[today] = rituals.map(r => r.ritual_id);
-    const { data: wellness } = await supa.from('wellness_logs').select('choice').eq('user_id', user.id).eq('date', today).single();
-    if (wellness) state.wellnessLog[today] = wellness.choice;
-    const { data: water } = await supa.from('water_logs').select('cups').eq('user_id', user.id).eq('date', today).single();
-    if (water) state.waterLog[today] = water.cups;
+    /* Aplicar dados do dia já carregados em paralelo */
+    if (ritualsRes.data && ritualsRes.data.length > 0) state.ritualsDone[today] = ritualsRes.data.map(r => r.ritual_id);
+    if (wellnessRes.data) state.wellnessLog[today] = wellnessRes.data.choice;
+    if (waterRes.data) state.waterLog[today] = waterRes.data.cups;
 
     saveState();
     hideAuthScreen();
     initApp();
   } catch(err) {
     console.error('Erro em onAuthSuccess:', err);
+    currentUser = null;
     hideSplash();
     /* Fallback: mostrar login em caso de erro inesperado */
     document.getElementById('v-auth').style.display = 'flex';
@@ -1695,8 +1704,15 @@ function hideSplash() {
   splash.classList.add('hiding');
   setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 650);
 }
-/* Segurança: se algo der errado e hideSplash não for chamado, some em 5s */
-setTimeout(hideSplash, 5000);
+/* Segurança: se algo der errado, some splash em 4s e mostra tela de login */
+setTimeout(() => {
+  hideSplash();
+  /* Se nenhuma view estiver ativa e o app não carregou, mostra login */
+  if (!document.querySelector('.view.active')) {
+    const va = document.getElementById('v-auth');
+    if (va && va.style.display === 'none') va.style.display = 'flex';
+  }
+}, 4000);
 
 let selectedMomento = 'inicio';
 function selectMomento(val) {
@@ -1770,7 +1786,9 @@ async function syncWaterToCloud(cups) {
 }
 
 loadState();
-/* Detecta eventos de autenticação do Supabase v2 */
+/* Detecta eventos de autenticação do Supabase v2.
+   INITIAL_SESSION = usuária já logada (sessão restaurada do localStorage) — acontece IMEDIATAMENTE
+   SIGNED_IN = login novo ou confirmação de email */
 supa.auth.onAuthStateChange(async (event, session) => {
   if (event === 'PASSWORD_RECOVERY') {
     document.getElementById('v-auth').style.display = 'flex';
@@ -1781,14 +1799,30 @@ supa.auth.onAuthStateChange(async (event, session) => {
     document.getElementById('auth-tabs').style.display = 'none';
     document.getElementById('auth-recovery').style.display = 'none';
     document.getElementById('auth-new-password').style.display = 'flex';
+    return;
   }
-  /* Confirmação de email: sessão nova criada via link — verificar aprovação */
-  if (event === 'SIGNED_IN' && session && !currentUser) {
+  /* INITIAL_SESSION: usuária de retorno — sessão restaurada do storage local (instantâneo) */
+  if (event === 'INITIAL_SESSION' && session) {
     await onAuthSuccess(session.user);
+    return;
+  }
+  /* INITIAL_SESSION sem sessão = usuária não logada → mostrar login */
+  if (event === 'INITIAL_SESSION' && !session) {
+    hideSplash();
+    document.getElementById('v-auth').style.display = 'flex';
+    return;
+  }
+  /* SIGNED_IN: login manual ou confirmação de e-mail */
+  if (event === 'SIGNED_IN' && session) {
+    await onAuthSuccess(session.user);
+    return;
   }
 });
 
 window.addEventListener('DOMContentLoaded', async () => {
+  /* DOMContentLoaded é backup — onAuthStateChange INITIAL_SESSION já deve ter iniciado o fluxo.
+     Só age se onAuthSuccess ainda não foi chamado (currentUser === null). */
+  if (currentUser) return; // já em andamento via INITIAL_SESSION
   try {
     const { data: { session } } = await supa.auth.getSession();
     if (session) {
@@ -1840,7 +1874,12 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(TAB_MAP[tab]).classList.add('active');
   document.querySelector(`.nav-btn[data-tab="${tab}"]`).classList.add('active');
-  ({ hoje:renderHoje, guias:renderGuias, evolucao:renderEvolucao, perfil:renderPerfil })[tab]?.();
+  try {
+    ({ hoje:renderHoje, guias:renderGuias, evolucao:renderEvolucao, perfil:renderPerfil })[tab]?.();
+  } catch(e) {
+    console.error('Erro ao renderizar aba', tab, e);
+    document.getElementById(TAB_MAP[tab]).innerHTML = '<div style="padding:40px 24px;text-align:center;color:var(--muted)">Erro ao carregar. Tente novamente.</div>';
+  }
 }
 
 function getGreeting() {
