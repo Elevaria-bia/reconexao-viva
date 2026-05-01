@@ -19,7 +19,7 @@ export default {
     const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
     try {
-      const { image, scores } = await request.json();
+      const { image, scores, userName, userQueixa } = await request.json();
 
       if (!image) {
         return new Response(JSON.stringify({ error: 'Imagem não recebida' }), { status: 400, headers: CORS });
@@ -103,7 +103,7 @@ export default {
                 type: 'text',
                 text: `Você é a Bia, criadora do Método Reconexão Facial — especialista em leitura facial com 15 anos de experiência em estética e consciência corporal.
 
-Esta mulher acabou de completar o Mapa de Reconexão. Pontuação do questionário: ${total}/15 (5 = mínima tensão, 15 = máxima tensão acumulada).
+${userName ? `A mulher na foto se chama ${userName}.` : 'Esta mulher'} acabou de completar o Mapa de Reconexão. Pontuação do questionário: ${total}/15 (5 = mínima tensão, 15 = máxima tensão acumulada).${userQueixa ? `\nEla disse que o que mais a incomoda hoje é: "${userQueixa}". Leve isso em conta na análise.` : ''}
 
 Analise esta foto do rosto com olhar clínico, empático e preciso. Observe:
 1. MASSETER E MANDÍBULA — há tensão visível? Assimetria? Sinal de bruxismo?

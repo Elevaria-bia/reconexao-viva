@@ -732,8 +732,62 @@
       </div>
     </div>
 
-    <button class="btn btn-primary btn-full" onclick="goTo('s-foto')">
+    <button class="btn btn-primary btn-full" onclick="goTo('s-perfil')">
       Traçar meu mapa →
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SCREEN 1C — PERFIL
+══════════════════════════════════════ -->
+<div class="screen" id="s-perfil" style="background: var(--dark);">
+  <div style="max-width:520px; width:100%; text-align:center;">
+    <div class="pill pill-accent" style="margin-bottom:24px;">antes de começar</div>
+    <h2 style="margin-bottom:10px;">Preciso te conhecer um pouco</h2>
+    <p class="lead" style="font-size:15px; margin-bottom:32px;">
+      Assim o seu mapa fica realmente personalizado para você.
+    </p>
+
+    <!-- Nome -->
+    <div style="text-align:left; margin-bottom:20px;">
+      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:8px;">Como posso te chamar?</label>
+      <input id="perfil-nome" type="text" placeholder="Seu primeiro nome" style="width:100%; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.12); border-radius:14px; padding:16px 18px; font-size:16px; color:white; font-family:'DM Sans',sans-serif; outline:none;" oninput="checkPerfilForm()" />
+    </div>
+
+    <!-- Gênero / confirmação -->
+    <div style="text-align:left; margin-bottom:20px;">
+      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:10px;">Este mapa é para você?</label>
+      <div style="display:flex; flex-direction:column; gap:10px;" id="genero-opts">
+        <div class="opt" onclick="selectGenero('mulher')" id="g-mulher" style="padding:16px 20px;">
+          <div style="font-weight:600; font-size:15px;">Sim — sou mulher adulta</div>
+        </div>
+        <div class="opt" onclick="selectGenero('outro')" id="g-outro" style="padding:16px 20px;">
+          <div style="font-weight:600; font-size:15px;">Não / Sou homem</div>
+        </div>
+      </div>
+      <!-- mensagem se não for mulher -->
+      <div id="genero-nao-msg" style="display:none; margin-top:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px 18px; font-size:14px; color:rgba(255,255,255,0.6); line-height:1.7;">
+        O Método Reconexão Facial foi criado especificamente para mulheres. Se você conhece alguém que pode se beneficiar, compartilha com ela.
+        <br><a href="https://instagram.com/biafaceyoga" target="_blank" style="color:var(--accent); font-weight:600; text-decoration:none;">Ver @biafaceyoga no Instagram →</a>
+      </div>
+    </div>
+
+    <!-- Principal queixa -->
+    <div style="text-align:left; margin-bottom:28px;" id="queixa-section">
+      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:10px;">O que mais te incomoda hoje?</label>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" id="queixa-opts">
+        <div class="opt" onclick="selectQueixa(this,'tensao')" style="padding:14px 16px; font-size:14px;">Tensão no rosto e mandíbula</div>
+        <div class="opt" onclick="selectQueixa(this,'olheiras')" style="padding:14px 16px; font-size:14px;">Olheiras e inchaço</div>
+        <div class="opt" onclick="selectQueixa(this,'contorno')" style="padding:14px 16px; font-size:14px;">Perda de contorno</div>
+        <div class="opt" onclick="selectQueixa(this,'cansaco')" style="padding:14px 16px; font-size:14px;">Expressão de cansaço</div>
+        <div class="opt" onclick="selectQueixa(this,'desconexao')" style="padding:14px 16px; font-size:14px; grid-column:1/-1;">Sensação de desconexão comigo mesma</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" id="btn-perfil" style="display:none;" onclick="goTo('s-foto')">
+      Continuar →
     </button>
   </div>
 </div>
@@ -936,6 +990,7 @@
   <div class="result-photo">
     <img id="result-img" src="" alt="" />
   </div>
+  <p id="result-greeting" style="font-size:14px; color:rgba(255,255,255,0.45); margin-bottom:8px; letter-spacing:0.5px;"></p>
   <div class="result-badge" id="result-badge">Seu Mapa</div>
   <h2 id="result-title">Título do Perfil</h2>
   <p class="lead" id="result-lead" style="margin-bottom:24px;"></p>
@@ -1235,12 +1290,38 @@
   // URL do Worker de análise facial — atualizar após deploy
   const FACE_ANALYZER_URL = 'https://elevaria-face-analyzer.biafaceyoga.workers.dev';
 
-  const SCREENS = ['s-hero','s-diagnostico','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-oferta','s-nao-agora','s-form','s-obrigada'];
+  const SCREENS = ['s-hero','s-diagnostico','s-perfil','s-foto','s-analise','s-q1','s-q2','s-q3','s-q4','s-q5','s-resultado','s-oferta','s-nao-agora','s-form','s-obrigada'];
   let scores = {1:0,2:0,3:0,4:0,5:0};
   let photoSrc = '';
   let currentScreen = 's-hero';
   let aiAnalysis = null; // resultado da análise facial por IA
   let selectedOffer = 'mentoria'; // 'desafio' | 'mentoria'
+  let userName = '';
+  let userGenero = '';
+  let userQueixa = '';
+
+  function selectGenero(val) {
+    userGenero = val;
+    document.querySelectorAll('#genero-opts .opt').forEach(el => el.classList.remove('selected'));
+    document.getElementById('g-' + val).classList.add('selected');
+    document.getElementById('genero-nao-msg').style.display = val === 'outro' ? 'block' : 'none';
+    document.getElementById('queixa-section').style.display = val === 'mulher' ? 'block' : 'none';
+    checkPerfilForm();
+  }
+
+  function selectQueixa(el, val) {
+    userQueixa = val;
+    document.querySelectorAll('#queixa-opts .opt').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    checkPerfilForm();
+  }
+
+  function checkPerfilForm() {
+    const nome = document.getElementById('perfil-nome').value.trim();
+    userName = nome;
+    const ok = nome.length >= 2 && userGenero === 'mulher' && userQueixa !== '';
+    document.getElementById('btn-perfil').style.display = ok ? 'inline-block' : 'none';
+  }
 
   // 5 Perfis poéticos baseados em pontuação (5-15)
   const PROFILES = [
@@ -1416,7 +1497,7 @@
       const res = await fetch(FACE_ANALYZER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: photoSrc, scores })
+        body: JSON.stringify({ image: photoSrc, scores, userName, userQueixa })
       });
       if (res.ok) {
         aiAnalysis = await res.json();
@@ -1511,6 +1592,10 @@
 
     const ri = document.getElementById('result-img');
     if (photoSrc) { ri.src = photoSrc; } else { ri.parentElement.style.display = 'none'; }
+
+    // Saudação personalizada pelo nome
+    const greetEl = document.getElementById('result-greeting');
+    if (greetEl && userName) greetEl.textContent = 'Seu mapa, ' + userName;
 
     if (aiAnalysis && aiAnalysis.perfil) {
       // Usa análise real da IA — personalizada para este rosto
