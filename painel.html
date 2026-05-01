@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELEVARIA — Painel da Mentora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0A0A0A;
+      --text: #F0ECE4;
+      --green: #3D5A3A;
+      --green-light: #4e7349;
+      --accent: #E87B6A;
+      --gold: #C4A87A;
+      --muted: #7A7A72;
+      --card: #141414;
+      --border: #2A2A2A;
+      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-logo {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--green);
+    }
+
+    .form-input::placeholder {
+      color: var(--border);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--green);
+      color: var(--text);
+      border: none;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      background: var(--green-light);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      background: rgba(232, 123, 106, 0.12);
+      border: 1px solid rgba(232, 123, 106, 0.3);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* ── DASHBOARD ── */
+    #dashboard-screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-logo {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-user {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-refresh:hover {
+      border-color: var(--green);
+      color: var(--text);
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      padding: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card.green .stat-value { color: #6aad65; }
+    .stat-card.gold .stat-value { color: var(--gold); }
+    .stat-card.red .stat-value { color: var(--accent); }
+
+    /* ── TABLE SECTION ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .search-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      width: 240px;
+      transition: border-color 0.2s;
+    }
+
+    .search-bar:focus {
+      border-color: var(--green);
+    }
+
+    .search-bar::placeholder {
+      color: var(--muted);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--green);
+      color: var(--text);
+    }
+
+    .filter-btn.active {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--text);
+    }
+
+    /* ── TABLE ── */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    thead th {
+      background: rgba(42, 42, 42, 0.6);
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    /* ── RITUAL DOTS ── */
+    .ritual-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .ritual-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .ritual-dot.done {
+      background: #6aad65;
+      border-color: #6aad65;
+    }
+
+    .ritual-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .ritual-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ritual-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── STATUS BADGE ── */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .badge-ativa {
+      background: rgba(61, 90, 58, 0.3);
+      color: #6aad65;
+      border: 1px solid rgba(61, 90, 58, 0.4);
+    }
+
+    .badge-atenta {
+      background: rgba(196, 168, 122, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(196, 168, 122, 0.3);
+    }
+
+    .badge-risco {
+      background: rgba(232, 123, 106, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(232, 123, 106, 0.3);
+    }
+
+    /* ── WELLNESS TAG ── */
+    .wellness-tag {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .wellness-green {
+      background: rgba(106, 173, 101, 0.15);
+      color: #6aad65;
+    }
+
+    .wellness-gold {
+      background: rgba(196, 168, 122, 0.15);
+      color: var(--gold);
+    }
+
+    .wellness-neutral {
+      background: rgba(122, 122, 114, 0.15);
+      color: var(--muted);
+    }
+
+    /* ── PHASE BADGE ── */
+    .phase-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(196, 168, 122, 0.12);
+      border: 1px solid rgba(196, 168, 122, 0.25);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── PROFILE BUTTON ── */
+    .btn-profile {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-profile:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-approve {
+      background: rgba(61,90,58,0.15);
+      border: 1px solid rgba(61,90,58,0.5);
+      color: #6aad65;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-approve:hover {
+      background: rgba(61,90,58,0.3);
+      border-color: #6aad65;
+    }
+
+    .btn-approve:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* ── LOADING / EMPTY ── */
+    .loading-state, .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: var(--border);
+    }
+
+    .empty-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .empty-sub {
+      font-size: 13px;
+      color: var(--border);
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 32px 16px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 720px;
+      padding: 0;
+      position: relative;
+      margin: auto;
+    }
+
+    .modal-header {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .modal-name {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .modal-meta-item {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .modal-meta-item span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .btn-close {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .modal-body {
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .modal-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── RITUAL CALENDAR ── */
+    .ritual-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .cal-day {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .cal-day-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .cal-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .cal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .cal-dot.done {
+      background: #6aad65;
+    }
+
+    /* ── WELLNESS TREND ── */
+    .wellness-trend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .wellness-trend-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .wellness-trend-date {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── PHOTOS ── */
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+
+    .photo-thumb {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      aspect-ratio: 1;
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-thumb-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+      padding: 4px;
+      background: var(--bg);
+    }
+
+    .photo-phase-group {
+      margin-bottom: 16px;
+    }
+
+    .photo-phase-title {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ── WATER BAR ── */
+    .water-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .water-value {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      color: #6aad65;
+    }
+
+    .water-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .stats-bar {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .main {
+        padding: 20px;
+      }
+      .header {
+        padding: 0 20px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .header-right {
+        gap: 8px;
+      }
+      .search-bar {
+        width: 100%;
+      }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* ── UTILITY ── */
+    .muted { color: var(--muted); }
+    .text-sm { font-size: 12px; }
+    .hidden { display: none !important; }
+
+    /* ── TABS ── */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--green);
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 7px;
+      margin-left: 8px;
+      min-width: 20px;
+    }
+
+    .tab-btn.active .tab-badge {
+      background: rgba(61, 90, 58, 0.4);
+      color: #6aad65;
+    }
+
+    /* ── LEAD PROFILE BADGES ── */
+    .badge-tensao {
+      background: rgba(232, 123, 106, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(232, 123, 106, 0.3);
+    }
+
+    .badge-desconexao {
+      background: rgba(196, 168, 122, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(196, 168, 122, 0.3);
+    }
+
+    .badge-pronta {
+      background: rgba(61, 90, 58, 0.3);
+      color: #6aad65;
+      border: 1px solid rgba(61, 90, 58, 0.4);
+    }
+
+    /* ── LEADS TABLE ── */
+    .whatsapp-link {
+      color: #6aad65;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .whatsapp-link:hover {
+      text-decoration: underline;
+    }
+
+    .score-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-bar {
+      width: 60px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--green);
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  LOGIN SCREEN                                          -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">ELEVARIA</div>
+      <div class="login-subtitle">Painel da Mentora</div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">E-mail</label>
+        <input
+          type="email"
+          id="email"
+          class="form-input"
+          placeholder="seu@email.com"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Senha</label>
+        <input
+          type="password"
+          id="password"
+          class="form-input"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button class="btn-primary" id="btn-login">Entrar</button>
+
+      <div class="error-msg" id="login-error"></div>
+
+      <div id="forgot-link-row" style="text-align:center;margin-top:14px;">
+        <a href="#" id="link-forgot" style="font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer;">Esqueceu a senha?</a>
+      </div>
+
+      <!-- Recovery form (hidden by default) -->
+      <div id="recovery-form" style="display:none;margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label" for="recovery-email">Digite seu e-mail</label>
+          <input type="email" id="recovery-email" class="form-input" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <button class="btn-primary" id="btn-send-recovery">Enviar link de recuperação</button>
+        <div class="error-msg" id="recovery-error"></div>
+        <div id="recovery-success" style="display:none;text-align:center;margin-top:14px;font-size:13px;color:#3D5A3A;">Verifique seu e-mail — enviamos o link de recuperação.</div>
+        <div style="text-align:center;margin-top:12px;">
+          <a href="#" id="link-back-login" style="font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer;">Voltar ao login</a>
+        </div>
+      </div>
+
+      <!-- New password form (shown after clicking recovery link) -->
+      <div id="new-password-form" style="display:none;margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label" for="new-password">Nova senha</label>
+          <input type="password" id="new-password" class="form-input" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm-password">Confirmar nova senha</label>
+          <input type="password" id="confirm-password" class="form-input" placeholder="Repita a senha" />
+        </div>
+        <button class="btn-primary" id="btn-update-password">Atualizar senha</button>
+        <div class="error-msg" id="new-password-error"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  DASHBOARD SCREEN                                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="dashboard-screen">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <div class="header-logo">ELEVARIA</div>
+        <div class="header-sub">Painel da Mentora</div>
+      </div>
+      <div class="header-right">
+        <span class="header-user" id="header-username"></span>
+        <button class="btn-refresh" id="btn-refresh">Atualizar</button>
+        <button class="btn-logout" id="btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- STATS BAR -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">Total de Alunas</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Ativas Hoje</div>
+          <div class="stat-value" id="stat-ativas">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Em Risco</div>
+          <div class="stat-value" id="stat-risco">—</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Fase Media</div>
+          <div class="stat-value" id="stat-fase">—</div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(61,90,58,0.4)">
+          <div class="stat-label">Leads Captados</div>
+          <div class="stat-value" id="stat-leads" style="color:#6aad65">—</div>
+        </div>
+        <div class="stat-card" style="border-color:rgba(232,123,106,0.4)">
+          <div class="stat-label">Aguardando Aprovação</div>
+          <div class="stat-value" id="stat-pending" style="color:var(--accent)">0</div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" id="tab-btn-alunas">
+          Alunas
+          <span class="tab-badge" id="tab-count-alunas">0</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-pendentes">
+          Aprovações
+          <span class="tab-badge" id="tab-count-pendentes" style="background:rgba(232,123,106,0.25);color:var(--accent)">0</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-leads">
+          Leads do Diagnostico
+          <span class="tab-badge" id="tab-count-leads">0</span>
+        </button>
+      </nav>
+
+      <!-- TAB: ALUNAS -->
+      <div id="tab-alunas">
+        <div class="section-header">
+          <div class="section-title">Alunas</div>
+          <input
+            type="text"
+            class="search-bar"
+            id="search-input"
+            placeholder="Buscar por nome..."
+          />
+        </div>
+
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-btn active" data-filter="todas">Todas</button>
+          <button class="filter-btn" data-filter="ativa">Ativas</button>
+          <button class="filter-btn" data-filter="atenta">Atentas</button>
+          <button class="filter-btn" data-filter="risco">Em Risco</button>
+          <button class="filter-btn" data-filter="fase-1">Fase I</button>
+          <button class="filter-btn" data-filter="fase-2">Fase II</button>
+          <button class="filter-btn" data-filter="fase-3">Fase III</button>
+          <button class="filter-btn" data-filter="fase-4">Fase IV</button>
+          <button class="filter-btn" data-filter="fase-5">Fase V</button>
+          <button class="filter-btn" data-filter="fase-6">Fase VI</button>
+        </div>
+
+        <div class="table-wrapper">
+          <div id="table-loading" class="loading-state">
+            <div class="spinner"></div>
+            <div>Carregando alunas...</div>
+          </div>
+          <div id="table-empty" class="empty-state hidden">
+            <div class="empty-title">Nenhuma aluna encontrada</div>
+            <div class="empty-sub">Tente ajustar os filtros ou a busca</div>
+          </div>
+          <table id="students-table" class="hidden">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Fase</th>
+                <th>Dias na Mentoria</th>
+                <th>Rituais Hoje</th>
+                <th>Ultima Atividade</th>
+                <th>Como esta</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- TAB: PENDENTES (APROVAÇÕES) -->
+      <div id="tab-pendentes" class="hidden">
+        <div class="section-header">
+          <div class="section-title">Aguardando Aprovação</div>
+        </div>
+        <div class="table-wrapper">
+          <div id="pendentes-loading" class="loading-state hidden">
+            <div class="spinner"></div>
+            <div>Carregando...</div>
+          </div>
+          <div id="pendentes-empty" class="empty-state hidden">
+            <div class="empty-title">Nenhuma aprovação pendente</div>
+            <div class="empty-sub">Todas as alunas foram aprovadas</div>
+          </div>
+          <table id="pendentes-table" class="hidden">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cadastro</th>
+                <th>Idade</th>
+                <th>Modalidade</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pendentes-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB: LEADS -->
+      <div id="tab-leads" class="hidden">
+        <div class="section-header">
+          <div class="section-title">Leads do Diagnostico</div>
+          <input
+            type="text"
+            class="search-bar"
+            id="leads-search-input"
+            placeholder="Buscar por nome ou perfil..."
+          />
+        </div>
+
+        <div class="table-wrapper">
+          <div id="leads-loading" class="loading-state hidden">
+            <div class="spinner"></div>
+            <div>Carregando leads...</div>
+          </div>
+          <div id="leads-empty" class="empty-state hidden">
+            <div class="empty-title">Nenhum lead ainda</div>
+            <div class="empty-sub">Os leads do diagnostico aparecao aqui</div>
+          </div>
+          <table id="leads-table" class="hidden">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Interesse</th>
+                <th>Idade</th>
+                <th>WhatsApp</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Pontuação</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  STUDENT DETAIL MODAL                                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-name" id="modal-name">—</div>
+          <div class="modal-meta" id="modal-meta"></div>
+        </div>
+        <button class="btn-close" id="btn-close-modal">&#x2715;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div>Carregando perfil...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  SUPABASE SDK + JAVASCRIPT                             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    'use strict';
+
+    // ── SUPABASE CONFIG ──────────────────────────────────────
+    const SUPABASE_URL = 'https://ihprxmuzqbhysohcmcqy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWh3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4';
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ── CONSTANTS ────────────────────────────────────────────
+    const PHASE_UNLOCK_DAYS = [0, 14, 28, 49, 77, 112];
+    const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
+    const WELLNESS_GREEN = ['Leve', 'Presente', 'Energizada'];
+    const WELLNESS_GOLD  = ['Cansada', 'Ansiosa'];
+
+    // ── STATE ────────────────────────────────────────────────
+    let allStudents = [];
+    let todayCompletions = {};  // user_id → Set of ritual_ids
+    let lastWellness = {};      // user_id → choice string
+    let lastActivity = {};      // user_id → date string
+    let currentFilter = 'todas';
+    let searchQuery = '';
+    let mentorName = '';
+    let allLeads = [];
+    let leadsSearchQuery = '';
+    let allPending = [];
+    let activeTab = 'alunas';
+
+    // ── HELPERS ──────────────────────────────────────────────
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function daysAgo(n) {
+      const d = new Date();
+      d.setDate(d.getDate() - n);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function daysSince(dateStr) {
+      if (!dateStr) return 0;
+      const start = new Date(dateStr);
+      const now = new Date();
+      const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+      return Math.max(0, diff);
+    }
+
+    function calcPhase(startDate) {
+      const days = daysSince(startDate);
+      for (let i = PHASE_UNLOCK_DAYS.length - 1; i >= 0; i--) {
+        if (days >= PHASE_UNLOCK_DAYS[i]) return i + 1;
+      }
+      return 1;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+
+    function formatDateFull(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function dayOfWeekShort(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+    }
+
+    function statusFromDays(daysSinceActivity) {
+      if (daysSinceActivity <= 1) return 'ativa';
+      if (daysSinceActivity <= 3) return 'atenta';
+      return 'risco';
+    }
+
+    function statusLabel(status) {
+      if (status === 'ativa') return 'Ativa';
+      if (status === 'atenta') return 'Atenta';
+      return 'Em Risco';
+    }
+
+    function statusClass(status) {
+      if (status === 'ativa') return 'badge-ativa';
+      if (status === 'atenta') return 'badge-atenta';
+      return 'badge-risco';
+    }
+
+    function wellnessClass(choice) {
+      if (!choice) return 'wellness-neutral';
+      if (WELLNESS_GREEN.some(w => choice.toLowerCase().includes(w.toLowerCase()))) return 'wellness-green';
+      if (WELLNESS_GOLD.some(w => choice.toLowerCase().includes(w.toLowerCase()))) return 'wellness-gold';
+      return 'wellness-neutral';
+    }
+
+    function daysSinceLastActivity(userId) {
+      const last = lastActivity[userId];
+      if (!last) return 999;
+      return daysSince(last);
+    }
+
+    function showEl(el)  { el.classList.remove('hidden'); }
+    function hideEl(el)  { el.classList.add('hidden'); }
+
+    // ── AUTH ─────────────────────────────────────────────────
+    async function checkAuth() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        showLogin();
+        return false;
+      }
+      return session;
+    }
+
+    function showLogin() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('dashboard-screen').style.display = 'none';
+    }
+
+    function showDashboard() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard-screen').style.display = 'flex';
+    }
+
+    async function login() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl  = document.getElementById('login-error');
+      const btn      = document.getElementById('btn-login');
+
+      errorEl.classList.remove('visible');
+
+      if (!email || !password) {
+        errorEl.textContent = 'Preencha o e-mail e a senha.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      try {
+        const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+        if (error) {
+          errorEl.textContent = 'E-mail ou senha incorretos.';
+          errorEl.classList.add('visible');
+          return;
+        }
+
+        // Check mentor flag
+        const { data: profile, error: profileError } = await db
+          .from('profiles')
+          .select('is_mentor, name')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError || !profile || !profile.is_mentor) {
+          await db.auth.signOut();
+          errorEl.textContent = 'Acesso restrito a mentora.';
+          errorEl.classList.add('visible');
+          return;
+        }
+
+        mentorName = profile.name || email;
+        document.getElementById('header-username').textContent = mentorName;
+        showDashboard();
+        await loadDashboardData();
+        await loadLeads();
+
+      } catch (err) {
+        errorEl.textContent = 'Erro ao conectar. Tente novamente.';
+        errorEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    }
+
+    function showRecoveryForm() {
+      document.getElementById('forgot-link-row').style.display = 'none';
+      document.getElementById('recovery-form').style.display = 'block';
+      document.getElementById('new-password-form').style.display = 'none';
+      // Pre-fill email if already typed
+      const emailVal = document.getElementById('email').value.trim();
+      if (emailVal) document.getElementById('recovery-email').value = emailVal;
+    }
+
+    function showLoginForm() {
+      document.getElementById('forgot-link-row').style.display = 'block';
+      document.getElementById('recovery-form').style.display = 'none';
+      document.getElementById('new-password-form').style.display = 'none';
+      document.getElementById('recovery-success').style.display = 'none';
+      document.getElementById('recovery-error').classList.remove('visible');
+    }
+
+    async function sendRecovery() {
+      const email = document.getElementById('recovery-email').value.trim();
+      const errorEl = document.getElementById('recovery-error');
+      const btn = document.getElementById('btn-send-recovery');
+      errorEl.classList.remove('visible');
+      document.getElementById('recovery-success').style.display = 'none';
+
+      if (!email) {
+        errorEl.textContent = 'Digite seu e-mail.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: 'https://app.biafaceyoga.workers.dev/reset-password.html'
+        });
+
+        if (error) {
+          errorEl.textContent = error.message || 'Erro ao enviar. Tente novamente.';
+          errorEl.classList.add('visible');
+        } else {
+          document.getElementById('recovery-success').style.display = 'block';
+          btn.style.display = 'none';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Erro de conexão. Tente novamente.';
+        errorEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        if (btn.style.display !== 'none') btn.textContent = 'Enviar link de recuperação';
+      }
+    }
+
+    async function updatePassword() {
+      const newPwd = document.getElementById('new-password').value;
+      const confirmPwd = document.getElementById('confirm-password').value;
+      const errorEl = document.getElementById('new-password-error');
+      const btn = document.getElementById('btn-update-password');
+      errorEl.classList.remove('visible');
+
+      if (!newPwd || newPwd.length < 6) {
+        errorEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+        errorEl.classList.add('visible');
+        return;
+      }
+      if (newPwd !== confirmPwd) {
+        errorEl.textContent = 'As senhas não coincidem.';
+        errorEl.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Atualizando...';
+
+      try {
+        const { error } = await db.auth.updateUser({ password: newPwd });
+
+        if (error) {
+          errorEl.textContent = 'Erro ao atualizar senha. Tente novamente.';
+          errorEl.classList.add('visible');
+        } else {
+          // Success — hide new password form, show login
+          document.getElementById('new-password-form').style.display = 'none';
+          document.getElementById('forgot-link-row').style.display = 'block';
+          document.getElementById('login-error').textContent = 'Senha atualizada. Faça login com a nova senha.';
+          document.getElementById('login-error').style.background = 'rgba(61,90,58,0.12)';
+          document.getElementById('login-error').style.borderColor = 'rgba(61,90,58,0.3)';
+          document.getElementById('login-error').style.color = '#3D5A3A';
+          document.getElementById('login-error').classList.add('visible');
+          // Clear hash from URL
+          history.replaceState(null, '', window.location.pathname);
+          // Sign out the recovery session so user must log in fresh
+          await db.auth.signOut();
+        }
+      } catch (err) {
+        errorEl.textContent = 'Erro de conexão. Tente novamente.';
+        errorEl.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Atualizar senha';
+      }
+    }
+
+    async function logout() {
+      await db.auth.signOut();
+      showLogin();
+    }
+
+    // ── DATA LOADING ─────────────────────────────────────────
+    async function loadDashboardData() {
+      const loadingEl = document.getElementById('table-loading');
+      const tableEl   = document.getElementById('students-table');
+      const emptyEl   = document.getElementById('table-empty');
+
+      showEl(loadingEl);
+      hideEl(tableEl);
+      hideEl(emptyEl);
+
+      try {
+        const today = todayStr();
+        const threeDaysAgo = daysAgo(3);
+
+        // 1. Load all approved students
+        const { data: students, error: studentsError } = await db
+          .from('profiles')
+          .select('*')
+          .or('is_mentor.eq.false,is_mentor.is.null')
+          .eq('approved', true)
+          .order('name', { ascending: true });
+
+        if (studentsError) throw studentsError;
+        allStudents = students || [];
+
+        // 1b. Load pending users (approved = false OR null)
+        const { data: pending } = await db
+          .from('profiles')
+          .select('*')
+          .or('approved.eq.false,approved.is.null')
+          .or('is_mentor.eq.false,is_mentor.is.null')
+          .order('created_at', { ascending: false });
+        allPending = pending || [];
+        document.getElementById('stat-pending').textContent = allPending.length;
+        document.getElementById('tab-count-pendentes').textContent = allPending.length;
+
+        // 2. Load today's ritual completions
+        const { data: completions } = await db
+          .from('ritual_completions')
+          .select('user_id, ritual_id')
+          .eq('date', today);
+
+        todayCompletions = {};
+        (completions || []).forEach(c => {
+          if (!todayCompletions[c.user_id]) todayCompletions[c.user_id] = new Set();
+          todayCompletions[c.user_id].add(c.ritual_id);
+        });
+
+        // 3. Load last activity date per student (most recent completion)
+        const studentIds = allStudents.map(s => s.id);
+
+        if (studentIds.length > 0) {
+          const { data: allCompletions } = await db
+            .from('ritual_completions')
+            .select('user_id, date')
+            .in('user_id', studentIds)
+            .order('date', { ascending: false });
+
+          lastActivity = {};
+          (allCompletions || []).forEach(c => {
+            if (!lastActivity[c.user_id]) {
+              lastActivity[c.user_id] = c.date;
+            }
+          });
+
+          // 4. Load last wellness log per student
+          const { data: wellnessLogs } = await db
+            .from('wellness_logs')
+            .select('user_id, choice, date')
+            .in('user_id', studentIds)
+            .order('date', { ascending: false })
+            .order('created_at', { ascending: false });
+
+          lastWellness = {};
+          (wellnessLogs || []).forEach(w => {
+            if (!lastWellness[w.user_id]) {
+              lastWellness[w.user_id] = w.choice;
+            }
+          });
+        }
+
+        // Update stats
+        updateStats();
+
+        // Update alunas tab badge
+        document.getElementById('tab-count-alunas').textContent = allStudents.length;
+
+        // Render table
+        renderTable();
+
+      } catch (err) {
+        console.error('Error loading data:', err);
+        hideEl(loadingEl);
+        showEl(emptyEl);
+        document.querySelector('.empty-title').textContent = 'Erro ao carregar dados';
+        document.querySelector('.empty-sub').textContent = err.message || 'Verifique a conexao e tente novamente.';
+      }
+    }
+
+    function updateStats() {
+      const total = allStudents.length;
+
+      const ativasHoje = allStudents.filter(s => {
+        const comp = todayCompletions[s.id];
+        return comp && comp.size > 0;
+      }).length;
+
+      const emRisco = allStudents.filter(s => {
+        return daysSinceLastActivity(s.id) > 3;
+      }).length;
+
+      const phases = allStudents.map(s => calcPhase(s.start_date));
+      const avgPhase = phases.length > 0
+        ? (phases.reduce((a, b) => a + b, 0) / phases.length).toFixed(1)
+        : '—';
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-ativas').textContent = ativasHoje;
+      document.getElementById('stat-risco').textContent = emRisco;
+      document.getElementById('stat-fase').textContent = avgPhase !== '—'
+        ? ROMAN[Math.round(parseFloat(avgPhase)) - 1] || avgPhase
+        : '—';
+    }
+
+    function getFilteredStudents() {
+      let list = [...allStudents];
+
+      // Search filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(s => (s.name || '').toLowerCase().includes(q));
+      }
+
+      // Status/phase filter
+      if (currentFilter !== 'todas') {
+        if (currentFilter.startsWith('fase-')) {
+          const faseNum = parseInt(currentFilter.split('-')[1]);
+          list = list.filter(s => calcPhase(s.start_date) === faseNum);
+        } else if (currentFilter === 'ativa') {
+          list = list.filter(s => daysSinceLastActivity(s.id) <= 1);
+        } else if (currentFilter === 'atenta') {
+          const d = (s) => daysSinceLastActivity(s.id);
+          list = list.filter(s => d(s) > 1 && d(s) <= 3);
+        } else if (currentFilter === 'risco') {
+          list = list.filter(s => daysSinceLastActivity(s.id) > 3);
+        }
+      }
+
+      return list;
+    }
+
+    function renderTable() {
+      const loadingEl = document.getElementById('table-loading');
+      const tableEl   = document.getElementById('students-table');
+      const emptyEl   = document.getElementById('table-empty');
+      const tbody     = document.getElementById('students-tbody');
+
+      hideEl(loadingEl);
+
+      const students = getFilteredStudents();
+
+      if (students.length === 0) {
+        hideEl(tableEl);
+        showEl(emptyEl);
+        document.querySelector('.empty-title').textContent = 'Nenhuma aluna encontrada';
+        document.querySelector('.empty-sub').textContent = 'Tente ajustar os filtros ou a busca';
+        return;
+      }
+
+      hideEl(emptyEl);
+      showEl(tableEl);
+
+      tbody.innerHTML = '';
+
+      students.forEach(student => {
+        const phase     = calcPhase(student.start_date);
+        const dayCount  = daysSince(student.start_date);
+        const todayComp = todayCompletions[student.id] || new Set();
+        const lastAct   = lastActivity[student.id];
+        const wellness  = lastWellness[student.id];
+        const dsla      = daysSinceLastActivity(student.id);
+        const status    = statusFromDays(dsla);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight:500">${escHtml(student.name || '—')}</div>
+          </td>
+          <td>
+            <span class="phase-badge">${ROMAN[phase - 1]}</span>
+          </td>
+          <td>
+            <span>${dayCount}</span>
+            <span class="muted text-sm"> dias</span>
+          </td>
+          <td>
+            <div class="ritual-col">
+              <div class="ritual-row">
+                <div class="ritual-dot ${todayComp.has('manha') ? 'done' : ''}"></div>
+                <span class="ritual-label">Manha</span>
+              </div>
+              <div class="ritual-row">
+                <div class="ritual-dot ${todayComp.has('tarde') ? 'done' : ''}"></div>
+                <span class="ritual-label">Tarde</span>
+              </div>
+              <div class="ritual-row">
+                <div class="ritual-dot ${todayComp.has('noite') ? 'done' : ''}"></div>
+                <span class="ritual-label">Noite</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            ${lastAct ? formatDate(lastAct) : '<span class="muted">—</span>'}
+          </td>
+          <td>
+            ${wellness
+              ? `<span class="wellness-tag ${wellnessClass(wellness)}">${escHtml(wellness)}</span>`
+              : '<span class="muted">—</span>'
+            }
+          </td>
+          <td>
+            <span class="badge ${statusClass(status)}">${statusLabel(status)}</span>
+          </td>
+          <td>
+            <button class="btn-profile" data-id="${escAttr(student.id)}">Ver Perfil</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Attach profile button events
+      tbody.querySelectorAll('.btn-profile').forEach(btn => {
+        btn.addEventListener('click', () => openModal(btn.dataset.id));
+      });
+    }
+
+    // ── LEADS ────────────────────────────────────────────────
+    async function loadLeads() {
+      const loadingEl = document.getElementById('leads-loading');
+      const tableEl   = document.getElementById('leads-table');
+      const emptyEl   = document.getElementById('leads-empty');
+
+      showEl(loadingEl);
+      hideEl(tableEl);
+      hideEl(emptyEl);
+
+      try {
+        const { data: leads, error } = await db
+          .from('leads')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        allLeads = leads || [];
+
+        document.getElementById('stat-leads').textContent = allLeads.length;
+        document.getElementById('tab-count-leads').textContent = allLeads.length;
+
+        renderLeads();
+      } catch (err) {
+        console.error('Error loading leads:', err);
+        hideEl(loadingEl);
+        showEl(emptyEl);
+        document.getElementById('leads-empty').querySelector('.empty-title').textContent = 'Erro ao carregar leads';
+        document.getElementById('leads-empty').querySelector('.empty-sub').textContent = err.message || 'Verifique a conexao.';
+      }
+    }
+
+    function getLeadBadgeClass(perfil) {
+      if (!perfil) return '';
+      const p = perfil.toLowerCase();
+      if (p.includes('tens')) return 'badge-tensao';
+      if (p.includes('descon')) return 'badge-desconexao';
+      if (p.includes('pronta') || p.includes('aprofund')) return 'badge-pronta';
+      return 'badge-atenta';
+    }
+
+    function formatDatetime(isoStr) {
+      if (!isoStr) return '—';
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function renderLeads() {
+      const loadingEl = document.getElementById('leads-loading');
+      const tableEl   = document.getElementById('leads-table');
+      const emptyEl   = document.getElementById('leads-empty');
+      const tbody     = document.getElementById('leads-tbody');
+
+      hideEl(loadingEl);
+
+      let list = [...allLeads];
+
+      if (leadsSearchQuery) {
+        const q = leadsSearchQuery.toLowerCase();
+        list = list.filter(l =>
+          (l.nome || '').toLowerCase().includes(q) ||
+          (l.perfil || '').toLowerCase().includes(q) ||
+          (l.email || '').toLowerCase().includes(q)
+        );
+      }
+
+      if (list.length === 0) {
+        hideEl(tableEl);
+        showEl(emptyEl);
+        return;
+      }
+
+      hideEl(emptyEl);
+      showEl(tableEl);
+
+      tbody.innerHTML = '';
+
+      list.forEach(lead => {
+        const maxScore = 30; // 6 perguntas x 5 pontos max
+        const pct = Math.min(100, Math.round(((lead.pontuacao || 0) / maxScore) * 100));
+        const whatsClean = (lead.whatsapp || '').replace(/\D/g, '');
+        const whatsLink = whatsClean
+          ? `<a class="whatsapp-link" href="https://wa.me/55${whatsClean}" target="_blank" rel="noopener">${escHtml(lead.whatsapp)}</a>`
+          : '<span class="muted">—</span>';
+
+        const tr = document.createElement('tr');
+        const interesseBadge = lead.interesse === 'desafio'
+          ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(100,160,240,0.15);color:#7ab4f5;border:1px solid rgba(100,160,240,0.3);">🔵 Desafio 21d</span>`
+          : lead.interesse === 'mentoria'
+          ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(180,120,240,0.15);color:#c49bf5;border:1px solid rgba(180,120,240,0.3);">🟣 Mentoria</span>`
+          : '<span class="muted">—</span>';
+
+        tr.innerHTML = `
+          <td><div style="font-weight:500">${escHtml(lead.nome || '—')}</div></td>
+          <td>${interesseBadge}</td>
+          <td><span class="muted text-sm">${lead.idade ? lead.idade + ' anos' : '—'}</span></td>
+          <td>${whatsLink}</td>
+          <td><span class="muted text-sm">${escHtml(lead.email || '—')}</span></td>
+          <td>
+            ${lead.perfil
+              ? `<span class="badge ${getLeadBadgeClass(lead.perfil)}">${escHtml(lead.perfil)}</span>`
+              : '<span class="muted">—</span>'
+            }
+          </td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar">
+                <div class="score-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span class="text-sm muted">${lead.pontuacao || 0}</span>
+            </div>
+          </td>
+          <td><span class="muted text-sm">${formatDatetime(lead.created_at)}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ── TABS ─────────────────────────────────────────────────
+    function switchTab(tab) {
+      activeTab = tab;
+      const tabs   = ['alunas', 'pendentes', 'leads'];
+      tabs.forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (el)  { el.classList.toggle('hidden', t !== tab); }
+        if (btn) { btn.classList.toggle('active', t === tab); }
+      });
+    }
+
+    // ── PENDING APPROVALS ─────────────────────────────────────
+    function renderPending() {
+      const loadingEl = document.getElementById('pendentes-loading');
+      const tableEl   = document.getElementById('pendentes-table');
+      const emptyEl   = document.getElementById('pendentes-empty');
+      const tbody     = document.getElementById('pendentes-tbody');
+
+      hideEl(loadingEl);
+
+      if (allPending.length === 0) {
+        hideEl(tableEl);
+        showEl(emptyEl);
+        return;
+      }
+
+      hideEl(emptyEl);
+      showEl(tableEl);
+      tbody.innerHTML = '';
+
+      allPending.forEach(p => {
+        const tr = document.createElement('tr');
+        const cadDate = p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—';
+        const prefModal = p.modalidade_pref || 'desafio';
+        tr.innerHTML = `
+          <td><div style="font-weight:500">${escHtml(p.name || '—')}</div></td>
+          <td><span class="muted text-sm">${cadDate}</span></td>
+          <td><span class="muted text-sm">${p.age || '—'}</span></td>
+          <td>
+            <select class="modal-select" data-id="${escAttr(p.id)}" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--fg);font-size:12px;cursor:pointer">
+              <option value="desafio" ${prefModal==='desafio'?'selected':''}>🔵 Desafio 21d</option>
+              <option value="mentoria" ${prefModal==='mentoria'?'selected':''}>🟣 Mentoria</option>
+            </select>
+          </td>
+          <td>
+            <button class="btn-approve" data-id="${escAttr(p.id)}">Aprovar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll('.btn-approve').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const row = btn.closest('tr');
+          const sel = row ? row.querySelector('.modal-select') : null;
+          const modalidade = sel ? sel.value : 'desafio';
+          approveUser(btn.dataset.id, btn, modalidade);
+        });
+      });
+    }
+
+    async function approveUser(userId, btn, modalidade) {
+      if (btn) { btn.textContent = 'Aprovando...'; btn.disabled = true; }
+      try {
+        const { error } = await db
+          .from('profiles')
+          .update({ approved: true, modalidade: modalidade || 'desafio' })
+          .eq('id', userId);
+        if (error) throw error;
+        // Remove from pending list and refresh
+        allPending = allPending.filter(p => p.id !== userId);
+        document.getElementById('stat-pending').textContent = allPending.length;
+        document.getElementById('tab-count-pendentes').textContent = allPending.length;
+        renderPending();
+        // Also reload approved students so they appear in Alunas
+        await loadDashboardData();
+        renderPending();
+      } catch(err) {
+        console.error('Erro ao aprovar:', err);
+        if (btn) { btn.textContent = 'Aprovar'; btn.disabled = false; }
+        alert('Erro ao aprovar. Tente novamente.');
+      }
+    }
+
+    // ── MODAL ─────────────────────────────────────────────────
+    async function openModal(studentId) {
+      const overlay = document.getElementById('modal-overlay');
+      const modalBody = document.getElementById('modal-body');
+      const modalName = document.getElementById('modal-name');
+      const modalMeta = document.getElementById('modal-meta');
+
+      overlay.classList.add('open');
+      modalName.textContent = '—';
+      modalMeta.innerHTML = '';
+      modalBody.innerHTML = '<div class="loading-state"><div class="spinner"></div><div>Carregando perfil...</div></div>';
+
+      const student = allStudents.find(s => s.id === studentId);
+      if (!student) {
+        modalBody.innerHTML = '<div class="loading-state">Aluna nao encontrada.</div>';
+        return;
+      }
+
+      const phase    = calcPhase(student.start_date);
+      const dayCount = daysSince(student.start_date);
+
+      modalName.textContent = student.name || '—';
+      modalMeta.innerHTML = `
+        ${student.age ? `<div class="modal-meta-item">Idade: <span>${student.age} anos</span></div>` : ''}
+        ${student.is_menopausa !== null && student.is_menopausa !== undefined
+          ? `<div class="modal-meta-item">Menopausa: <span>${student.is_menopausa ? 'Sim' : 'Nao'}</span></div>`
+          : ''
+        }
+        ${student.weight ? `<div class="modal-meta-item">Peso: <span>${student.weight} kg</span></div>` : ''}
+        <div class="modal-meta-item">Inicio: <span>${formatDateFull(student.start_date)}</span></div>
+        <div class="modal-meta-item">Fase: <span>${ROMAN[phase - 1]}</span></div>
+        <div class="modal-meta-item">Na mentoria ha: <span>${dayCount} dias</span></div>
+      `;
+
+      try {
+        const today = todayStr();
+        const sevenDaysAgo = daysAgo(6);
+
+        // Build last 7 days array
+        const last7 = [];
+        for (let i = 6; i >= 0; i--) {
+          last7.push(daysAgo(i));
+        }
+
+        // Load last 7 days ritual completions
+        const { data: rituals7 } = await db
+          .from('ritual_completions')
+          .select('date, ritual_id')
+          .eq('user_id', studentId)
+          .gte('date', sevenDaysAgo)
+          .lte('date', today);
+
+        const ritualsMap = {};
+        (rituals7 || []).forEach(r => {
+          if (!ritualsMap[r.date]) ritualsMap[r.date] = new Set();
+          ritualsMap[r.date].add(r.ritual_id);
+        });
+
+        // Load last 7 wellness logs
+        const { data: wellness7 } = await db
+          .from('wellness_logs')
+          .select('date, choice')
+          .eq('user_id', studentId)
+          .gte('date', sevenDaysAgo)
+          .lte('date', today)
+          .order('date', { ascending: true });
+
+        // Load water logs last 7 days
+        const { data: water7 } = await db
+          .from('water_logs')
+          .select('date, cups')
+          .eq('user_id', studentId)
+          .gte('date', sevenDaysAgo)
+          .lte('date', today);
+
+        let waterAvg = 0;
+        if (water7 && water7.length > 0) {
+          waterAvg = (water7.reduce((s, w) => s + (w.cups || 0), 0) / 7).toFixed(1);
+        }
+
+        // Load photos
+        const { data: photos } = await db
+          .from('photos')
+          .select('phase_num, photo_type, data_url, created_at')
+          .eq('user_id', studentId)
+          .order('phase_num', { ascending: true })
+          .order('created_at', { ascending: true });
+
+        // Build modal HTML
+        let html = '';
+
+        // ── Ritual Calendar ──
+        html += `<div>
+          <div class="modal-section-title">Rituais — Ultimos 7 Dias</div>
+          <div class="ritual-calendar">`;
+
+        last7.forEach(dateStr => {
+          const done = ritualsMap[dateStr] || new Set();
+          html += `
+            <div class="cal-day">
+              <div class="cal-day-label">${dayOfWeekShort(dateStr)}<br>${formatDate(dateStr)}</div>
+              <div class="cal-dots">
+                <div class="cal-dot ${done.has('manha') ? 'done' : ''}" title="Manha"></div>
+                <div class="cal-dot ${done.has('tarde') ? 'done' : ''}" title="Tarde"></div>
+                <div class="cal-dot ${done.has('noite') ? 'done' : ''}" title="Noite"></div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+
+        // ── Wellness Trend ──
+        html += `<div>
+          <div class="modal-section-title">Como Estava — Ultimos 7 Dias</div>
+          <div class="wellness-trend">`;
+
+        if (wellness7 && wellness7.length > 0) {
+          wellness7.forEach(w => {
+            html += `
+              <div class="wellness-trend-item">
+                <span class="wellness-tag ${wellnessClass(w.choice)}">${escHtml(w.choice)}</span>
+                <span class="wellness-trend-date">${formatDate(w.date)}</span>
+              </div>
+            `;
+          });
+        } else {
+          html += `<span class="muted text-sm">Nenhum registro nos ultimos 7 dias.</span>`;
+        }
+
+        html += `</div></div>`;
+
+        // ── Water ──
+        html += `<div>
+          <div class="modal-section-title">Hidratacao — Media Diaria (7 dias)</div>
+          <div class="water-display">
+            <div class="water-value">${waterAvg}</div>
+            <div class="water-unit">copos por dia</div>
+          </div>
+        </div>`;
+
+        // ── Photos ──
+        html += `<div>
+          <div class="modal-section-title">Fotos por Fase</div>`;
+
+        if (photos && photos.length > 0) {
+          const byPhase = {};
+          photos.forEach(p => {
+            const ph = p.phase_num || 1;
+            if (!byPhase[ph]) byPhase[ph] = [];
+            byPhase[ph].push(p);
+          });
+
+          Object.keys(byPhase).sort((a, b) => a - b).forEach(phaseKey => {
+            html += `<div class="photo-phase-group">
+              <div class="photo-phase-title">Fase ${ROMAN[parseInt(phaseKey) - 1] || phaseKey}</div>
+              <div class="photos-grid">`;
+
+            byPhase[phaseKey].forEach(photo => {
+              html += `
+                <div>
+                  <div class="photo-thumb">
+                    <img src="${escAttr(photo.data_url)}" alt="Foto fase ${phaseKey}" loading="lazy" />
+                  </div>
+                  <div class="photo-thumb-label">${escHtml(photo.photo_type || '')}</div>
+                </div>
+              `;
+            });
+
+            html += `</div></div>`;
+          });
+        } else {
+          html += `<span class="muted text-sm">Nenhuma foto enviada ainda.</span>`;
+        }
+
+        html += `</div>`;
+
+        modalBody.innerHTML = html;
+
+      } catch (err) {
+        console.error('Error loading student detail:', err);
+        modalBody.innerHTML = `<div class="loading-state">Erro ao carregar perfil: ${escHtml(err.message)}</div>`;
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    // ── SANITIZATION ─────────────────────────────────────────
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;');
+    }
+
+    // ── EVENT LISTENERS ──────────────────────────────────────
+    document.getElementById('btn-login').addEventListener('click', login);
+    document.getElementById('link-forgot').addEventListener('click', e => { e.preventDefault(); showRecoveryForm(); });
+    document.getElementById('link-back-login').addEventListener('click', e => { e.preventDefault(); showLoginForm(); });
+    document.getElementById('btn-send-recovery').addEventListener('click', sendRecovery);
+    document.getElementById('btn-update-password').addEventListener('click', updatePassword);
+
+    document.getElementById('recovery-email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendRecovery();
+    });
+
+    document.getElementById('email').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', logout);
+
+    document.getElementById('btn-refresh').addEventListener('click', () => {
+      loadDashboardData();
+      loadLeads();
+    });
+
+    document.getElementById('search-input').addEventListener('input', e => {
+      searchQuery = e.target.value;
+      renderTable();
+    });
+
+    document.getElementById('leads-search-input').addEventListener('input', e => {
+      leadsSearchQuery = e.target.value;
+      renderLeads();
+    });
+
+    document.getElementById('tab-btn-alunas').addEventListener('click', () => switchTab('alunas'));
+    document.getElementById('tab-btn-pendentes').addEventListener('click', () => { switchTab('pendentes'); renderPending(); });
+    document.getElementById('tab-btn-leads').addEventListener('click', () => switchTab('leads'));
+
+    document.getElementById('filter-bar').addEventListener('click', e => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderTable();
+    });
+
+    document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Detecta evento de recuperação de senha do Supabase v2
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        showLogin();
+        document.getElementById('forgot-link-row').style.display = 'none';
+        document.getElementById('recovery-form').style.display = 'none';
+        document.getElementById('new-password-form').style.display = 'block';
+      }
+    });
+
+    // ── INIT ─────────────────────────────────────────────────
+    (async function init() {
+      const session = await checkAuth();
+      if (!session) return;
+
+      // Already logged in — verify mentor status
+      try {
+        const { data: profile } = await db
+          .from('profiles')
+          .select('is_mentor, name')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile || !profile.is_mentor) {
+          await db.auth.signOut();
+          showLogin();
+          const errEl = document.getElementById('login-error');
+          errEl.textContent = 'Acesso restrito a mentora.';
+          errEl.classList.add('visible');
+          return;
+        }
+
+        mentorName = profile.name || session.user.email;
+        document.getElementById('header-username').textContent = mentorName;
+        showDashboard();
+        await loadDashboardData();
+        await loadLeads();
+
+      } catch (err) {
+        showLogin();
+      }
+    })();
+  </script>
+</body>
+</html>
