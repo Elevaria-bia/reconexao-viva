@@ -49,7 +49,7 @@ export default {
               },
               {
                 type: 'text',
-                text: 'Esta imagem mostra um rosto humano claramente visível? Responda APENAS com: SIM ou NAO'
+                text: 'Esta imagem mostra o rosto de um adulto humano (homem ou mulher, maior de 18 anos) claramente visível? Responda APENAS com: SIM ou NAO'
               }
             ]
           }]
