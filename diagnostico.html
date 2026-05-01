@@ -1701,18 +1701,27 @@
     btn.disabled = true;
     btn.textContent = 'Enviando…';
 
-    // Salva no Supabase
-    const { error: sbErr } = await supa.from('leads').insert({
-      nome,
-      idade: idade ? parseInt(idade) : null,
-      whatsapp: whats,
-      email,
-      perfil,
-      pontuacao,
-      respostas: scores,
-      interesse: selectedOffer
-    });
-    if (sbErr) console.error('Supabase error:', sbErr.message, sbErr);
+    // Salva no Supabase via REST direto (mais confiável que o SDK)
+    try {
+      const interesse = (selectedOffer === 'desafio' || selectedOffer === 'mentoria') ? selectedOffer : 'mentoria';
+      const payload = { nome, idade: idade ? parseInt(idade) : null, whatsapp: whats, email, perfil, pontuacao, respostas: scores, interesse };
+      const res = await fetch('https://ihprxmuzqbhysohcmcqy.supabase.co/rest/v1/leads', {
+        method: 'POST',
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWh3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlocHJ4bXV6cWJoeXNvaGNtY3F5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzEzNDksImV4cCI6MjA5MjAwNzM0OX0.MzmBYnKfWh3qU2_mKPIE3zuShoECKmOtSSH17pkNAc4',
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Supabase REST error:', res.status, errText);
+      }
+    } catch(err) {
+      console.error('Erro ao salvar lead:', err);
+    }
 
     // Personaliza tela de obrigada
     const nomeEl = document.getElementById('obrigada-nome');
@@ -1722,15 +1731,10 @@
       ? 'Desafio 21 Dias — você receberá o link de pagamento em breve.'
       : 'Mentoria Individual — entrarei em contato em até 24h para conversarmos.';
 
-    // Envia para Netlify Forms
-    const formData = new FormData(e.target);
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(formData).toString()
-    })
-    .then(() => goTo('s-obrigada'))
-    .catch(() => goTo('s-obrigada'));
+    goTo('s-obrigada');
+
+    btn.disabled = false;
+    btn.textContent = 'Confirmar meu interesse ✦';
   }
 
   function initCardsDots(cardsEl) {
