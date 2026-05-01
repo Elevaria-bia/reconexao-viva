@@ -1327,16 +1327,20 @@
     document.getElementById('prog-bar').style.width = pct + '%';
   }
 
-  // ── DETECÇÃO DE ROSTO (lado do cliente) ─────────────────────────────────────
+  // ── DETECÇÃO DE ROSTO + IDADE (lado do cliente) ─────────────────────────────
   let faceAPIReady = false;
+  let ageModelReady = false;
+  const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
   (async () => {
     try {
-      await faceapi.nets.tinyFaceDetector.loadFromUri(
-        'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model'
-      );
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
       faceAPIReady = true;
+      // Carrega modelo de idade em paralelo (não bloqueia a inicialização)
+      faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+        .then(() => { ageModelReady = true; })
+        .catch(e => console.log('ageGenderNet não carregou:', e.message));
     } catch(e) {
-      // Se não carregar, não bloqueia — a IA do servidor faz a validação
       console.log('face-api não carregou:', e.message);
     }
   })();
@@ -1344,11 +1348,19 @@
   async function checkFaceLocally(imgEl) {
     if (!faceAPIReady) return null; // null = inconclusivo, não bloqueia
     try {
-      const detection = await faceapi.detectSingleFace(
-        imgEl,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 })
-      );
-      return !!detection;
+      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.35 });
+
+      if (ageModelReady) {
+        // Detecta rosto E estima idade
+        const result = await faceapi.detectSingleFace(imgEl, opts).withAgeAndGender();
+        if (!result) return false;           // sem rosto → bloqueia
+        if (result.age < 16) return false;   // criança detectada → bloqueia
+        return true;
+      } else {
+        // Modelo de idade ainda carregando — só verifica se há rosto
+        const result = await faceapi.detectSingleFace(imgEl, opts);
+        return !!result;
+      }
     } catch(e) {
       return null; // inconclusivo, não bloqueia
     }
