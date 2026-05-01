@@ -668,15 +668,10 @@
       </p>
     </div>
 
-    <div class="scarcity" style="margin: 0 auto 24px;">
-      <span class="dot-live"></span>
-      Apenas <strong>&nbsp;4 vagas&nbsp;</strong> disponíveis este mês
-    </div>
-
     <button class="btn btn-primary btn-full" onclick="goTo('s-diagnostico')">
       Traçar meu mapa de reconexão →
     </button>
-    <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:14px; text-align:center;">Grátis · sem compromisso · 3 minutos</p>
+    <p style="font-size:12px; color:rgba(255,255,255,0.25); margin-top:14px; text-align:center;">Grátis · sem compromisso · 5 minutos</p>
 
     <div class="authority-bar" style="margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.07);">
       <div class="auth-item">
@@ -704,7 +699,7 @@
     <div class="pill pill-green" style="margin-bottom:24px;">mapa gratuito</div>
     <h2 style="margin-bottom:16px;">Como funciona o seu mapa</h2>
     <p class="lead" style="margin-bottom:32px;">
-      Em 3 etapas simples, vou mapear qual padrão de tensão está bloqueando
+      Em poucos minutos, vou mapear qual padrão de tensão está bloqueando
       sua vitalidade — e o caminho mais natural de volta a si mesma.
     </p>
 
@@ -712,22 +707,29 @@
       <div style="display:flex; align-items:flex-start; gap:16px;">
         <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">1</div>
         <div>
-          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Envie uma foto do seu rosto</p>
-          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Natural, sem filtro — para eu ver onde a tensão se manifesta</p>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Me conta um pouco sobre você</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">O que você sente, o que te incomoda — para o mapa ser realmente seu</p>
         </div>
       </div>
       <div style="display:flex; align-items:flex-start; gap:16px;">
         <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">2</div>
         <div>
-          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Responda 5 perguntas rápidas</p>
-          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Sobre como você acorda, onde sente tensão e o que deseja sentir</p>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Envie uma foto do seu rosto</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Natural, sem filtro — para eu ver onde a tensão se manifesta</p>
         </div>
       </div>
       <div style="display:flex; align-items:flex-start; gap:16px;">
         <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">3</div>
         <div>
+          <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Responda algumas perguntas rápidas</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Sobre como você acorda, onde sente tensão e o que deseja sentir</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:flex-start; gap:16px;">
+        <div style="width:36px; height:36px; border-radius:50%; background:rgba(232,123,106,0.15); border:1px solid rgba(232,123,106,0.4); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--accent); flex-shrink:0;">4</div>
+        <div>
           <p style="font-weight:600; font-size:15px; margin-bottom:4px;">Receba seu mapa personalizado</p>
-          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Com o que está acontecendo no seu corpo e o próximo passo para você</p>
+          <p style="font-size:13px; color:rgba(255,255,255,0.45);">Com o que está acontecendo no seu rosto e o caminho de volta a si mesma</p>
         </div>
       </div>
     </div>
@@ -745,45 +747,35 @@
 <div class="screen" id="s-perfil" style="background: var(--dark);">
   <div style="max-width:520px; width:100%; text-align:center;">
     <div class="pill pill-accent" style="margin-bottom:24px;">antes de começar</div>
-    <h2 style="margin-bottom:10px;">Preciso te conhecer um pouco</h2>
+    <h2 style="margin-bottom:10px;">Conta um pouco pra mim</h2>
     <p class="lead" style="font-size:15px; margin-bottom:32px;">
       Assim o seu mapa fica realmente personalizado para você.
     </p>
 
     <!-- Nome -->
-    <div style="text-align:left; margin-bottom:20px;">
+    <div style="text-align:left; margin-bottom:24px;">
       <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:8px;">Como posso te chamar?</label>
       <input id="perfil-nome" type="text" placeholder="Seu primeiro nome" style="width:100%; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.12); border-radius:14px; padding:16px 18px; font-size:16px; color:white; font-family:'DM Sans',sans-serif; outline:none;" oninput="checkPerfilForm()" />
     </div>
 
-    <!-- Gênero / confirmação -->
-    <div style="text-align:left; margin-bottom:20px;">
-      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:10px;">Este mapa é para você?</label>
-      <div style="display:flex; flex-direction:column; gap:10px;" id="genero-opts">
-        <div class="opt" onclick="selectGenero('mulher')" id="g-mulher" style="padding:16px 20px;">
-          <div style="font-weight:600; font-size:15px;">Sim — sou mulher adulta</div>
-        </div>
-        <div class="opt" onclick="selectGenero('outro')" id="g-outro" style="padding:16px 20px;">
-          <div style="font-weight:600; font-size:15px;">Não / Sou homem</div>
-        </div>
-      </div>
-      <!-- mensagem se não for mulher -->
-      <div id="genero-nao-msg" style="display:none; margin-top:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px 18px; font-size:14px; color:rgba(255,255,255,0.6); line-height:1.7;">
-        O Método Reconexão Facial foi criado especificamente para mulheres. Se você conhece alguém que pode se beneficiar, compartilha com ela.
-        <br><a href="https://instagram.com/biafaceyoga" target="_blank" style="color:var(--accent); font-weight:600; text-decoration:none;">Ver @biafaceyoga no Instagram →</a>
+    <!-- Queixas — multi-select -->
+    <div style="text-align:left; margin-bottom:24px;" id="queixa-section">
+      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:6px;">O que te incomoda no seu rosto?</label>
+      <p style="font-size:12px; color:rgba(255,255,255,0.3); margin-bottom:12px;">Pode marcar mais de uma</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" id="queixa-opts">
+        <div class="opt" onclick="toggleQueixa(this,'tensao')" style="padding:14px 16px; font-size:14px;">Tensão e mandíbula</div>
+        <div class="opt" onclick="toggleQueixa(this,'olheiras')" style="padding:14px 16px; font-size:14px;">Olheiras e inchaço</div>
+        <div class="opt" onclick="toggleQueixa(this,'derretido')" style="padding:14px 16px; font-size:14px;">Rosto pesado e derretido</div>
+        <div class="opt" onclick="toggleQueixa(this,'contorno')" style="padding:14px 16px; font-size:14px;">Perda de contorno</div>
+        <div class="opt" onclick="toggleQueixa(this,'cansaco')" style="padding:14px 16px; font-size:14px;">Expressão de cansaço</div>
+        <div class="opt" onclick="toggleQueixa(this,'desconexao')" style="padding:14px 16px; font-size:14px;">Desconexão comigo mesma</div>
       </div>
     </div>
 
-    <!-- Principal queixa -->
-    <div style="text-align:left; margin-bottom:28px;" id="queixa-section">
-      <label style="font-size:13px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.5); text-transform:uppercase; display:block; margin-bottom:10px;">O que mais te incomoda hoje?</label>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" id="queixa-opts">
-        <div class="opt" onclick="selectQueixa(this,'tensao')" style="padding:14px 16px; font-size:14px;">Tensão no rosto e mandíbula</div>
-        <div class="opt" onclick="selectQueixa(this,'olheiras')" style="padding:14px 16px; font-size:14px;">Olheiras e inchaço</div>
-        <div class="opt" onclick="selectQueixa(this,'contorno')" style="padding:14px 16px; font-size:14px;">Perda de contorno</div>
-        <div class="opt" onclick="selectQueixa(this,'cansaco')" style="padding:14px 16px; font-size:14px;">Expressão de cansaço</div>
-        <div class="opt" onclick="selectQueixa(this,'desconexao')" style="padding:14px 16px; font-size:14px; grid-column:1/-1;">Sensação de desconexão comigo mesma</div>
-      </div>
+    <!-- Confirmação gentil — quem é este mapa -->
+    <div id="genero-nao-msg" style="display:none; margin-bottom:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px 18px; font-size:14px; color:rgba(255,255,255,0.6); line-height:1.7; text-align:left;">
+      Este mapa foi criado especialmente para mulheres. Se você conhece alguém que pode se beneficiar, compartilha com ela.
+      <br><a href="https://instagram.com/biafaceyoga" target="_blank" style="color:var(--accent); font-weight:600; text-decoration:none;">Ver @biafaceyoga no Instagram →</a>
     </div>
 
     <button class="btn btn-primary btn-full" id="btn-perfil" style="display:none;" onclick="goTo('s-foto')">
@@ -1297,29 +1289,24 @@
   let aiAnalysis = null; // resultado da análise facial por IA
   let selectedOffer = 'mentoria'; // 'desafio' | 'mentoria'
   let userName = '';
-  let userGenero = '';
-  let userQueixa = '';
+  let userQueixas = []; // multi-select
 
-  function selectGenero(val) {
-    userGenero = val;
-    document.querySelectorAll('#genero-opts .opt').forEach(el => el.classList.remove('selected'));
-    document.getElementById('g-' + val).classList.add('selected');
-    document.getElementById('genero-nao-msg').style.display = val === 'outro' ? 'block' : 'none';
-    document.getElementById('queixa-section').style.display = val === 'mulher' ? 'block' : 'none';
-    checkPerfilForm();
-  }
-
-  function selectQueixa(el, val) {
-    userQueixa = val;
-    document.querySelectorAll('#queixa-opts .opt').forEach(e => e.classList.remove('selected'));
-    el.classList.add('selected');
+  function toggleQueixa(el, val) {
+    const idx = userQueixas.indexOf(val);
+    if (idx === -1) {
+      userQueixas.push(val);
+      el.classList.add('selected');
+    } else {
+      userQueixas.splice(idx, 1);
+      el.classList.remove('selected');
+    }
     checkPerfilForm();
   }
 
   function checkPerfilForm() {
     const nome = document.getElementById('perfil-nome').value.trim();
     userName = nome;
-    const ok = nome.length >= 2 && userGenero === 'mulher' && userQueixa !== '';
+    const ok = nome.length >= 2 && userQueixas.length > 0;
     document.getElementById('btn-perfil').style.display = ok ? 'inline-block' : 'none';
   }
 
@@ -1497,7 +1484,7 @@
       const res = await fetch(FACE_ANALYZER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: photoSrc, scores, userName, userQueixa })
+        body: JSON.stringify({ image: photoSrc, scores, userName, userQueixa: userQueixas.join(', ') })
       });
       if (res.ok) {
         aiAnalysis = await res.json();
