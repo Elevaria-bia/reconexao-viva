@@ -25,47 +25,56 @@ export default {
         return new Response(JSON.stringify({ error: 'Imagem não recebida' }), { status: 400, headers: CORS });
       }
 
+      // Detecta o formato real da imagem a partir do prefixo data URL
+      const mimeMatch = image.match(/^data:(image\/\w+);base64,/);
+      const mediaType = (mimeMatch && mimeMatch[1]) || 'image/jpeg';
       const imageData = image.replace(/^data:image\/\w+;base64,/, '');
 
       // ─── PASSO 1: VALIDAÇÃO RÁPIDA COM HAIKU ────────────────────────────────
-      // Pergunta simples e direta: tem rosto humano na foto?
-      // Haiku é rápido (~0.5s) e barato. Resposta: SIM ou NAO, nada mais.
-      const validateRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 5,
-          messages: [{
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: { type: 'base64', media_type: 'image/jpeg', data: imageData }
-              },
-              {
-                type: 'text',
-                text: 'Esta imagem mostra o rosto de um adulto humano (homem ou mulher, maior de 18 anos) claramente visível? Responda APENAS com: SIM ou NAO'
-              }
-            ]
-          }]
-        })
-      });
+      let faceValid = true; // padrão: deixa passar se a API falhar (não penaliza a usuária)
 
-      if (!validateRes.ok) {
-        // Se a validação falhar por erro de API, bloqueia por segurança
-        return new Response(JSON.stringify({ face_detected: false }), { headers: CORS });
+      try {
+        const validateRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 5,
+            messages: [{
+              role: 'user',
+              content: [
+                {
+                  type: 'image',
+                  source: { type: 'base64', media_type: mediaType, data: imageData }
+                },
+                {
+                  type: 'text',
+                  text: 'Esta imagem mostra o rosto de um adulto humano (homem ou mulher, maior de 18 anos) claramente visível? Responda APENAS com: SIM ou NAO'
+                }
+              ]
+            }]
+          })
+        });
+
+        if (validateRes.ok) {
+          const validateData = await validateRes.json();
+          const answer = (validateData.content?.[0]?.text || '').trim().toUpperCase();
+          // Só bloqueia se a resposta for definitivamente NAO
+          if (answer.startsWith('NAO') || answer.startsWith('NÃO') || answer === 'NO') {
+            faceValid = false;
+          }
+        }
+        // Se validateRes não ok (erro de API): faceValid permanece true — não penaliza a usuária
+      } catch(e) {
+        console.log('Validação Haiku falhou, prosseguindo:', e.message);
+        // faceValid permanece true
       }
 
-      const validateData = await validateRes.json();
-      const answer = (validateData.content?.[0]?.text || '').trim().toUpperCase();
-
-      // Qualquer resposta que não comece com SIM = sem rosto = bloqueia
-      if (!answer.startsWith('SIM')) {
+      if (!faceValid) {
         return new Response(JSON.stringify({ face_detected: false }), { headers: CORS });
       }
 
@@ -88,7 +97,7 @@ export default {
             content: [
               {
                 type: 'image',
-                source: { type: 'base64', media_type: 'image/jpeg', data: imageData }
+                source: { type: 'base64', media_type: mediaType, data: imageData }
               },
               {
                 type: 'text',
