@@ -69,8 +69,17 @@ Analise esta foto do rosto com olhar clínico, empático e preciso. Observe:
 5. ASSIMETRIA — qual lado carrega mais tensão? Isso revela padrão postural ou emocional
 6. EXPRESSÃO EM REPOUSO — o que este rosto comunica quando está quieto? Cansaço, fechamento, leveza, peso?
 
+PASSO 1 — VALIDAÇÃO OBRIGATÓRIA:
+Antes de qualquer análise, verifique se a imagem contém um rosto humano claramente visível.
+Se NÃO houver rosto humano na imagem (foto de objeto, paisagem, tela, animal, imagem em branco, rosto de costas, etc.), retorne SOMENTE:
+{ "face_detected": false }
+
+Se houver rosto humano visível, continue para o Passo 2.
+
+PASSO 2 — ANÁLISE (apenas se face_detected = true):
 RETORNE SOMENTE um JSON válido, sem markdown, sem explicações fora do JSON:
 {
+  "face_detected": true,
   "perfil": "Nome poético do perfil desta mulher especificamente (2-4 palavras)",
   "titulo": "Uma frase que captura o que este rosto revela (máx 10 palavras)",
   "lead": "2-3 frases descrevendo o que você observou no rosto DESTA mulher. Seja específica sobre o que viu — não genérica. Mencione a área de maior tensão. Tom: acolhedor, presente, como uma amiga que realmente olhou para ela.",
@@ -86,8 +95,7 @@ REGRAS ABSOLUTAS DE LINGUAGEM:
 - NUNCA use: anti-envelhecimento, elimine rugas, pareça mais jovem, corrija, conserte, combata
 - USE: reconectar, habitar, presença, liberar, amadurecimento, rosto com história, consciência
 - Tom: acolhedor, inteligente, como amiga especialista — nunca clínico frio, nunca vendedor
-- Idioma: português brasileiro
-- Se a foto estiver pouco nítida ou o rosto não estiver visível claramente, ainda assim gere uma análise baseada no questionário`
+- Idioma: português brasileiro`
               }
             ]
           }]

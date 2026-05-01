@@ -767,6 +767,12 @@
   <input type="file" id="file-input" accept="image/*" capture="user" onchange="handlePhoto(event)" />
   <p class="privacy-note">Sua foto é usada só aqui e não é salva em nenhum servidor</p>
 
+  <!-- Erro: rosto não detectado -->
+  <div id="no-face-error" style="display:none; margin-top:16px; background:rgba(232,123,106,0.1); border:1px solid rgba(232,123,106,0.35); border-radius:14px; padding:16px 20px; max-width:340px; text-align:center;">
+    <div style="font-size:15px; font-weight:600; color:var(--accent); margin-bottom:6px;">Não consegui ver seu rosto</div>
+    <div style="font-size:13px; color:rgba(255,255,255,0.6); line-height:1.6;">A foto precisa mostrar o seu rosto claramente — frontal, com boa iluminação. Tente novamente.</div>
+  </div>
+
   <button class="btn btn-primary" id="btn-foto" style="display:none; margin-top:24px;" onclick="goTo('s-analise'); startAnalise()">
     Analisar meu rosto →
   </button>
@@ -1323,6 +1329,8 @@
   function handlePhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
+    // Esconde erro anterior se existir
+    document.getElementById('no-face-error').style.display = 'none';
     const reader = new FileReader();
     reader.onload = function(ev) {
       // Redimensiona para max 800px antes de guardar (economiza custo de API)
@@ -1406,6 +1414,21 @@
 
   function buildResult() {
     const total = Object.values(scores).reduce((a,b) => a+b, 0);
+
+    // Rosto não detectado — volta para foto com mensagem de erro
+    if (aiAnalysis && aiAnalysis.face_detected === false) {
+      photoSrc = '';
+      aiAnalysis = null;
+      const preview = document.getElementById('preview');
+      const placeholder = document.getElementById('upload-placeholder');
+      const btnFoto = document.getElementById('btn-foto');
+      preview.style.display = 'none';
+      placeholder.style.display = '';
+      btnFoto.style.display = 'none';
+      document.getElementById('no-face-error').style.display = 'block';
+      goTo('s-foto');
+      return;
+    }
 
     const ri = document.getElementById('result-img');
     if (photoSrc) { ri.src = photoSrc; } else { ri.parentElement.style.display = 'none'; }
