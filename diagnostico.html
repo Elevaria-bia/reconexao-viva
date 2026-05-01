@@ -1373,6 +1373,8 @@
     }
   }
 
+  let _analyzePromise = null;
+
   function startAnalise() {
     const img = document.getElementById('analysis-img');
     if (photoSrc) {
@@ -1382,20 +1384,43 @@
       img.parentElement.style.display = 'none';
     }
 
-    // Dispara análise IA em background — resultado estará pronto quando chegar no resultado
     aiAnalysis = null;
-    analisarFotoIA();
 
-    // Anima steps enquanto aguarda
+    // Guarda promise da IA para poder aguardar depois
+    _analyzePromise = analisarFotoIA();
+
+    // Anima os 5 steps (dura ~4.4s)
     const steps = [1,2,3,4,5];
     steps.forEach((n, i) => {
       setTimeout(() => {
         document.getElementById('step-' + n).classList.add('done');
-        if (n === 5) {
-          setTimeout(() => goTo('s-q1'), 700);
-        }
       }, 900 + i * 700);
     });
+
+    // Após animação, aguarda IA (até 4s a mais como segurança) antes de avançar
+    setTimeout(async () => {
+      try {
+        await Promise.race([
+          _analyzePromise,
+          new Promise(resolve => setTimeout(resolve, 4000))
+        ]);
+      } catch(e) {}
+
+      // Rosto não detectado — bloqueia e volta para foto
+      if (aiAnalysis && aiAnalysis.face_detected === false) {
+        photoSrc = '';
+        aiAnalysis = null;
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('upload-placeholder').style.display = '';
+        document.getElementById('btn-foto').style.display = 'none';
+        document.getElementById('no-face-error').style.display = 'block';
+        goTo('s-foto');
+        return;
+      }
+
+      // Rosto detectado (ou IA indisponível) — segue para questionário
+      goTo('s-q1');
+    }, 4400);
   }
 
   function selectOpt(el, qNum, score) {
