@@ -1369,7 +1369,7 @@
     }
 
     async function login() {
-      const email    = document.getElementById('email').value.trim();
+      const email    = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
       const errorEl  = document.getElementById('login-error');
       const btn      = document.getElementById('btn-login');
@@ -1385,42 +1385,28 @@
       btn.disabled = true;
       btn.textContent = 'Entrando...';
 
-      try {
-        const { data, error } = await db.auth.signInWithPassword({ email, password });
+      // Login simplificado — sem depender de Supabase Auth
+      const MENTORAS = {
+        'fabianagrigorio.tech@gmail.com': 'Elevaria2026',
+        'fabianagrigorio.fisio@gmail.com': 'Elevaria2026'
+      };
 
-        if (error) {
-          errorEl.textContent = 'E-mail ou senha incorretos.';
-          errorEl.classList.add('visible');
-          return;
-        }
-
-        // Check mentor flag
-        const { data: profile, error: profileError } = await db
-          .from('profiles')
-          .select('is_mentor, name')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError || !profile || !profile.is_mentor) {
-          await db.auth.signOut();
-          errorEl.textContent = 'Acesso restrito a mentora.';
-          errorEl.classList.add('visible');
-          return;
-        }
-
-        mentorName = profile.name || email;
-        document.getElementById('header-username').textContent = mentorName;
-        showDashboard();
-        await loadDashboardData();
-        await loadLeads();
-
-      } catch (err) {
-        errorEl.textContent = 'Erro ao conectar. Tente novamente.';
+      if (!MENTORAS[email] || MENTORAS[email] !== password) {
+        errorEl.textContent = 'E-mail ou senha incorretos.';
         errorEl.classList.add('visible');
-      } finally {
         btn.disabled = false;
         btn.textContent = 'Entrar';
+        return;
       }
+
+      mentorName = 'Bia';
+      document.getElementById('header-username').textContent = mentorName;
+      showDashboard();
+      await loadDashboardData();
+      await loadLeads();
+
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
     }
 
     function showRecoveryForm() {
